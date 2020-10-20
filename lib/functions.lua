@@ -1,9 +1,15 @@
 fn = {}
 
 function fn.dirty_screen(bool)
-  if bool == nil then return globals.screen_dirty end
-  globals.screen_dirty = bool
-  return globals.screen_dirty
+  if bool == nil then return y.screen_dirty end
+  y.screen_dirty = bool
+  return y.screen_dirty
+end
+
+function fn.break_splash(bool)
+  if bool == nil then return y.splash_break end
+  y.splash_break = bool
+  return y.splash_break
 end
 
 function fn.table_contains(t, check)
