@@ -44,7 +44,11 @@ function keys.init()
     { k = 57, v = "SPACEBAR" },
     { k = 42, v = "SHIFT" },
     { k = 39, v = ";" },
-    { k = 15, v = "TAB" }
+    { k = 15, v = "TAB" },
+    { k = 103, v = "UP_ARROW" },
+    { k = 106, v = "RIGHT_ARROW" },
+    { k = 108, v = "DOWN_ARROW" },
+    { k = 105, v = "LEFT_ARROW" },
   }
 end
 
@@ -92,6 +96,10 @@ end
 
 function keys:is_tab(code)
   return 15 == code
+end
+
+function keys:is_arrow(code)
+  return (103 == code) or (106 == code) or (108 == code) or (105 == code)
 end
 
 return keys

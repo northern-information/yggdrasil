@@ -3,9 +3,6 @@
 include("lib/includes")
 
 function init()
-  y = {}
-  y.playing = false
-  y.bpm = 120
   parameters.init()
   page.init()
   graphics.init()
@@ -13,11 +10,14 @@ function init()
   buffer.init()
   commands.init()
   tracker.init()
+  y = {
+    screen_dirty = true,
+    splash_break = false,
+    init_done = true,
+  }
   y.redraw_clock_id = clock.run(graphics.redraw_clock)
   y.frame_clock_id = clock.run(graphics.frame_clock)
-  y.screen_dirty = true
-  y.splash_break = false
-  y.init_done = true
+  y.tracker_clock_id = clock.run(tracker.tracker_clock)
   page:select(parameters.is_splash_screen_on and 0 or 1)
   redraw()
 end
@@ -30,9 +30,22 @@ function enc(e, d)
   elseif e == 3 then
     tracker:scroll_y(d)
   end
+  fn.dismiss_messages()
   fn.dirty_screen(true)
 end
 
+function key(k, z)
+  if z == 0 then return end
+  if k == 1 then
+    print("k1")
+  elseif k == 2 then
+    tracker:toggle_playback()
+  elseif k == 3 then
+    print("k3")
+  end
+  fn.dismiss_messages()
+  fn.dirty_screen(true)
+end
 
 function redraw()
   if not fn.dirty_screen() then return end
@@ -43,4 +56,5 @@ end
 function cleanup()
   clock.cancel(y.redraw_clock_id)
   clock.cancel(y.frame_clock_id)
+  clock.cancel(y.tracker_clock_id)
 end

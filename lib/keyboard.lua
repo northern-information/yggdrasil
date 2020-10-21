@@ -22,7 +22,7 @@ function keyboard.event(type, code, val)
   -- if keys.shift then ... end
   
   if keys:is_letter_code(code) or keys:is_number_code(code) then
-   buffer:add(keys:get_keycode(code))
+    buffer:add(keys:get_keycode(code))
   end
 
   if keys:is_spacebar(code) then
@@ -35,6 +35,10 @@ function keyboard.event(type, code, val)
 
   if keys:is_backspace(code) then
     buffer:backspace()
+  end
+
+  if keys:is_arrow(code) then
+    tracker:handle_arrow(keys:get_keycode(code))
   end
 
   fn.dirty_screen(true)

@@ -12,6 +12,10 @@ function fn.break_splash(bool)
   return y.splash_break
 end
 
+function fn.dismiss_messages()
+  fn.break_splash(true)
+end
+
 function fn.table_contains(t, check)
   for k, v in pairs(t) do
     if v == check then
@@ -21,11 +25,23 @@ function fn.table_contains(t, check)
   return false
 end
 
+function fn.cycle(value, min, max)
+  if value > max then
+    return min
+  elseif value < min then
+    return max
+  else
+    return value
+  end
+end
+
 function fn.is_int(test)
+  if test == nil then return false end
   return test == math.floor(test)
 end
 
 function fn.is_space(test)
+  if test == nil then return false end
   return test == " "
 end
 

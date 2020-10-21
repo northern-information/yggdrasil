@@ -5,42 +5,46 @@ function graphics.init()
   graphics.glow = 0
   graphics.glow_up = true
   graphics.frame = 0
+  graphics.slot_width = 16
+  graphics.slot_height = 7
   graphics.splash_lines_open = {}
   graphics.splash_lines_close = {}
   graphics.splash_lines_close_available = {}
-  for i=1,45 do graphics.splash_lines_open[i] = i end
-  for i=1,64 do graphics.splash_lines_close_available[i] = i end
+  for i = 1, 45 do graphics.splash_lines_open[i] = i end
+  for i = 1, 64 do graphics.splash_lines_close_available[i] = i end
 end
 
 
 
 -- tracker
 
-
+function graphics:draw_highlight(view)
+  local y_offset = (view.y - 1) * self.slot_height
+  local y = (((view.current_row - 1) * self.slot_height) + 1) - y_offset
+  self:rect(0, y, 128, self.slot_height, 1)
+end
 
 function graphics:draw_slots(slots, view)
   local slot_x_offset = view.x - 1
   local slot_y_offset = view.y - 1
-  local slot_width = 16
-  local slot_height = 7
   for k, slot in pairs(slots) do
     if slot.y >= view.y then
       local text_level = 15
-      local x_offset = slot_x_offset * slot_width
-      local y_offset = slot_y_offset * slot_height
+      local x_offset = slot_x_offset * self.slot_width
+      local y_offset = slot_y_offset * self.slot_height
       if slot:is_focus() then
         text_level = 0
         self:rect(
-          ((slot.x - 1) * slot_width) - x_offset,
-          ((slot.y - 1) * slot_height + 1) - y_offset,
-          slot_width,
-          slot_height,
+          ((slot.x - 1) * self.slot_width) - x_offset,
+          ((slot.y - 1) * self.slot_height + 1) - y_offset,
+          self.slot_width,
+          self.slot_height,
           15
         )
       end
       self:text_right(
-        (slot.x * slot_width - 2) - x_offset,
-        (slot.y * slot_height) - y_offset,
+        (slot.x * self.slot_width - 2) - x_offset,
+        (slot.y * self.slot_height) - y_offset,
         tostring(slot),
         text_level
       )
