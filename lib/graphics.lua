@@ -7,14 +7,18 @@ function graphics.init()
   graphics.frame = 0
   graphics.slot_width = 16
   graphics.slot_height = 7
-  graphics.splash_lines_open = {}
-  graphics.splash_lines_close = {}
-  graphics.splash_lines_close_available = {}
-  for i = 1, 45 do graphics.splash_lines_open[i] = i end
-  for i = 1, 64 do graphics.splash_lines_close_available[i] = i end
+
+  -- ni splash
+  graphics.ni_splash_lines_open = {}
+  graphics.ni_splash_lines_close = {}
+  graphics.ni_splash_lines_close_available = {}
+  for i = 1, 45 do graphics.ni_splash_lines_open[i] = i end
+  for i = 1, 64 do graphics.ni_splash_lines_close_available[i] = i end
+  graphics.ni_splash_done = false
+  graphics.yggdrasil_scale = 6
+  graphics.yggdrasil_segments = graphics:get_yggdrasil_segments()
+  graphics.yggdrasil_splash_done = false
 end
-
-
 
 -- tracker
 
@@ -178,39 +182,144 @@ end
 
 
 function graphics:splash()
+  if fn.break_splash() then
+    self.ni_splash_done = true
+    self.yggdrasil_splash_done = true
+  end
   local col_x = 34
   local row_x = 34
   local y = 45
   local l = self.frame >= 49 and 0 or 15
-  if self.frame >= 49 then
+  if self.frame >= 49 and self.frame < 168 then
     self:rect(0, 0, 128, 50, 15)
   end
   self:ni(col_x, row_x, y, l)
-  if #self.splash_lines_open > 1 then 
-    local delete = math.random(1, #self.splash_lines_open)
-    table.remove(self.splash_lines_open, delete)
-    for i = 1, #self.splash_lines_open do
-      self:mlrs(1, self.splash_lines_open[i] + 4, 128, 1, 0)
+  if #self.ni_splash_lines_open > 1 then 
+    local delete = math.random(1, #self.ni_splash_lines_open)
+    table.remove(self.ni_splash_lines_open, delete)
+    for i = 1, #self.ni_splash_lines_open do
+      self:mlrs(1, self.ni_splash_lines_open[i] + 4, 128, 1, 0)
     end
   end
   if self.frame >= 49 then
     self:text_center(64, 60, "NORTHERN INFORMATION")
   end
   if self.frame > 100 then
-    if #self.splash_lines_close_available > 0 then 
-      local add = math.random(1, #self.splash_lines_close_available)
-      table.insert(self.splash_lines_close, self.splash_lines_close_available[add])
-      table.remove(self.splash_lines_close_available, add)
+    if #self.ni_splash_lines_close_available > 0 then 
+      local add = math.random(1, #self.ni_splash_lines_close_available)
+      table.insert(self.ni_splash_lines_close, self.ni_splash_lines_close_available[add])
+      table.remove(self.ni_splash_lines_close_available, add)
     end
-    for i = 1, #self.splash_lines_close do
-      self:mlrs(1, self.splash_lines_close[i], 128, 1, 0)
+    for i = 1, #self.ni_splash_lines_close do
+      self:mlrs(1, self.ni_splash_lines_close[i], 128, 1, 0)
     end
   end
-  if #self.splash_lines_close_available == 0 then
+  if #self.ni_splash_lines_close_available == 0 then
+    self.ni_splash_done = true
+  end
+  if self.frame >= 168 then
+    if self.frame <= 300 then
+      self:yggdrasil_random_on()
+    end
+    if (self.frame >= 168 and self.frame <= 250) or (self.frame >= 340) then
+      for i = 1, #self.yggdrasil_segments do
+        self.yggdrasil_segments[i].l = util.clamp(self.yggdrasil_segments[i].l - 1, 0, 15)
+      end
+    elseif self.frame > 250 then
+      for i = 1, #self.yggdrasil_segments do
+        self.yggdrasil_segments[i].l = util.clamp(self.yggdrasil_segments[i].l + 1, 0, 15)
+      end
+    end
+  end
+  if self.frame >= 168 then
+    for k, segment in pairs(self.yggdrasil_segments) do
+      screen.level(segment.l)
+      screen.move(segment.x - self.yggdrasil_scale, segment.y)
+      screen.line_rel(-self.yggdrasil_scale, self.yggdrasil_scale)
+      screen.stroke()
+    end
+  end
+  if self.frame >= 370 then
+    self.yggdrasil_splash_done = true
+  end
+  if self.ni_splash_done and self.yggdrasil_splash_done then
     fn.break_splash(true)
     page:select(1)
   end
   fn.dirty_screen(true)
+end
+
+function graphics:yggdrasil_random_on()
+  local on = math.random(1, #self.yggdrasil_segments)
+  if self.yggdrasil_segments[on].l == 0 then
+    self.yggdrasil_segments[on].l = 15
+  end
+end
+
+
+function graphics:get_yggdrasil_segments()
+  local s           = self.yggdrasil_scale
+  local baseline    = 35
+  local asc_line    = baseline - s
+  local asc_2_line  = baseline - (s * 2)
+  local asc_3_line  = baseline - (s * 3)
+  local asc_4_line  = baseline - (s * 4)
+  local desc_line   = baseline + s
+  local desc_2_line = baseline + (s * 2)
+  return {
+    -- y
+    { l = 0, x = s * 5, y = asc_2_line },
+    { l = 0, x = s * 4, y = asc_line },
+    { l = 0, x = s * 6, y = asc_2_line },
+    { l = 0, x = s * 5, y = asc_line },
+    { l = 0, x = s * 4, y = baseline },
+    { l = 0, x = s * 3, y = desc_line },
+    { l = 0, x = s * 2, y = desc_2_line },
+    -- g
+    { l = 0, x = s * 7, y = asc_2_line },
+    { l = 0, x = s * 6, y = asc_line },
+    { l = 0, x = s * 8, y = asc_2_line },
+    { l = 0, x = s * 7, y = asc_line },
+    { l = 0, x = s * 6, y = baseline} ,
+    { l = 0, x = s * 5, y = desc_line },
+    { l = 0, x = s * 4, y = desc_2_line },
+    -- g
+    { l = 0, x = s * 9,  y = asc_2_line },
+    { l = 0, x = s * 8,  y = asc_line },
+    { l = 0, x = s * 10, y = asc_2_line },
+    { l = 0, x = s * 9,  y = asc_line },
+    { l = 0, x = s * 8,  y = baseline },
+    { l = 0, x = s * 7,  y = desc_line },
+    { l = 0, x = s * 6,  y = desc_2_line },
+    -- d
+    { l = 0, x = s * 11, y = asc_2_line },
+    { l = 0, x = s * 10, y = asc_line },
+    { l = 0, x = s * 14, y = asc_4_line },
+    { l = 0, x = s * 13, y = asc_3_line },
+    { l = 0, x = s * 12, y = asc_2_line },
+    { l = 0, x = s * 11, y = asc_line },
+    -- r
+    { l = 0, x = s * 13, y = asc_2_line },
+    { l = 0, x = s * 12, y = asc_line },
+    { l = 0, x = s * 14, y = asc_2_line },
+    -- a
+    { l = 0, x = s * 15, y = asc_2_line },
+    { l = 0, x = s * 14, y = asc_line },
+    { l = 0, x = s * 16, y = asc_2_line },
+    { l = 0, x = s * 15, y = asc_line },
+    -- s
+    { l = 0, x = s * 17, y = asc_2_line },
+    { l = 0, x = s * 17, y = asc_line },
+    -- i
+    { l = 0, x = s * 21, y = asc_4_line },
+    { l = 0, x = s * 19, y = asc_2_line },
+    { l = 0, x = s * 18, y = asc_line },
+    -- l
+    { l = 0, x = s * 22, y = asc_4_line },
+    { l = 0, x = s * 21, y = asc_3_line },
+    { l = 0, x = s * 20, y = asc_2_line },
+    { l = 0, x = s * 19, y = asc_line }
+  }
 end
 
 function graphics:ni(col_x, row_x, y, l)

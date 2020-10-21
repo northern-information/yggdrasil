@@ -3,6 +3,7 @@
 include("lib/includes")
 
 function init()
+  y = {}
   parameters.init()
   page.init()
   graphics.init()
@@ -10,15 +11,15 @@ function init()
   buffer.init()
   commands.init()
   tracker.init()
-  y = {
-    screen_dirty = true,
-    splash_break = false,
-    init_done = true,
-  }
+  y.screen_dirty = true
+  y.splash_break = false
+  y.init_done = true
   y.redraw_clock_id = clock.run(graphics.redraw_clock)
   y.frame_clock_id = clock.run(graphics.frame_clock)
   y.tracker_clock_id = clock.run(tracker.tracker_clock)
-  page:select(parameters.is_splash_screen_on and 0 or 1)
+  page:select(0)
+  -- page:select(parameters.is_splash_screen_on and 0 or 1)
+  -- if config.settings.dev_mode then dev:scene(config.settings.dev_scene) end
   redraw()
 end
 

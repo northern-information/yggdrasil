@@ -25,7 +25,7 @@ function page:render()
   graphics:setup()
       if page.error            then self:error_message()
   elseif self.active_page == 1 then self:tracker()
-  elseif self.active_page == 2 then self:beta()
+  elseif self.active_page == 2 then self:dev()
   elseif self.active_page == 3 then self:gamma()
   elseif self.active_page == 0 then graphics:splash()
   end
@@ -37,8 +37,8 @@ function page:tracker()
   tracker:render()
 end
 
-function page:beta()
-  print("page beta")
+function page:dev()
+  graphics:yggdrasil()
 end
 
 function page:gamma()
