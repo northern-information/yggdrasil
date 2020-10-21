@@ -22,20 +22,19 @@ function keyboard.event(type, code, val)
   -- if keys.shift then ... end
   
   if keys:is_letter_code(code) or keys:is_number_code(code) then
-    y.buffer = y.buffer .. keys:get_keycode(code)
+   buffer:add(keys:get_keycode(code))
   end
 
   if keys:is_spacebar(code) then
-    y.buffer = y.buffer .. " "
+    buffer:add(" ")
   end
 
   if keys:is_return(code) then
-    fn.run_command()
-    y.buffer =  ""
+    buffer:execute()
   end
 
   if keys:is_backspace(code) then
-    y.buffer = y.buffer:sub(1, -2)
+    buffer:backspace()
   end
 
   fn.dirty_screen(true)

@@ -5,7 +5,7 @@ engine.name = "PolyPerc"
 
 local lib = "yggdrasil/lib/"
 
--- stores application configuration and cell composition data
+-- stores application configuration
 config = include("lib/config")
 config_ = io.open(_path["code"] .. lib .. "config_.lua", "r")
 if config_ ~= nil then
@@ -31,6 +31,17 @@ keyboard = include("lib/keyboard")
 -- keycodes, keycodes everywhere
 keys = include("lib/keys")
 
+-- liminal space for all the characters
+buffer = include("lib/buffer")
+
+-- where the action is
+commands = include("lib/commands")
+
+-- the left hand of darkness
+tracker = include("lib/tracker")
+
+-- what miracle is this?
+include("lib/Slot")
 
 -- dev only stuff
 dev = io.open(_path["code"] .. lib .. "dev.lua", "r")

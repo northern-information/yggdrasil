@@ -21,6 +21,28 @@ function fn.table_contains(t, check)
   return false
 end
 
+function fn.is_int(test)
+  return test == math.floor(test)
+end
+
+function fn.is_space(test)
+  return test == " "
+end
+
+function fn.string_split(input_string, split_character)
+  local s = split_character ~= nil and split_character or "%s"
+  local t = {}
+  for str in string.gmatch(input_string, "([^" .. s .. "]+)") do
+    table.insert(t, str)
+  end
+  return t
+end
+
+function fn.screenshot()
+  local which_screen = string.match(string.match(string.match(norns.state.script,"/home/we/dust/code/(.*)"),"/(.*)"),"(.+).lua")
+  _norns.screen_export_png("/home/we/dust/" .. which_screen .. "-" .. os.time() .. ".png")
+end
+
 function rerun()
   norns.script.load(norns.state.script)
 end

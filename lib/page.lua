@@ -24,7 +24,7 @@ end
 function page:render()
   graphics:setup()
       if page.error            then self:error_message()
-  elseif self.active_page == 1 then self:alpha()
+  elseif self.active_page == 1 then self:tracker()
   elseif self.active_page == 2 then self:beta()
   elseif self.active_page == 3 then self:gamma()
   elseif self.active_page == 0 then graphics:splash()
@@ -33,9 +33,8 @@ function page:render()
   graphics:teardown()
 end
 
-function page:alpha()
-  graphics:draw_slots()
-  graphics:draw_terminal()  
+function page:tracker()
+  tracker:render()
 end
 
 function page:beta()

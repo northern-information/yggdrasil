@@ -12,6 +12,70 @@ function graphics.init()
   for i=1,64 do graphics.splash_lines_close_available[i] = i end
 end
 
+
+
+-- tracker
+
+
+
+function graphics:draw_slots(slots, view)
+  local slot_x_offset = view.x - 1
+  local slot_y_offset = view.y - 1
+  local slot_width = 16
+  local slot_height = 7
+  for k, slot in pairs(slots) do
+    if slot.y >= view.y then
+      local text_level = 15
+      local x_offset = slot_x_offset * slot_width
+      local y_offset = slot_y_offset * slot_height
+      if slot:is_focus() then
+        text_level = 0
+        self:rect(
+          ((slot.x - 1) * slot_width) - x_offset,
+          ((slot.y - 1) * slot_height + 1) - y_offset,
+          slot_width,
+          slot_height,
+          15
+        )
+      end
+      self:text_right(
+        (slot.x * slot_width - 2) - x_offset,
+        (slot.y * slot_height) - y_offset,
+        tostring(slot),
+        text_level
+      )
+    end
+  end
+end
+
+function graphics:draw_cols(view)
+  for i = 1, 8 do
+    local x = (i - 1) * 16
+    self:mls(x, 0, x, 64, 1)
+    for ii = 1, 14 do
+      if view.rows_above then
+        self:mls(x, 1 + ii, x, ii, 16 - ii)
+      end
+      if view.rows_below then
+        self:mls(x, 56 - ii, x, 55 - ii, 16 - ii)
+      end
+    end
+  end
+end
+
+function graphics:draw_terminal()
+  self:mls(0, 55, 128, 54, 15)
+  self:rect(0, 55, 128, 9, 0)
+  self:text(0, 63, ">", graphics.glow)
+  self:text(5, 62, buffer.b, 15)
+end
+
+
+
+-- housekeeping
+
+
+
 function graphics.redraw_clock()
   while true do
     if fn.dirty_screen() then
@@ -38,17 +102,6 @@ function graphics:handle_frames()
   self.glow = self.glow_up and self.frame % 16 or math.abs((self.frame % 16) - 16)
 end
 
-function graphics:draw_slots()
-  for i = 1, 8 do
-    self:rect(100, (i - 1) * 8, 28, 6, 15)
-  end
-end
-
-function graphics:draw_terminal()
-  self:text(screen.text_extents(y.buffer), 62, " >", graphics.glow)
-  self:text(0, 62, y.buffer, 15)
-end
-
 function graphics:setup()
   screen.clear()
   screen.aa(0)
@@ -64,7 +117,61 @@ function graphics:teardown()
   screen.update()
 end
 
+
+
+-- northern information graphics abstractions
+
+
+
+function graphics:mlrs(x1, y1, x2, y2, l)
+  screen.level(l or 15)
+  screen.move(x1, y1)
+  screen.line_rel(x2, y2)
+  screen.stroke()
+end
+
+function graphics:mls(x1, y1, x2, y2, l)
+  screen.level(l or 15)
+  screen.move(x1, y1)
+  screen.line(x2, y2)
+  screen.stroke()
+end
+
+function graphics:rect(x, y, w, h, l)
+  screen.level(l or 15)
+  screen.rect(x, y, w, h)
+  screen.fill()
+end
+
+function graphics:circle(x, y, r, l)
+  screen.level(l or 15)
+  screen.circle(x, y, r)
+  screen.fill()
+end
+
+function graphics:text(x, y, s, l)
+  screen.level(l or 15)
+  screen.move(x, y)
+  screen.text(s)
+end
+
+function graphics:text_right(x, y, s, l)
+  screen.level(l or 15)
+  screen.move(x, y)
+  screen.text_right(s)
+end
+
+function graphics:text_center(x, y, s, l)
+  screen.level(l or 15)
+  screen.move(x, y)
+  screen.text_center(s)
+end
+
+
+
 -- northern information splash screen
+
+
 
 function graphics:splash()
   local col_x = 34
@@ -137,44 +244,5 @@ function graphics:n_row_bottom(x, y, l)
 end
 
 
--- northern information graphics abstractions
-
-function graphics:mlrs(x1, y1, x2, y2, l)
-  screen.level(l or 15)
-  screen.move(x1, y1)
-  screen.line_rel(x2, y2)
-  screen.stroke()
-end
-
-function graphics:mls(x1, y1, x2, y2, l)
-  screen.level(l or 15)
-  screen.move(x1, y1)
-  screen.line(x2, y2)
-  screen.stroke()
-end
-
-function graphics:rect(x, y, w, h, l)
-  screen.level(l or 15)
-  screen.rect(x, y, w, h)
-  screen.fill()
-end
-
-function graphics:circle(x, y, r, l)
-  screen.level(l or 15)
-  screen.circle(x, y, r)
-  screen.fill()
-end
-
-function graphics:text(x, y, s, l)
-  screen.level(l or 15)
-  screen.move(x, y)
-  screen.text(s)
-end
-
-function graphics:text_center(x, y, s, l)
-  screen.level(l or 15)
-  screen.move(x, y)
-  screen.text_center(s)
-end
 
 return graphics
