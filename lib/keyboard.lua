@@ -2,12 +2,10 @@ keyboard = hid.connect()
 
 function keyboard.event(type, code, val)
 
+  screen.ping()
+
   if keys:is_shift(code) then
-    if not keys.shift and val == 1 then
-      keys.shift = true
-    elseif val == 0 then
-      keys.shift = false
-    end
+    keys:handle_shift(val)
   end
 
   if val == 0 then return end -- ignore other keyups
@@ -34,11 +32,34 @@ function keyboard.event(type, code, val)
   end
 
   if keys:is_backspace(code) then
-    buffer:backspace()
+    if buffer:is_empty() and tracker:is_focused() then
+      tracker:clear_focused_slot()
+    else
+      buffer:backspace()
+    end
   end
 
   if keys:is_arrow(code) then
-    tracker:handle_arrow(keys:get_keycode(code))
+    if keys:shifted() then
+      tracker:handle_arrow(keys:get_keycode(code))
+    else
+      if keys:get_keycode(code) == "UP" then
+        buffer:up_history()
+      elseif keys:get_keycode(code) == "DOWN" then
+        buffer:down_history()
+      end
+      local history = buffer:get_history()
+      if history ~= nil then
+        buffer:clear()
+        buffer:set(history.history_string, history.history_table)
+      else
+        buffer:clear()
+      end
+    end
+  end
+
+  if keys:is_esc(code) then
+    tracker:clear_message()
   end
 
   fn.dirty_screen(true)

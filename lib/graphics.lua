@@ -7,17 +7,17 @@ function graphics.init()
   graphics.frame = 0
   graphics.slot_width = 16
   graphics.slot_height = 7
-
-  -- ni splash
   graphics.ni_splash_lines_open = {}
   graphics.ni_splash_lines_close = {}
   graphics.ni_splash_lines_close_available = {}
   for i = 1, 45 do graphics.ni_splash_lines_open[i] = i end
   for i = 1, 64 do graphics.ni_splash_lines_close_available[i] = i end
   graphics.ni_splash_done = false
-  graphics.yggdrasil_scale = 6
-  graphics.yggdrasil_segments = graphics:get_yggdrasil_segments()
+  graphics.yggdrasil_splash_scale = 6
+  graphics.yggdrasil_splash_segments = graphics:get_yggdrasil_segments(0, 35, graphics.yggdrasil_splash_scale)
   graphics.yggdrasil_splash_done = false
+  graphics.yggdrasil_gui_scale = 2
+  graphics.yggdrasil_gui_segments = graphics:get_yggdrasil_segments(0, 50, graphics.yggdrasil_gui_scale)
 end
 
 -- tracker
@@ -71,14 +71,28 @@ function graphics:draw_cols(view)
   end
 end
 
-function graphics:draw_terminal()
-  self:mls(0, 55, 128, 54, 15)
-  self:rect(0, 55, 128, 9, 0)
+function graphics:draw_terminal(message, message_value)
+  local height = 9
+  if message then
+    height = 18
+  end
+  self:mls(0, 64 - height, 128, 64 - height - 1, 15)
+  self:rect(0, 64 - height, 128, height, 0)
+  if message then
+    self:text(5, 54, message_value, 1)
+  end
   self:text(0, 63, ">", graphics.glow)
   self:text(5, 62, buffer.b, 15)
 end
 
-
+function graphics:draw_yggdrasil_gui_logo()
+  for k, segment in pairs(self.yggdrasil_gui_segments) do
+    screen.level(5)
+    screen.move(segment.x - self.yggdrasil_gui_scale, segment.y)
+    screen.line_rel(-self.yggdrasil_gui_scale, self.yggdrasil_gui_scale)
+    screen.stroke()
+  end
+end
 
 -- housekeeping
 
@@ -177,7 +191,7 @@ end
 
 
 
--- northern information splash screen
+-- northern information & yggdrasil splash screen
 
 
 
@@ -222,20 +236,20 @@ function graphics:splash()
       self:yggdrasil_random_on()
     end
     if (self.frame >= 168 and self.frame <= 250) or (self.frame >= 340) then
-      for i = 1, #self.yggdrasil_segments do
-        self.yggdrasil_segments[i].l = util.clamp(self.yggdrasil_segments[i].l - 1, 0, 15)
+      for i = 1, #self.yggdrasil_splash_segments do
+        self.yggdrasil_splash_segments[i].l = util.clamp(self.yggdrasil_splash_segments[i].l - 1, 0, 15)
       end
     elseif self.frame > 250 then
-      for i = 1, #self.yggdrasil_segments do
-        self.yggdrasil_segments[i].l = util.clamp(self.yggdrasil_segments[i].l + 1, 0, 15)
+      for i = 1, #self.yggdrasil_splash_segments do
+        self.yggdrasil_splash_segments[i].l = util.clamp(self.yggdrasil_splash_segments[i].l + 1, 0, 15)
       end
     end
   end
   if self.frame >= 168 then
-    for k, segment in pairs(self.yggdrasil_segments) do
+    for k, segment in pairs(self.yggdrasil_splash_segments) do
       screen.level(segment.l)
-      screen.move(segment.x - self.yggdrasil_scale, segment.y)
-      screen.line_rel(-self.yggdrasil_scale, self.yggdrasil_scale)
+      screen.move(segment.x - self.yggdrasil_splash_scale, segment.y)
+      screen.line_rel(-self.yggdrasil_splash_scale, self.yggdrasil_splash_scale)
       screen.stroke()
     end
   end
@@ -250,16 +264,16 @@ function graphics:splash()
 end
 
 function graphics:yggdrasil_random_on()
-  local on = math.random(1, #self.yggdrasil_segments)
-  if self.yggdrasil_segments[on].l == 0 then
-    self.yggdrasil_segments[on].l = 15
+  local on = math.random(1, #self.yggdrasil_splash_segments)
+  if self.yggdrasil_splash_segments[on].l == 0 then
+    self.yggdrasil_splash_segments[on].l = 15
   end
 end
 
-
-function graphics:get_yggdrasil_segments()
-  local s           = self.yggdrasil_scale
-  local baseline    = 35
+function graphics:get_yggdrasil_segments(x, y, scale)
+  local s           = scale
+  local x           = x
+  local baseline    = y
   local asc_line    = baseline - s
   local asc_2_line  = baseline - (s * 2)
   local asc_3_line  = baseline - (s * 3)
@@ -268,57 +282,57 @@ function graphics:get_yggdrasil_segments()
   local desc_2_line = baseline + (s * 2)
   return {
     -- y
-    { l = 0, x = s * 5, y = asc_2_line },
-    { l = 0, x = s * 4, y = asc_line },
-    { l = 0, x = s * 6, y = asc_2_line },
-    { l = 0, x = s * 5, y = asc_line },
-    { l = 0, x = s * 4, y = baseline },
-    { l = 0, x = s * 3, y = desc_line },
-    { l = 0, x = s * 2, y = desc_2_line },
+    { l = 0, x = x + (s * 5), y = asc_2_line },
+    { l = 0, x = x + (s * 4), y = asc_line },
+    { l = 0, x = x + (s * 6), y = asc_2_line },
+    { l = 0, x = x + (s * 5), y = asc_line },
+    { l = 0, x = x + (s * 4), y = baseline },
+    { l = 0, x = x + (s * 3), y = desc_line },
+    { l = 0, x = x + (s * 2), y = desc_2_line },
     -- g
-    { l = 0, x = s * 7, y = asc_2_line },
-    { l = 0, x = s * 6, y = asc_line },
-    { l = 0, x = s * 8, y = asc_2_line },
-    { l = 0, x = s * 7, y = asc_line },
-    { l = 0, x = s * 6, y = baseline} ,
-    { l = 0, x = s * 5, y = desc_line },
-    { l = 0, x = s * 4, y = desc_2_line },
+    { l = 0, x = x + (s * 7), y = asc_2_line },
+    { l = 0, x = x + (s * 6), y = asc_line },
+    { l = 0, x = x + (s * 8), y = asc_2_line },
+    { l = 0, x = x + (s * 7), y = asc_line },
+    { l = 0, x = x + (s * 6), y = baseline} ,
+    { l = 0, x = x + (s * 5), y = desc_line },
+    { l = 0, x = x + (s * 4), y = desc_2_line },
     -- g
-    { l = 0, x = s * 9,  y = asc_2_line },
-    { l = 0, x = s * 8,  y = asc_line },
-    { l = 0, x = s * 10, y = asc_2_line },
-    { l = 0, x = s * 9,  y = asc_line },
-    { l = 0, x = s * 8,  y = baseline },
-    { l = 0, x = s * 7,  y = desc_line },
-    { l = 0, x = s * 6,  y = desc_2_line },
+    { l = 0, x = x + (s * 9),  y = asc_2_line },
+    { l = 0, x = x + (s * 8),  y = asc_line },
+    { l = 0, x = x + (s * 10), y = asc_2_line },
+    { l = 0, x = x + (s * 9),  y = asc_line },
+    { l = 0, x = x + (s * 8),  y = baseline },
+    { l = 0, x = x + (s * 7),  y = desc_line },
+    { l = 0, x = x + (s * 6),  y = desc_2_line },
     -- d
-    { l = 0, x = s * 11, y = asc_2_line },
-    { l = 0, x = s * 10, y = asc_line },
-    { l = 0, x = s * 14, y = asc_4_line },
-    { l = 0, x = s * 13, y = asc_3_line },
-    { l = 0, x = s * 12, y = asc_2_line },
-    { l = 0, x = s * 11, y = asc_line },
+    { l = 0, x = x + (s * 11), y = asc_2_line },
+    { l = 0, x = x + (s * 10), y = asc_line },
+    { l = 0, x = x + (s * 14), y = asc_4_line },
+    { l = 0, x = x + (s * 13), y = asc_3_line },
+    { l = 0, x = x + (s * 12), y = asc_2_line },
+    { l = 0, x = x + (s * 11), y = asc_line },
     -- r
-    { l = 0, x = s * 13, y = asc_2_line },
-    { l = 0, x = s * 12, y = asc_line },
-    { l = 0, x = s * 14, y = asc_2_line },
+    { l = 0, x = x + (s * 13), y = asc_2_line },
+    { l = 0, x = x + (s * 12), y = asc_line },
+    { l = 0, x = x + (s * 14), y = asc_2_line },
     -- a
-    { l = 0, x = s * 15, y = asc_2_line },
-    { l = 0, x = s * 14, y = asc_line },
-    { l = 0, x = s * 16, y = asc_2_line },
-    { l = 0, x = s * 15, y = asc_line },
+    { l = 0, x = x + (s * 15), y = asc_2_line },
+    { l = 0, x = x + (s * 14), y = asc_line },
+    { l = 0, x = x + (s * 16), y = asc_2_line },
+    { l = 0, x = x + (s * 15), y = asc_line },
     -- s
-    { l = 0, x = s * 17, y = asc_2_line },
-    { l = 0, x = s * 17, y = asc_line },
+    { l = 0, x = x + (s * 17), y = asc_2_line },
+    { l = 0, x = x + (s * 17), y = asc_line },
     -- i
-    { l = 0, x = s * 21, y = asc_4_line },
-    { l = 0, x = s * 19, y = asc_2_line },
-    { l = 0, x = s * 18, y = asc_line },
+    { l = 0, x = x + (s * 21), y = asc_4_line },
+    { l = 0, x = x + (s * 19), y = asc_2_line },
+    { l = 0, x = x + (s * 18), y = asc_line },
     -- l
-    { l = 0, x = s * 22, y = asc_4_line },
-    { l = 0, x = s * 21, y = asc_3_line },
-    { l = 0, x = s * 20, y = asc_2_line },
-    { l = 0, x = s * 19, y = asc_line }
+    { l = 0, x = x + (s * 22), y = asc_4_line },
+    { l = 0, x = x + (s * 21), y = asc_3_line },
+    { l = 0, x = x + (s * 20), y = asc_2_line },
+    { l = 0, x = x + (s * 19), y = asc_line }
   }
 end
 
@@ -355,7 +369,5 @@ function graphics:n_row_bottom(x, y, l)
   self:mls(x+20, y-38, x+28, y-38, l)
   self:mls(x+20, y-37, x+28, y-37, l)
 end
-
-
 
 return graphics

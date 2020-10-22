@@ -8,11 +8,16 @@ function Slot:new(x, y)
   s.x = x ~= nil and x or 0
   s.y = y ~= nil and y or 0
   s.focus = false
+  s.midi_note = ""
   return s
 end
 
 function Slot:to_string()
-  return self.x .. ";" .. self.y
+  return self.midi_note
+end
+
+function Slot:set_midi_note(i)
+  self.midi_note = i
 end
 
 function Slot:set_focus(bool)
@@ -21,4 +26,9 @@ end
 
 function Slot:is_focus()
   return self.focus
+end
+
+function Slot:clear()
+  self:set_midi_note("")
+  self:set_focus(false)
 end
