@@ -8,6 +8,10 @@ function keyboard.event(type, code, val)
     keys:handle_shift(val)
   end
 
+  if not fn.break_splash() then
+    fn.dismiss_messages()
+  end
+
   if val == 0 then return end -- ignore other keyups
 
   print(code)
@@ -24,7 +28,11 @@ function keyboard.event(type, code, val)
   end
 
   if keys:is_spacebar(code) then
-    buffer:add(" ")
+    if buffer:is_empty() then
+      tracker:toggle_playback()
+    else
+      buffer:add(" ")
+    end
   end
 
   if keys:is_return(code) then

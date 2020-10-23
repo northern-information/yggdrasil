@@ -4,6 +4,7 @@ dev = {}
 
 function dev:scene(i)
   if i == 1 then
+    filesystem:load()
     page:select(1)
   elseif i == 2 then
     page:select(2)

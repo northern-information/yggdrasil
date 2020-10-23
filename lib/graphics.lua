@@ -5,6 +5,9 @@ function graphics.init()
   graphics.glow = 0
   graphics.glow_up = true
   graphics.frame = 0
+  graphics.quarter_frame = 0
+  graphics.run_command_frame = 0
+  graphics.command_icon = {}
   graphics.slot_width = 16
   graphics.slot_height = 7
   graphics.ni_splash_lines_open = {}
@@ -19,6 +22,8 @@ function graphics.init()
   graphics.yggdrasil_gui_scale = 2
   graphics.yggdrasil_gui_segments = graphics:get_yggdrasil_segments(0, 50, graphics.yggdrasil_gui_scale)
 end
+
+
 
 -- tracker
 
@@ -81,8 +86,31 @@ function graphics:draw_terminal(message, message_value)
   if message then
     self:text(5, 54, message_value, 1)
   end
-  self:text(0, 63, ">", graphics.glow)
-  self:text(5, 62, buffer.b, 15)
+  local adjust = 0
+  if self.run_command_frame > self.frame then
+    adjust = 7
+  end
+  self:text(1 + adjust, 62, ">", self.glow)
+  self:text(6 + adjust, 62, buffer.b, 15)
+end
+
+function graphics:draw_command_processing()
+  if self.run_command_frame < self.frame then return end
+  self:rect(0, 55, 5, 9, 0)
+  local this = math.random(1, 5)
+  self.command_icon[this] = util.clamp(self.command_icon[this] - math.random(1, 2), -7, 0)
+  for i = 1, #self.command_icon do
+    self:mlrs(i, 64, 0, self.command_icon[i], 15)
+  end
+  for i = 1, #self.command_icon do
+    local l = math.abs(self.command_icon[i])
+    self:mlrs(i, 64, 0, -math.floor(l / 2), 0)
+  end
+end
+
+function graphics:run_command()
+  self.command_icon = {0, 0, 0, 0, 0}
+  self.run_command_frame = self.frame + 30
 end
 
 function graphics:draw_yggdrasil_gui_logo()
@@ -118,6 +146,7 @@ end
 
 function graphics:handle_frames()
   self.frame = self.frame + 1
+  self.quarter_frame = self.frame % 16 == 0 and self.quarter_frame + 1 or self.quarter_frame
   if self.frame % 16 == 0 then
     self.glow_up =  not self.glow_up
   end

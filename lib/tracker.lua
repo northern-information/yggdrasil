@@ -4,8 +4,8 @@ function tracker.init()
   tracker.playback = false
   tracker.focused = false
   tracker.track = 1
-  tracker.cols = 16
-  tracker.rows = 16
+  tracker.cols = 8
+  tracker.rows = 8
   tracker.view = {
     x = 1,
     y = 1,
@@ -27,8 +27,35 @@ end
 
 function tracker:set_midi_note(payload)
   self:focus(payload.x, payload.y)
+  print(payload.x, payload.y)
   local slot = self:get_focused_slot()
   slot:set_midi_note(payload.midi_note)
+end
+
+function tracker:set_rows(i)
+  local _rows = self.rows
+  self.rows = i
+  if _rows < i then
+    local start = i - (i - _rows) + 1
+    for x = 1, self.cols do
+      for y = start, self.rows do
+        table.insert(self.slots, Slot:new(x, y))
+      end
+    end
+  end
+end
+
+function tracker:load_column(col, data)
+  if #data > self.rows then
+    self:set_rows(#data)
+  end
+  for i = 1, #data do
+    self:set_midi_note({
+      x = col,
+      y = i,
+      midi_note = music:convert("ygg_to_midi", data[i])
+    })
+  end
 end
 
 function tracker.tracker_clock()
@@ -44,10 +71,19 @@ end
 function tracker:advance()
   self:set_track(self.track + 1)
   self:set_current_row(self:get_track())
+  self:trigger_slots()
+end
+
+function tracker:trigger_slots()
+  for k, slot in pairs(self.slots) do
+    if slot:get_track() == self:get_track() then
+      slot:trigger()
+    end
+  end
 end
 
 function tracker:set_track(i)
-  self.track = fn.cycle(self.track + 1, 1, self.cols)
+  self.track = fn.cycle(self.track + 1, 1, self.rows)
 end
 
 function tracker:get_track()
@@ -87,15 +123,19 @@ end
 
 function tracker:focus(x, y)
   self:unfocus()
-  for k, slot in pairs(self.slots) do
-    if slot.x == x and slot.y == y then
-      self:set_focused(true)
-      slot:set_focus(true)
-      if (self.view.x > x) or (self.view.cols_per_view < x) then -- or (self.view.rows_per_view < y) then
-        self.view.x = x
-      end
-      if (self.view.y > y) then
-        self.view.y = y
+  if x > self.cols or y > self.rows then
+    self:set_message(x .. "/" .. y .. " is out of bounds.")
+  else
+    for k, slot in pairs(self.slots) do
+      if slot.x == x and slot.y == y then
+        self:set_focused(true)
+        slot:set_focus(true)
+        -- if (self.view.x > x) or (self.view.cols_per_view < self.view.x) then
+        --   self.view.x = x
+        -- end
+        -- if (self.view.y < y) or (self.view.rows_per_view > y) then
+        --   self.view.y = y
+        -- end
       end
     end
   end
@@ -137,6 +177,7 @@ function tracker:render()
   graphics:draw_cols(self.view)
   graphics:draw_slots(self.slots, self.view)
   graphics:draw_terminal(self.message, self.message_value)
+  graphics:draw_command_processing()
 end
 
 function tracker:set_message(s)

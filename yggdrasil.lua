@@ -1,4 +1,11 @@
--- yggdrasil
+--
+-- k1: exit   e1: ???
+--
+--
+--      e2: pan x     e3: pan y
+--
+--   k2: play      k3: ???
+
 
 include("lib/includes")
 
@@ -7,17 +14,19 @@ function init()
   parameters.init()
   page.init()
   graphics.init()
+  filesystem.init()
   keys.init()
   buffer.init()
   commands.init()
   tracker.init()
+  music.init()
+  synth.init()
   y.screen_dirty = true
   y.splash_break = false
   y.init_done = true
   y.redraw_clock_id = clock.run(graphics.redraw_clock)
   y.frame_clock_id = clock.run(graphics.frame_clock)
   y.tracker_clock_id = clock.run(tracker.tracker_clock)
-  page:select(0)
   page:select(parameters.is_splash_screen_on and 0 or 1)
   if config.settings.dev_mode then dev:scene(config.settings.dev_scene) end
   redraw()
@@ -38,7 +47,7 @@ end
 function key(k, z)
   if z == 0 then return end
   if k == 1 then
-    print("k1")
+    -- exit
   elseif k == 2 then
     tracker:toggle_playback()
   elseif k == 3 then

@@ -13,6 +13,7 @@ function fn.break_splash(bool)
 end
 
 function fn.dismiss_messages()
+  tracker:clear_message()
   fn.break_splash(true)
 end
 
@@ -59,8 +60,13 @@ function fn.screenshot()
   _norns.screen_export_png("/home/we/dust/" .. which_screen .. "-" .. os.time() .. ".png")
 end
 
-function rerun()
+function fn.rerun()
   norns.script.load(norns.state.script)
 end
+
+function rerun()
+  fn.rerun()
+end
+
 
 return fn

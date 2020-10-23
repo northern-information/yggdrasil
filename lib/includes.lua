@@ -22,6 +22,9 @@ parameters = include("lib/parameters")
 -- everything you see on the screen
 graphics = include("lib/graphics")
 
+-- manipulate files
+filesystem = include("lib/filesystem")
+
 -- "controller" for the page
 page = include("lib/page")
 
@@ -42,6 +45,12 @@ tracker = include("lib/tracker")
 
 -- what miracle is this?
 include("lib/Slot")
+
+-- essentially musicutil abstractions
+music = include("lib/music")
+
+-- supercollider
+synth = include("lib/synth")
 
 -- dev only stuff
 dev = io.open(_path["code"] .. lib .. "dev.lua", "r")

@@ -13,13 +13,17 @@ function commands:run(c)
   self:set_command(c)
   self:clear_class()
   self:check_class()
-  if self.valid_class then tracker:clear_message() end
+  if self.valid_class then
+    graphics:run_command()
+    tracker:clear_message()
+  end
       if self.class == "AAAA"           then -- empty to easily sort below:
   elseif self.class == "BPM"            then params:set("clock_tempo", self.payload.bpm)
   elseif self.class == "FOCUS"          then tracker:focus(self.payload.x, self.payload.y)
   elseif self.class == "PLAY"           then tracker:set_playback(true)
   elseif self.class == "SET_MIDI_NOTE"  then tracker:set_midi_note(self.payload)
   elseif self.class == "STOP"           then tracker:set_playback(false)
+  elseif self.class == "RERUN"          then fn.rerun()
   else tracker:set_message(commands.error_prefix .. self.command)
   end
 end
@@ -55,6 +59,9 @@ end
 
 function commands:register_all()
   
+
+
+
   self:register_class({
     name = "BPM",
     format_payload = function(c)
@@ -66,6 +73,9 @@ function commands:register_all()
       return #c == 2 and c[1] == "bpm" and fn.is_int(tonumber(c[2]))
     end
   })
+
+
+
 
   self:register_class({
     name = "FOCUS",
@@ -80,6 +90,9 @@ function commands:register_all()
     end
   })
 
+
+
+
   self:register_class({
     name = "PLAY",
     format_payload = function(c) return {} end,
@@ -88,6 +101,9 @@ function commands:register_all()
     end
   })
 
+
+
+
   self:register_class({
     name = "STOP",
     format_payload = function(c) return {} end,
@@ -95,6 +111,9 @@ function commands:register_all()
       return #c == 1 and c[1] == "stop"
     end
   })
+
+
+
 
   self:register_class({
     name = "SET_MIDI_NOTE",
@@ -108,6 +127,20 @@ function commands:register_all()
       return #c == 3 and fn.is_int(tonumber(c[1])) and fn.is_int(tonumber(c[2])) and fn.is_int(tonumber(c[3]))
     end
   })
+
+
+
+
+  self:register_class({
+    name = "RERUN",
+    format_payload = function(c) return {} end,
+    condition = function(c)
+      return #c == 1 and c[1] == "rerun"
+    end
+  })
+
+
+
 
 end
 
