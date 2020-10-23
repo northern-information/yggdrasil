@@ -268,4 +268,8 @@ function tracker:clear_message()
   self.message_value = ""
 end
 
+function tracker:has_message()
+  return self.message
+end
+
 return tracker

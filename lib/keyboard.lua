@@ -67,7 +67,11 @@ function keyboard.event(type, code, val)
   end
 
   if keys:is_esc(code) then
-    tracker:clear_message()
+    if tracker:has_message() then
+      tracker:clear_message()
+    elseif tracker:is_focused() then
+      tracker:unfocus()
+    end
   end
 
   if keys:is_caps(code) then
