@@ -33,7 +33,7 @@ end
 
 function enc(e, d)
   if e == 1 then
-    tracker:scroll_tracker(d)
+    tracker:cycle_focus(d)
   elseif e == 2 then
     tracker:pan_x(d)
   elseif e == 3 then

@@ -47,7 +47,7 @@ function graphics:draw_hud(view)
       (i * self.slot_width - 2),
       (self.slot_height - 2),
       ((value < 1 or value > view.cols) and "" or value),
-      1
+      15
     )
   end
   -- start at 2 because of the row HUD
@@ -57,7 +57,7 @@ function graphics:draw_hud(view)
       (self.slot_width - 3),
       (i * self.slot_height),
       ((value < 1 or value > view.rows) and "" or value),
-      1
+      15
     )
   end
 end
@@ -65,7 +65,7 @@ end
 function graphics:draw_highlight(view)
   local offsets = self:get_offsets(view)
   local y = (((view.current_row - 1) * self.slot_height) + 1) - (offsets.y * self.slot_height)
-  self:rect(0, y, 128, self.slot_height, 1)
+  self:rect(0, y, 128, self.slot_height, 5)
 end
 
 function graphics:get_offsets(view)

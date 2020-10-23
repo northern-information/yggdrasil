@@ -1,8 +1,9 @@
- tracker = {}
+tracker = {}
 
 function tracker.init()
   tracker.playback = false
   tracker.focused = false
+  tracker.focused_index = 0
   tracker.follow = false
   tracker.track = 1
   tracker.cols = 16
@@ -20,9 +21,10 @@ function tracker.init()
   }
   tracker:update_view()
   tracker.slots = {}
-  for x = 1, tracker.cols do
-    for y = 1, tracker.rows do
-      table.insert(tracker.slots, Slot:new(x, y))
+  for y = 1, tracker.rows do
+    for x = 1, tracker.cols do
+      local index = tracker:index(x, y)
+      tracker.slots[index] = Slot:new(x, y, index)
     end
   end
   tracker.message = false
@@ -38,7 +40,6 @@ function tracker:render()
   graphics:draw_command_processing()
 end
 
-
 function tracker:set_midi_note(payload)
   self:focus_slot(payload.x, payload.y)
   -- print(payload.x, payload.y)
@@ -48,22 +49,27 @@ function tracker:set_midi_note(payload)
   end
 end
 
-function tracker:set_rows(i)
-  local _rows = self.rows
-  self.rows = i
-  if _rows < i then
-    local start = i - (i - _rows) + 1
+function tracker:add_rows(i)
+  -- make sure we're actually adding rows
+  if i <= self.rows then return end
+  -- cache the last row
+  local cached_row = self.rows
+  self:set_rows(self.rows + i)
+  for y = cached_row + 1, self.rows - cached_row do
+    -- even though we're adding rows we need to 
+    -- fill in all the cols with slots
     for x = 1, self.cols do
-      for y = start, self.rows do
-        table.insert(self.slots, Slot:new(x, y))
-      end
+      local index = tracker:index(x, y)
+      tracker.slots[index] = Slot:new(x, y, index)
     end
   end
 end
 
 function tracker:load_column(col, data)
+  -- compare incoming rows with existing rows
+  -- if incoming is larger, we need to add more rows
   if #data > self.rows then
-    self:set_rows(#data)
+    self:add_rows(#data)
   end
   for i = 1, #data do
     self:set_midi_note({
@@ -104,7 +110,7 @@ end
 
 function tracker:trigger_slots()
   for k, slot in pairs(self.slots) do
-    if slot:get_track() == self:get_track() then
+    if slot:get_y() == self:get_track() then
       slot:trigger()
     end
   end
@@ -126,9 +132,10 @@ function tracker:focus_slot(x, y)
     for k, slot in pairs(self.slots) do
       if slot.x == x and slot.y == y then
         self:set_focused(true)
-        slot:set_focus(true)
+        self:set_focused_index(slot:get_index())
         self.view.x = x
         self.view.y = y
+        slot:set_focus(true)
       end
     end
   end
@@ -144,6 +151,7 @@ function tracker:focus_col(x)
     for k, slot in pairs(self.slots) do
       if slot.x == x then
         self:set_focused(true)
+        self:set_focused_index(slot:get_index())
         slot:set_focus(true)
         if not first_focus then
           self.view.x = x
@@ -158,6 +166,7 @@ end
 
 function tracker:unfocus()
   self:set_focused(false)
+  self:set_focused_index(0)
   local slots = self:get_focused_slots()
   for k, slot in pairs(slots) do
     if slot ~= nil then
@@ -185,9 +194,6 @@ function tracker:clear_focused_slots()
     end
   end
 end
-
-
-
 
 function tracker:set_track(i)
   self.track = fn.cycle(i, 1, self.rows)
@@ -229,12 +235,49 @@ function tracker:is_focused()
   return self.focused
 end
 
-function tracker:scroll_tracker(d)
-  if d > 0 then
-    tracker:descend()
-  elseif d < 0 then
-    tracker:ascend()
+function tracker:set_focused_index(index)
+  self.focused_index = index
+end
+
+function tracker:get_focused_index()
+  return self.focused_index
+end
+
+function tracker:collect_slots_for_focus()
+  local out = {}
+  local slots = self:get_not_empty_slots()
+  local i = 1
+  for k, slot in fn.pairs_by_keys(slots) do
+      out[i] = slot
+      i = i + 1
+  end 
+  return out
+end
+
+function tracker:cycle_focus(d)
+  self:set_follow(false)
+  if self:is_focused() then
+    local slots = self:collect_slots_for_focus()
+    local sorted_index = 0
+    for k, slot in pairs(slots) do
+      if slot:get_index() == self:get_focused_index() then
+        sorted_index = k
+      end
+    end
+    local direction = d > 0 and 1 or -1
+    next_focus = fn.cycle(sorted_index + direction, 1, #slots)
+    self:focus_slot(slots[next_focus].x, slots[next_focus].y)
   end
+end
+
+function tracker:get_not_empty_slots()
+  local slots = {}
+  for k, slot in pairs(self.slots) do
+    if not slot:is_empty() then
+      table.insert(slots, slot)
+    end
+  end
+  return slots
 end
 
 function tracker:pan_x(d)
@@ -270,6 +313,14 @@ end
 
 function tracker:has_message()
   return self.message
+end
+
+function tracker:index(x, y)
+  return y + ((x - 1) * self.rows)
+end
+
+function tracker:set_rows(i)
+  self.rows = i
 end
 
 return tracker

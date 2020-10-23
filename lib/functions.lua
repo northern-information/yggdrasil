@@ -26,6 +26,25 @@ function fn.table_contains(t, check)
   return false
 end
 
+function fn.pairs_by_keys(t)
+  local a = {}
+  for n in pairs(t) do
+    table.insert(a, n)
+  end
+  table.sort(a)
+  local i = 0
+  local iterator = function()
+    i = i + 1
+    if a[i] == nil then
+      return nil
+    else 
+      return a[i], t[a[i]]
+    end
+  end
+  return iterator
+end
+
+
 function fn.cycle(value, min, max)
   if value > max then
     return min
