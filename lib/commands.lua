@@ -20,6 +20,7 @@ function commands:run(c)
       if self.class == "AAAA"           then -- empty to easily sort below:
   elseif self.class == "BPM"            then params:set("clock_tempo", self.payload.bpm)
   elseif self.class == "FOCUS"          then tracker:focus(self.payload.x, self.payload.y)
+  elseif self.class == "FOLLOW"         then tracker:toggle_follow()
   elseif self.class == "PLAY"           then tracker:set_playback(true)
   elseif self.class == "SET_MIDI_NOTE"  then tracker:set_midi_note(self.payload)
   elseif self.class == "STOP"           then tracker:set_playback(false)
@@ -87,6 +88,18 @@ function commands:register_all()
     end,
     condition = function(c)
       return #c == 2 and fn.is_int(tonumber(c[1])) and fn.is_int(tonumber(c[2]))
+    end
+  })
+
+
+
+
+
+  self:register_class({
+    name = "FOLLOW",
+    format_payload = function(c) return {} end,
+    condition = function(c)
+      return #c == 1 and c[1] == "follow"
     end
   })
 

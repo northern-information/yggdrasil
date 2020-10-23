@@ -3,6 +3,7 @@ tracker = {}
 function tracker.init()
   tracker.playback = false
   tracker.focused = false
+  tracker.follow = false
   tracker.track = 1
   tracker.cols = 8
   tracker.rows = 8
@@ -72,6 +73,9 @@ function tracker:advance()
   self:set_track(self.track + 1)
   self:set_current_row(self:get_track())
   self:trigger_slots()
+  if self:is_follow() then
+    self:scroll_to_y(self:get_track())
+  end
 end
 
 function tracker:trigger_slots()
@@ -94,8 +98,16 @@ function tracker:toggle_playback()
   self:set_playback(not self.playback)
 end
 
+function tracker:toggle_follow()
+  self:set_follow(not self.follow)
+end
+
 function tracker:set_playback(bool)
   self.playback = bool
+end
+
+function tracker:set_follow(bool)
+  self.follow = bool
 end
 
 function tracker:set_current_row(i)
@@ -109,6 +121,12 @@ end
 
 function tracker:scroll_y(d)
   self.view.y = util.clamp(self.view.y + d, 1, self.rows)
+  self.view.rows_above = self.view.y > 1
+  self.view.rows_below = self.view.y <= self.rows - 7
+end
+
+function tracker:scroll_to_y(y)
+  self.view.y = util.clamp(y, 1, self.rows)
   self.view.rows_above = self.view.y > 1
   self.view.rows_below = self.view.y <= self.rows - 7
 end
@@ -190,4 +208,8 @@ function tracker:clear_message()
   self.message_value = ""
 end
 
+
+function tracker:is_follow()
+  return self.follow
+end
 return tracker
