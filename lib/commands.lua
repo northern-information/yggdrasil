@@ -19,7 +19,8 @@ function commands:run(c)
   end
       if self.class == "AAAA"           then -- empty to easily sort below:
   elseif self.class == "BPM"            then params:set("clock_tempo", self.payload.bpm)
-  elseif self.class == "FOCUS"          then tracker:focus(self.payload.x, self.payload.y)
+  elseif self.class == "FOCUS_COL"      then tracker:focus_col(self.payload.x)
+  elseif self.class == "FOCUS_SLOT"     then tracker:focus_slot(self.payload.x, self.payload.y)
   elseif self.class == "FOLLOW"         then tracker:toggle_follow()
   elseif self.class == "PLAY"           then tracker:set_playback(true)
   elseif self.class == "SET_MIDI_NOTE"  then tracker:set_midi_note(self.payload)
@@ -62,7 +63,6 @@ function commands:register_all()
   
 
 
-
   self:register_class({
     name = "BPM",
     format_payload = function(c)
@@ -77,9 +77,8 @@ function commands:register_all()
 
 
 
-
   self:register_class({
-    name = "FOCUS",
+    name = "FOCUS_SLOT",
     format_payload = function(c)
       return {
         x = tonumber(c[1]), 
@@ -93,6 +92,18 @@ function commands:register_all()
 
 
 
+  self:register_class({
+    name = "FOCUS_COL",
+    format_payload = function(c)
+      return {
+        x = tonumber(c[1])
+      }
+    end,
+    condition = function(c)
+      return #c == 1 and fn.is_int(tonumber(c[1]))
+    end
+  })
+
 
 
   self:register_class({
@@ -102,7 +113,6 @@ function commands:register_all()
       return #c == 1 and c[1] == "follow"
     end
   })
-
 
 
 
@@ -116,7 +126,6 @@ function commands:register_all()
 
 
 
-
   self:register_class({
     name = "STOP",
     format_payload = function(c) return {} end,
@@ -124,7 +133,6 @@ function commands:register_all()
       return #c == 1 and c[1] == "stop"
     end
   })
-
 
 
 
@@ -143,7 +151,6 @@ function commands:register_all()
 
 
 
-
   self:register_class({
     name = "RERUN",
     format_payload = function(c) return {} end,
@@ -151,7 +158,6 @@ function commands:register_all()
       return #c == 1 and c[1] == "rerun"
     end
   })
-
 
 
 

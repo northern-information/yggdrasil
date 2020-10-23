@@ -22,7 +22,7 @@ function Slot:trigger()
 end
 
 function Slot:to_string()
-  return self.midi_note or "" -- self.x .. ";" .. self.y
+  return self.midi_note or self.x .. ";" .. self.y
 end
 
 function Slot:set_midi_note(i)

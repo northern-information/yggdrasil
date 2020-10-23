@@ -41,7 +41,7 @@ function keyboard.event(type, code, val)
 
   if keys:is_backspace(code) then
     if buffer:is_empty() and tracker:is_focused() then
-      tracker:clear_focused_slot()
+      tracker:clear_focused_slots()
     else
       buffer:backspace()
     end
@@ -68,6 +68,10 @@ function keyboard.event(type, code, val)
 
   if keys:is_esc(code) then
     tracker:clear_message()
+  end
+
+  if keys:is_caps(code) then
+    graphics:toggle_hud()
   end
 
   fn.dirty_screen(true)

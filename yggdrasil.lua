@@ -6,7 +6,6 @@
 --
 --   k2: play      k3: ???
 
-
 include("lib/includes")
 
 function init()
@@ -34,11 +33,11 @@ end
 
 function enc(e, d)
   if e == 1 then
-    print("e1", d)
+    tracker:scroll_tracker(d)
   elseif e == 2 then
-    tracker:scroll_x(d)
+    tracker:pan_x(d)
   elseif e == 3 then
-    tracker:scroll_y(d)
+    tracker:pan_y(d)
   end
   fn.dismiss_messages()
   fn.dirty_screen(true)
