@@ -45,6 +45,8 @@ function keys.init()
     { k = 42,  v = "SHIFT" },
     { k = 54,  v = "SHIFT" },
     { k = 39,  v = ";" },
+    { k = 51,  v = "," },
+    { k = 52,  v = "." },
     { k = 15,  v = "TAB" },
     { k = 103, v = "UP" },
     { k = 106, v = "RIGHT" },
@@ -77,6 +79,13 @@ function keys:is_number_code(code)
   -- 0 thru 9
   local check = {
     11, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  }
+  return fn.table_contains(check, code)
+end
+
+function keys:is_symbol(code)
+  local check = {
+    39, 51, 52
   }
   return fn.table_contains(check, code)
 end

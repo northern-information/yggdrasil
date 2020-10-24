@@ -23,7 +23,7 @@ function keyboard.event(type, code, val)
 
   -- if keys.shift then ... end
   
-  if keys:is_letter_code(code) or keys:is_number_code(code) then
+  if keys:is_letter_code(code) or keys:is_number_code(code) or keys:is_symbol(code) then
     buffer:add(keys:get_keycode(code))
   end
 

@@ -38,11 +38,9 @@ function graphics:draw_hud(view)
   self:rect(0, 0, 128, sh, 0)
   self:mls(sw, sh, sw, 64, 15)
   self:mls(sw - 1, sh, 128, sh, 15)
-  -- numbers
-  local offsets = self:get_offsets(view)
   -- start at 2 because of the column HUD
   for i = 2, view.cols_per_view do
-    local value = i + offsets.x
+    local value = i + view.x_offset
     self:text_right(
       (i * self.slot_width - 2),
       (self.slot_height - 2),
@@ -52,7 +50,7 @@ function graphics:draw_hud(view)
   end
   -- start at 2 because of the row HUD
   for i = 2, view.rows_per_view do
-    local value = i + offsets.y
+    local value = i + view.y_offset
     self:text_right(
       (self.slot_width - 3),
       (i * self.slot_height),
@@ -63,37 +61,30 @@ function graphics:draw_hud(view)
 end
 
 function graphics:draw_highlight(view)
-  local offsets = self:get_offsets(view)
-  local y = (((view.current_row - 1) * self.slot_height) + 1) - (offsets.y * self.slot_height)
+  if (self:is_hud() and view.current_row < view.y - 1) 
+    or (not self:is_hud() and view.current_row < view.y - 2) then return end
+  local y = (((view.current_row - 1) * self.slot_height) + 1) - (view.y_offset * self.slot_height)
   self:rect(0, y, 128, self.slot_height, 5)
 end
 
-function graphics:get_offsets(view)
-  return {
-    x = view.x - math.floor(view.cols_per_view / 2),
-    y = view.y - math.floor(view.rows_per_view / 2)
-  }
-end
-
 function graphics:draw_slots(slots, view)
-  local offsets = self:get_offsets(view)
   for k, slot in pairs(slots) do
     local text_level = 15
-    local x_offset = offsets.x * self.slot_width
-    local y_offset = offsets.y * self.slot_height
+    local w = view.x_offset * self.slot_width
+    local h = view.y_offset * self.slot_height
     if slot:is_focus() then
       text_level = 0
       self:rect(
-        ((slot.x - 1) * self.slot_width) - x_offset,
-        ((slot.y - 1) * self.slot_height + 1) - y_offset,
+        ((slot.x - 1) * self.slot_width) - w,
+        ((slot.y - 1) * self.slot_height + 1) - h,
         self.slot_width,
         self.slot_height,
         15
       )
     end
     self:text_right(
-      (slot.x * self.slot_width - 2) - x_offset,
-      (slot.y * self.slot_height) - y_offset,
+      (slot.x * self.slot_width - 2) - w,
+      (slot.y * self.slot_height) - h,
       tostring(slot),
       text_level
     )
@@ -101,20 +92,21 @@ function graphics:draw_slots(slots, view)
 end
 
 function graphics:draw_cols(view)
-  local offsets = self:get_offsets(view)
   for i = 1, view.cols_per_view do
     local x = (i - 1) * self.slot_width
-    self:mls(x, 0, x, 64, 1)
-    for ii = 1, (view.rows_per_view * 2) do
-      local adjust_y = self:is_hud() and self.slot_height - 1 or -1
-      if view.rows_above and (
-          (offsets.y > 0  and not self:is_hud()) or
-          (offsets.y > -1 and     self:is_hud())
-        ) then
-        self:mls(x, 1 + ii + adjust_y, x, ii + adjust_y, 16 - ii)
-      end
-      if view.rows_below then
-        self:mls(x, 56 - ii, x, 55 - ii, 16 - ii)
+    local value = i + view.x_offset
+    if value > 1 and value <= view.cols + 1 then
+      for ii = 1, (view.rows_per_view * 2) do
+        local adjust_y = self:is_hud() and self.slot_height - 1 or -1
+        if view.rows_above and (
+            (view.y_offset > 0  and not self:is_hud()) or
+            (view.y_offset > -1 and     self:is_hud())
+          ) then
+          self:mls(x, 1 + ii + adjust_y, x, ii + adjust_y, 16 - ii)
+        end
+        if view.rows_below then
+          self:mls(x, 56 - ii, x, 55 - ii, 16 - ii)
+        end
       end
     end
   end
@@ -166,7 +158,10 @@ function graphics:draw_yggdrasil_gui_logo()
   end
 end
 
+
+
 -- housekeeping
+
 
 
 function graphics:toggle_hud()
@@ -176,7 +171,6 @@ end
 function graphics:is_hud()
   return self.hud
 end
-
 
 function graphics.redraw_clock()
   while true do

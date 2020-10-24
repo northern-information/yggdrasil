@@ -1,5 +1,5 @@
 --
--- k1: exit   e1: ???
+-- k1: exit   e1: focus
 --
 --
 --      e2: pan x     e3: pan y

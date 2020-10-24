@@ -17,15 +17,16 @@ function commands:run(c)
     graphics:run_command()
     tracker:clear_message()
   end
-      if self.class == "AAAA"           then -- empty to easily sort below:
-  elseif self.class == "BPM"            then params:set("clock_tempo", self.payload.bpm)
-  elseif self.class == "FOCUS_COL"      then tracker:focus_col(self.payload.x)
-  elseif self.class == "FOCUS_SLOT"     then tracker:focus_slot(self.payload.x, self.payload.y)
-  elseif self.class == "FOLLOW"         then tracker:toggle_follow()
-  elseif self.class == "PLAY"           then tracker:set_playback(true)
-  elseif self.class == "SET_MIDI_NOTE"  then tracker:set_midi_note(self.payload)
-  elseif self.class == "STOP"           then tracker:set_playback(false)
-  elseif self.class == "RERUN"          then fn.rerun()
+      if self.class == "AAAA"                       then -- empty to easily sort below:
+  elseif self.class == "BPM"                        then params:set("clock_tempo", self.payload.bpm)
+  elseif self.class == "FOCUS_COL"                  then tracker:focus_col(self.payload.x)
+  elseif self.class == "FOCUS_SLOT"                 then tracker:focus_slot(self.payload.x, self.payload.y)
+  elseif self.class == "FOLLOW"                     then tracker:toggle_follow()
+  elseif self.class == "PLAY"                       then tracker:set_playback(true)
+  elseif self.class == "SET_MIDI_NOTE"              then tracker:update_slot(self.payload)
+  elseif self.class == "SET_MIDI_NOTE_AND_VELOCITY" then tracker:update_slot(self.payload)
+  elseif self.class == "STOP"                       then tracker:set_playback(false)
+  elseif self.class == "RERUN"                      then fn.rerun()
   else tracker:set_message(commands.error_prefix .. self.command)
   end
 end
@@ -47,7 +48,7 @@ function commands:check_class()
   self:set_valid_class(false)
   local c = fn.string_split(self.command)
   for k, check in pairs(self.classes) do
-    if check.condition(c) then
+    if check.signature(c) then
       self:set_valid_class(true)
       self.class = check.name
       self.payload = check.format_payload(c)
@@ -70,7 +71,7 @@ function commands:register_all()
         bpm = tonumber(c[2])
       }
     end,
-    condition = function(c)
+    signature = function(c)
       return #c == 2 and c[1] == "bpm" and fn.is_int(tonumber(c[2]))
     end
   })
@@ -85,7 +86,7 @@ function commands:register_all()
         y = tonumber(c[2])
       }
     end,
-    condition = function(c)
+    signature = function(c)
       return #c == 2 and fn.is_int(tonumber(c[1])) and fn.is_int(tonumber(c[2]))
     end
   })
@@ -99,7 +100,7 @@ function commands:register_all()
         x = tonumber(c[1])
       }
     end,
-    condition = function(c)
+    signature = function(c)
       return #c == 1 and fn.is_int(tonumber(c[1]))
     end
   })
@@ -109,7 +110,7 @@ function commands:register_all()
   self:register_class({
     name = "FOLLOW",
     format_payload = function(c) return {} end,
-    condition = function(c)
+    signature = function(c)
       return #c == 1 and c[1] == "follow"
     end
   })
@@ -119,8 +120,18 @@ function commands:register_all()
   self:register_class({
     name = "PLAY",
     format_payload = function(c) return {} end,
-    condition = function(c)
+    signature = function(c)
       return #c == 1 and c[1] == "play"
+    end
+  })
+
+
+
+self:register_class({
+    name = "RERUN",
+    format_payload = function(c) return {} end,
+    signature = function(c)
+      return #c == 1 and c[1] == "rerun"
     end
   })
 
@@ -129,7 +140,7 @@ function commands:register_all()
   self:register_class({
     name = "STOP",
     format_payload = function(c) return {} end,
-    condition = function(c)
+    signature = function(c)
       return #c == 1 and c[1] == "stop"
     end
   })
@@ -144,18 +155,25 @@ function commands:register_all()
         midi_note = tonumber(c[3])
       }
     end,
-    condition = function(c)
+    signature = function(c)
       return #c == 3 and fn.is_int(tonumber(c[1])) and fn.is_int(tonumber(c[2])) and fn.is_int(tonumber(c[3]))
     end
   })
 
 
-
+  -- 1 1 72 vel;100
   self:register_class({
-    name = "RERUN",
-    format_payload = function(c) return {} end,
-    condition = function(c)
-      return #c == 1 and c[1] == "rerun"
+    name = "SET_MIDI_NOTE_AND_VELOCITY",
+    format_payload = function(c) return {
+        x = tonumber(c[1]), 
+        y = tonumber(c[2]),
+        midi_note = tonumber(c[3]),
+        velocity = fn.extract("velocity", c[4])
+      }
+    end,
+    signature = function(c)
+      return #c == 4 and fn.is_int(tonumber(c[1])) and fn.is_int(tonumber(c[2])) 
+            and fn.is_int(tonumber(c[3])) and fn.is_velocity_command(c[4])
     end
   })
 

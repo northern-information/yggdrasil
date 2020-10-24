@@ -19,7 +19,7 @@ end
 function Slot:trigger()
   if self.midi_note == nil then return end
   if self.route == "synth" then
-    synth:play(self.midi_note, self.velocity)
+    synth:play(self:get_midi_note(), self:get_velocity())
   end
 end
 
@@ -29,6 +29,12 @@ end
 
 function Slot:set_midi_note(i)
   self.midi_note = i
+  self:set_empty(false)
+end
+
+function Slot:set_velocity(i)
+  print(i)
+  self.velocity = util.clamp(i, 0, 127)
   self:set_empty(false)
 end
 
@@ -56,6 +62,14 @@ end
 
 function Slot:get_index()
   return self.index
+end
+
+function Slot:get_midi_note()
+  return self.midi_note
+end
+
+function Slot:get_velocity()
+  return self.velocity
 end
 
 function Slot:is_empty()

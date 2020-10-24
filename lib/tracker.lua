@@ -18,6 +18,8 @@ function tracker.init()
     current_row = 1,
     rows_per_view = 7,
     cols_per_view = 8,
+    x_offset = 0,
+    y_offset = 0,
   }
   tracker:update_view()
   tracker.slots = {}
@@ -40,12 +42,17 @@ function tracker:render()
   graphics:draw_command_processing()
 end
 
-function tracker:set_midi_note(payload)
+function tracker:update_slot(payload)
   self:focus_slot(payload.x, payload.y)
-  -- print(payload.x, payload.y)
-  local slots = self:get_focused_slots()
-  for k, slot in pairs(slots) do
-    slot:set_midi_note(payload.midi_note)
+  local slot = self:get_focused_slots()
+  if #slot == 1 then
+    local s = slot[1]
+    if fn.table_contains_key(payload, "midi_note") then
+      s:set_midi_note(payload.midi_note)
+    end
+    if fn.table_contains_key(payload, "velocity") then
+      s:set_velocity(payload.velocity)
+    end
   end
 end
 
@@ -72,7 +79,7 @@ function tracker:load_column(col, data)
     self:add_rows(#data)
   end
   for i = 1, #data do
-    self:set_midi_note({
+    self:update_slot({
       x = col,
       y = i,
       midi_note = music:convert("ygg_to_midi", data[i])
@@ -282,6 +289,7 @@ end
 
 function tracker:pan_x(d)
   self.view.x = util.clamp(self.view.x + d, 1, self.cols)
+  self:update_view()
 end
 
 function tracker:pan_y(d)
@@ -298,7 +306,9 @@ function tracker:update_view()
   self.view.rows = self.rows
   self.view.cols = self.cols
   self.view.rows_above = self.view.y > 1
-  self.view.rows_below = self.view.y <= self.rows - 7
+  self.view.rows_below = self.view.y <= self.rows - 5
+  self.view.x_offset = self.view.x - math.floor(self.view.cols_per_view / 2)
+  self.view.y_offset = self.view.y - math.floor(self.view.rows_per_view / 2)
 end
 
 function tracker:set_message(s)

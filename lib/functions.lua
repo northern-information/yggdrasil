@@ -17,6 +17,35 @@ function fn.dismiss_messages()
   fn.break_splash(true)
 end
 
+function fn.split_semicolon(input)
+  local result = {
+    valid = false,
+    payload = {}
+  }
+  for s in (input .. ";"):gmatch("([^;]*);") do 
+    result.payload[#result.payload + 1] = s
+  end
+  if #result.payload > 1 then
+    result.valid = true
+  end
+  return result
+end
+
+function fn.is_velocity_command(input)
+  local result = fn.split_semicolon(input)
+  if not result.valid then return false end
+  if #result.payload ~= 2 then return false end
+  if result.payload[1] ~= "vel" then return false end
+  return fn.is_int(tonumber(result.payload[2]))
+end
+
+function fn.extract(attribute, input)
+  local result = fn.split_semicolon(input)
+  if attribute == "velocity" and fn.is_velocity_command(input) then
+    return tonumber(result.payload[2])
+  end
+end
+
 function fn.table_contains(t, check)
   for k, v in pairs(t) do
     if v == check then
@@ -24,6 +53,14 @@ function fn.table_contains(t, check)
     end
   end
   return false
+end
+
+function fn.table_contains_key(t, check)
+  local keys = {}
+  for k, v in pairs(t) do
+    table.insert(keys, k)
+  end
+  return fn.table_contains(keys, check)
 end
 
 function fn.pairs_by_keys(t)
