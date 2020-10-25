@@ -9,17 +9,17 @@ include("lib/includes")
 
 function init()
   y = {}
-  parameters.init()
-  page.init()
-  graphics.init()
-  filesystem.init()
-  keys.init()
   buffer.init()
   commands.init()
-  tracker.init()
-  music.init()
-  synth.init()
   docs.init()
+  filesystem.init()
+  graphics.init()
+  keys.init()
+  music.init()
+  page.init()
+  parameters.init()
+  synth.init()
+  tracker.init()
   y.screen_dirty = true
   y.splash_break = false
   y.init_done = true
@@ -28,6 +28,7 @@ function init()
   y.tracker_clock_id = clock.run(tracker.tracker_clock)
   page:select(parameters.is_splash_screen_on and 0 or 1)
   if config.settings.dev_mode then dev:scene(config.settings.dev_scene) end
+  tracker:refresh()
   redraw()
 end
 

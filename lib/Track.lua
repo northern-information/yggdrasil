@@ -10,7 +10,23 @@ function Track:new(x)
   t.position = 0
   t.direction = "descend"
   t.slots = {}
+  t.extents = 0
   return t
+end
+
+
+
+function Track:refresh()
+  local e = 0
+  local tracker_slot_view = tracker:get_slot_view()
+  for k, slot in pairs(self.slots) do
+    slot:set_index(tracker:index(slot.x, slot.y))
+    slot:set_view(tracker_slot_view)
+    slot:refresh()
+    local se = slot:get_extents()
+    if e < se then e = se end
+  end
+  self:set_extents(e)
 end
 
 
@@ -27,10 +43,24 @@ function Track:fill(depth)
   for y = cached_depth + 1, self.depth - cached_depth do
     self:append_slot(Slot:new(self.x, y))
   end
+  self:refresh()
 end
 
 function Track:append_slot(slot)
   self.slots[#self.slots + 1] = slot
+  self:refresh()
+end
+
+function Track:update_slot(payload)
+  local slot = self:get_slot(payload.y)
+  if fn.table_contains_key(payload, "midi_note") then
+    slot:set_midi_note(payload.midi_note)
+  end
+  if fn.table_contains_key(payload, "velocity") then
+    slot:set_velocity(payload.velocity)
+  end
+  slot:refresh()
+  self:refresh()
 end
 
 
@@ -101,15 +131,6 @@ function Track:load(data)
   end
 end
 
-function Track:update_slot(payload)
-  local slot = self:get_slot(payload.y)
-  if fn.table_contains_key(payload, "midi_note") then
-    slot:set_midi_note(payload.midi_note)
-  end
-  if fn.table_contains_key(payload, "velocity") then
-    slot:set_velocity(payload.velocity)
-  end
-end
 
 
 -- getters & setters
@@ -154,5 +175,13 @@ end
 
 function Track:set_direction(s)
   self.direction = s
+end
+
+function Track:set_extents(i)
+  self.extents = i
+end
+
+function Track:get_extents()
+  return self.extents
 end
 

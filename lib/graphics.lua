@@ -9,8 +9,10 @@ function graphics.init()
   graphics.quarter_frame = 0
   graphics.run_command_frame = 0
   graphics.command_icon = {}
-  graphics.slot_width = 16
+  graphics.slot_width_min = 16
+  graphics.slot_width = graphics.slot_width_min
   graphics.slot_height = 7
+  graphics.extents = graphics.slot_width_min
   graphics.ni_splash_lines_open = {}
   graphics.ni_splash_lines_close = {}
   graphics.ni_splash_lines_close_available = {}
@@ -33,33 +35,37 @@ end
 function graphics:draw_hud(view)
   if not self.hud then return end
 
-  local sw, sh = self.slot_width, self.slot_height
-  self:rect(0, 0, sw, 64, 0)
+  local swm, sw, sh =  self.slot_width_min, self.slot_width, self.slot_height
+  self:rect(0, 0, swm, 64, 0)
   self:rect(0, 0, 128, sh, 0)
 
   -- vertical indicator to scroll up
   if view.rows_above then
     for i = 1, 16 do
-      self:mls(sw, sh - 1 + i, sw, sh + i, 16 - i)
+      self:mls(swm, sh - 1 + i, swm, sh + i, 16 - i)
     end
   end
 
   -- horizontal rule under the top numbers
   if view.rows_above then
-    local x_end = view.cols_right and 128 or 128 + (self.slot_width * (view.cols - view.x_offset))
-    self:mls(sw - 1, sh, x_end, sh, 15)
+    self:mls(swm - 1, sh, 128, sh, 15)
   end
 
+  -- vertical indicator to scroll down
   if view.rows_below then
     local adjust_y = tracker:has_message() and -9 or 0
     for i = 1, 16 do 
-      self:mls(sw, 56 - i + adjust_y, sw, 55 - i + adjust_y, 16 - i)
+      self:mls(swm, 56 - i + adjust_y, swm, 55 - i + adjust_y, 16 - i)
     end
   end
 
   -- col numbers
   -- start at 2 because of the column HUD
-  for i = 2, view.cols_per_view do
+  local start = 2
+  if view.extents > swm then
+    start = 1
+  end
+  for i = start, view.cols_per_view do
     local value = i + view.x_offset
     self:text_right(
       (i * sw - 2),
@@ -69,12 +75,12 @@ function graphics:draw_hud(view)
     )
   end
 
-  -- col numbers
+  -- row numbers
   -- start at 2 because of the row HUD
   for i = 2, view.rows_per_view + 2 do
     local value = i + view.y_offset
     self:text_right(
-      (sw - 3),
+      (swm - 3),
       (i * sh),
       ((value < 1 or value > view.rows) and "" or value),
       15
@@ -237,6 +243,22 @@ function graphics:teardown()
   screen.update()
 end
 
+function graphics:set_extents(i)
+  self.extents = i
+  if i > self.slot_width_min then
+    self.slot_width = i
+  else
+    self.slot_width = self:get_width_min()
+  end
+end
+
+function graphics:get_extents()
+  return self.extents
+end
+
+function graphics:get_width_min()
+  return self.slot_width_min 
+end
 
 
 -- northern information graphics abstractions

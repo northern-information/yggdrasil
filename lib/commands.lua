@@ -4,6 +4,7 @@ function commands.init()
   commands.command = ""
   commands.classes = {}
   commands.class = ""
+  commands.valid_class = false
   commands.payload = {}
   commands:register_all()
   commands.error_prefix = "Unfound:"
@@ -29,6 +30,7 @@ function commands:run(c)
   elseif self.class == "SET_MIDI_NOTE"              then tracker:update_slot(self.payload)
   elseif self.class == "SET_MIDI_NOTE_AND_VELOCITY" then tracker:update_slot(self.payload)
   elseif self.class == "STOP"                       then tracker:set_playback(false)
+  elseif self.class == "VIEW"                       then tracker:set_slot_view(self.payload.view)
   else tracker:set_message(commands.error_prefix .. " " .. self.command)
   end
 end
@@ -199,6 +201,19 @@ self:register_class({
     end
   })
 
+
+
+  -- view {midi,index}
+  self:register_class({
+    name = "VIEW",
+    format_payload = function(c) return {
+        view = c[2]
+      }
+    end,
+    signature = function(c)
+      return #c == 2 and c[1] == "view"
+    end
+  })
 
 
 end
