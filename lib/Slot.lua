@@ -1,13 +1,13 @@
 Slot = {}
 
-function Slot:new(x, y, index)
+function Slot:new(x, y)
   local s = setmetatable({}, { 
     __index = Slot,
     __tostring = function(s) return s:to_string() end
   })
   s.x = x ~= nil and x or 0
   s.y = y ~= nil and y or 0
-  s.index = index ~= nil and index or 0
+  s.index = 0
   s.empty = true
   s.focus = false
   s.midi_note = nil
@@ -33,7 +33,6 @@ function Slot:set_midi_note(i)
 end
 
 function Slot:set_velocity(i)
-  print(i)
   self.velocity = util.clamp(i, 0, 127)
   self:set_empty(false)
 end
@@ -62,6 +61,10 @@ end
 
 function Slot:get_index()
   return self.index
+end
+
+function Slot:set_index(i)
+  self.index = i
 end
 
 function Slot:get_midi_note()

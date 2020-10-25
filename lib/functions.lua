@@ -81,7 +81,6 @@ function fn.pairs_by_keys(t)
   return iterator
 end
 
-
 function fn.cycle(value, min, max)
   if value > max then
     return min
@@ -109,6 +108,10 @@ function fn.string_split(input_string, split_character)
     table.insert(t, str)
   end
   return t
+end
+
+function fn.draw_oblique()
+  tracker:set_message(docs:draw_oblique())
 end
 
 function fn.screenshot()

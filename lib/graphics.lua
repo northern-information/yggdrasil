@@ -32,32 +32,55 @@ end
 
 function graphics:draw_hud(view)
   if not self.hud then return end
-  -- cover the screen
+
   local sw, sh = self.slot_width, self.slot_height
   self:rect(0, 0, sw, 64, 0)
   self:rect(0, 0, 128, sh, 0)
-  self:mls(sw, sh, sw, 64, 15)
-  self:mls(sw - 1, sh, 128, sh, 15)
+
+  -- vertical indicator to scroll up
+  if view.rows_above then
+    for i = 1, 16 do
+      self:mls(sw, sh - 1 + i, sw, sh + i, 16 - i)
+    end
+  end
+
+  -- horizontal rule under the top numbers
+  if view.rows_above then
+    local x_end = view.cols_right and 128 or 128 + (self.slot_width * (view.cols - view.x_offset))
+    self:mls(sw - 1, sh, x_end, sh, 15)
+  end
+
+  if view.rows_below then
+    local adjust_y = tracker:has_message() and -9 or 0
+    for i = 1, 16 do 
+      self:mls(sw, 56 - i + adjust_y, sw, 55 - i + adjust_y, 16 - i)
+    end
+  end
+
+  -- col numbers
   -- start at 2 because of the column HUD
   for i = 2, view.cols_per_view do
     local value = i + view.x_offset
     self:text_right(
-      (i * self.slot_width - 2),
-      (self.slot_height - 2),
+      (i * sw - 2),
+      (sh - 2),
       ((value < 1 or value > view.cols) and "" or value),
       15
     )
   end
+
+  -- col numbers
   -- start at 2 because of the row HUD
-  for i = 2, view.rows_per_view do
+  for i = 2, view.rows_per_view + 2 do
     local value = i + view.y_offset
     self:text_right(
-      (self.slot_width - 3),
-      (i * self.slot_height),
+      (sw - 3),
+      (i * sh),
       ((value < 1 or value > view.rows) and "" or value),
       15
     )
   end
+
 end
 
 function graphics:draw_highlight(view)
@@ -97,15 +120,16 @@ function graphics:draw_cols(view)
     local value = i + view.x_offset
     if value > 1 and value <= view.cols + 1 then
       for ii = 1, (view.rows_per_view * 2) do
-        local adjust_y = self:is_hud() and self.slot_height - 1 or -1
         if view.rows_above and (
             (view.y_offset > 0  and not self:is_hud()) or
             (view.y_offset > -1 and     self:is_hud())
           ) then
-          self:mls(x, 1 + ii + adjust_y, x, ii + adjust_y, 16 - ii)
+          local adjust_y = self:is_hud() and self.slot_height or -1
+          self:mls(x, ii - 1 + adjust_y, x, ii + adjust_y, 16 - ii)
         end
         if view.rows_below then
-          self:mls(x, 56 - ii, x, 55 - ii, 16 - ii)
+          local adjust_y = tracker:has_message() and -9 or 0
+          self:mls(x, 56 - ii + adjust_y, x, 55 - ii + adjust_y, 16 - ii)
         end
       end
     end
@@ -122,25 +146,24 @@ function graphics:draw_terminal(message, message_value)
   if message then
     self:text(5, 54, message_value, 1)
   end
-  local adjust = 0
-  if self.run_command_frame > self.frame then
-    adjust = 7
-  end
-  self:text(1 + adjust, 62, ">", self.glow)
-  self:text(6 + adjust, 62, buffer.b, 15)
+  self:text(1, 62, ">", self.glow)
+  self:text(6, 62, buffer.b, 15)
 end
 
 function graphics:draw_command_processing()
-  if self.run_command_frame < self.frame then return end
-  self:rect(0, 55, 5, 9, 0)
+  if self.run_command_frame < self.frame then return end  
+  local x = 123
+  local y = 55
+  local l = self.frame < self.run_command_frame - 15 and 15 or (self.run_command_frame - self.frame)
+  self:rect(x, y, 5, 9, 0)
   local this = math.random(1, 5)
   self.command_icon[this] = util.clamp(self.command_icon[this] - math.random(1, 2), -7, 0)
   for i = 1, #self.command_icon do
-    self:mlrs(i, 64, 0, self.command_icon[i], 15)
+    self:mlrs(x - 1 + i, y + 9, 0, self.command_icon[i], l)
   end
   for i = 1, #self.command_icon do
     local l = math.abs(self.command_icon[i])
-    self:mlrs(i, 64, 0, -math.floor(l / 2), 0)
+    self:mlrs(x - 1 + i, y + 9, 0, -math.floor(l / 2), 0)
   end
 end
 

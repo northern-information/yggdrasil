@@ -166,7 +166,6 @@ function music:convert(direction, value)
   if direction == "ygg_to_midi" then
     for k, v in pairs(conversion) do
       if v.y == value then
-        print(v.y, value, v.m)
         return v.m
       end
     end

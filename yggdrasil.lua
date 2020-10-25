@@ -1,4 +1,3 @@
---
 -- k1: exit   e1: focus
 --
 --
@@ -20,6 +19,7 @@ function init()
   tracker.init()
   music.init()
   synth.init()
+  docs.init()
   y.screen_dirty = true
   y.splash_break = false
   y.init_done = true

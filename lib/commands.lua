@@ -1,12 +1,12 @@
 commands = {}
 
 function commands.init()
+  commands.command = ""
   commands.classes = {}
-  commands.command = c
   commands.class = ""
   commands.payload = {}
   commands:register_all()
-  commands.error_prefix = "Unfound: "
+  commands.error_prefix = "Unfound:"
 end
 
 function commands:run(c)
@@ -19,15 +19,17 @@ function commands:run(c)
   end
       if self.class == "AAAA"                       then -- empty to easily sort below:
   elseif self.class == "BPM"                        then params:set("clock_tempo", self.payload.bpm)
-  elseif self.class == "FOCUS_COL"                  then tracker:focus_col(self.payload.x)
   elseif self.class == "FOCUS_SLOT"                 then tracker:focus_slot(self.payload.x, self.payload.y)
+  elseif self.class == "FOCUS_TRACK"                then tracker:focus_track(self.payload.x)
   elseif self.class == "FOLLOW"                     then tracker:toggle_follow()
+  elseif self.class == "OBLIQUE"                    then fn.draw_oblique()
   elseif self.class == "PLAY"                       then tracker:set_playback(true)
+  elseif self.class == "RERUN"                      then fn.rerun()
+  elseif self.class == "SCREENSHOT"                 then fn.screenshot()
   elseif self.class == "SET_MIDI_NOTE"              then tracker:update_slot(self.payload)
   elseif self.class == "SET_MIDI_NOTE_AND_VELOCITY" then tracker:update_slot(self.payload)
   elseif self.class == "STOP"                       then tracker:set_playback(false)
-  elseif self.class == "RERUN"                      then fn.rerun()
-  else tracker:set_message(commands.error_prefix .. self.command)
+  else tracker:set_message(commands.error_prefix .. " " .. self.command)
   end
 end
 
@@ -94,7 +96,7 @@ function commands:register_all()
 
 
   self:register_class({
-    name = "FOCUS_COL",
+    name = "FOCUS_TRACK",
     format_payload = function(c)
       return {
         x = tonumber(c[1])
@@ -118,6 +120,16 @@ function commands:register_all()
 
 
   self:register_class({
+    name = "OBLIQUE",
+    format_payload = function(c) return {} end,
+    signature = function(c)
+      return #c == 1 and c[1] == "oblique"
+    end
+  })
+
+
+
+  self:register_class({
     name = "PLAY",
     format_payload = function(c) return {} end,
     signature = function(c)
@@ -132,6 +144,16 @@ self:register_class({
     format_payload = function(c) return {} end,
     signature = function(c)
       return #c == 1 and c[1] == "rerun"
+    end
+  })
+
+
+
+  self:register_class({
+    name = "SCREENSHOT",
+    format_payload = function(c) return {} end,
+    signature = function(c)
+      return #c == 1 and c[1] == "screenshot"
     end
   })
 

@@ -40,10 +40,13 @@ buffer = include("lib/buffer")
 -- where the action is
 commands = include("lib/commands")
 
--- the left hand of darkness
+-- what miracle is this?
 tracker = include("lib/tracker")
 
--- what miracle is this?
+-- this giant tree
+include("lib/Track")
+
+-- it stands ten thousand feet high
 include("lib/Slot")
 
 -- essentially musicutil abstractions
@@ -51,6 +54,9 @@ music = include("lib/music")
 
 -- supercollider
 synth = include("lib/synth")
+
+-- documentation
+docs = include("lib/docs")
 
 -- dev only stuff
 dev = io.open(_path["code"] .. lib .. "dev.lua", "r")
