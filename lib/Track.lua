@@ -20,7 +20,7 @@ function Track:refresh()
   local e = 0
   local tracker_slot_view = tracker:get_slot_view()
   for k, slot in pairs(self.slots) do
-    slot:set_index(tracker:index(slot.x, slot.y))
+    slot:set_index(tracker:index(slot:get_x(), slot:get_y()))
     slot:set_view(tracker_slot_view)
     slot:refresh()
     local se = slot:get_extents()
@@ -104,8 +104,8 @@ function Track:focus()
     slot:set_focus(true)
     tracker:set_focused_index(slot:get_index())
     if not first_focus then
-      tracker:set_view("x", self:get_x())
-      tracker:set_view("y", slot.y)
+      graphics:set_view_x(self:get_x())
+      graphics:set_view_y(slot:get_y())
       first_focus = true
     end 
   end

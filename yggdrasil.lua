@@ -13,6 +13,7 @@ function init()
   commands.init()
   docs.init()
   filesystem.init()
+  fn.init()
   graphics.init()
   keys.init()
   music.init()
@@ -20,6 +21,7 @@ function init()
   parameters.init()
   synth.init()
   tracker.init()
+  tracker:refresh()
   y.screen_dirty = true
   y.splash_break = false
   y.init_done = true
@@ -28,7 +30,6 @@ function init()
   y.tracker_clock_id = clock.run(tracker.tracker_clock)
   page:select(parameters.is_splash_screen_on and 0 or 1)
   if config.settings.dev_mode then dev:scene(config.settings.dev_scene) end
-  tracker:refresh()
   redraw()
 end
 
@@ -36,9 +37,9 @@ function enc(e, d)
   if e == 1 then
     tracker:cycle_focus(d)
   elseif e == 2 then
-    tracker:pan_x(d)
+    graphics:pan_x(d)
   elseif e == 3 then
-    tracker:pan_y(d)
+    graphics:pan_y(d)
   end
   fn.dismiss_messages()
   fn.dirty_screen(true)

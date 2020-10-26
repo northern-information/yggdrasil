@@ -49,7 +49,7 @@ function keyboard.event(type, code, val)
 
   if keys:is_arrow(code) then
     if keys:shifted() then
-      tracker:handle_arrow(keys:get_keycode(code))
+      graphics:handle_arrow(keys:get_keycode(code))
     else
       if keys:get_keycode(code) == "UP" then
         buffer:up_history()

@@ -7,6 +7,7 @@ function Slot:new(x, y)
   })
   s.x = x ~= nil and x or 0
   s.y = y ~= nil and y or 0
+  s.id = "slot-" .. fn.id()
   s.index = 0
   s.empty = true
   s.focus = false
@@ -27,6 +28,7 @@ function Slot:trigger()
   if self:get_route() == "synth" then
     synth:play(self:get_midi_note(), self:get_velocity())
   end
+  graphics:register_slot_trigger(self:get_id())
 end
 
 function Slot:to_string()
@@ -50,7 +52,7 @@ function Slot:refresh()
     self:set_frequency(music:convert("midi_to_freq", m))
     extents = screen.text_extents(self:to_string())
   end
-  self:set_extents(extents + 4)
+  self:set_extents(extents + 4) -- 4 is the "left padding" pixel adjustment
 end
 
 function Slot:get_midi_note()
@@ -104,6 +106,10 @@ function Slot:clear()
   self:set_frequency(nil)
   self:set_focus(false)
   self:set_empty(true)
+end
+
+function Slot:get_id()
+  return self.id
 end
 
 function Slot:get_x()

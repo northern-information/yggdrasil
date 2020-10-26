@@ -11,88 +11,11 @@ function tracker.init()
   tracker.tracks = {}
   tracker.rows = 8
   tracker.cols = 8
+  tracker.extents = 0
   for x = 1, tracker.cols do
     tracker.tracks[x] = Track:new(x)
     tracker.tracks[x]:fill(tracker.rows)
   end
-  tracker.view = {
-    x = 1,
-    y = 1,
-    rows = 0,
-    cols = 0,
-    rows_above = nil,
-    rows_below = nil,
-    current_row = 1,
-    rows_per_view = 7,
-    cols_per_view = 8,
-    x_offset = 0,
-    y_offset = 0,
-    extents = 0
-  }
-  tracker:update_view()
-end
-
-function tracker:render()
-  graphics:set_extents(self:get_view("extents"))
-  graphics:draw_highlight(self.view)
-  graphics:draw_cols(self.view)
-  graphics:draw_slots(self:get_all_slots(), self.view)
-  graphics:draw_hud(self.view)
-  graphics:draw_terminal(self.message, self.message_value)
-  graphics:draw_command_processing()
-end
-
-
--- again, there is some type of sequencing error
--- view freq, then in matron tracker:update_view() works
--- need to look at order of ops
-
-
-function tracker:update_view()
-  self:set_view("rows", self:get_rows())
-  self:set_view("cols", self:get_cols())
-  self:set_view("rows_above", self:get_view("y") > 2)
-  self:set_view("rows_below", self:get_view("y") <= self:get_rows() - 5) -- todo what is this magic number
-  self:set_view("cols_per_view", math.floor(128 / graphics:get_extents()))
-  self:set_view("x_offset", self:get_view("x") - math.floor(self:get_view("cols_per_view") / 2))
-  self:set_view("y_offset", self:get_view("y") - math.floor(self:get_view("rows_per_view") / 2))
-end
-
-function tracker:refresh()
-  local e = 0
-  for track_key, track in pairs(self:get_tracks()) do
-    track:refresh()
-    local te = track:get_extents()
-    if e < te then e = te end
-  end
-  self:set_view("extents", e)
-  self:update_view()
-end
-
-function tracker:get_all_slots()
-  local slots = {}
-  for track_key, track in pairs(self:get_tracks()) do
-    for slot_key, slot in pairs(track:get_slots()) do
-      table.insert(slots, slot)
-    end
-  end
-  return slots
-end
-
-
-
-function tracker:load_track(track, data)
-  -- compare incoming rows with existing rows
-  -- if incoming is larger, we need to add more rows
-  if #data > self.rows then
-    self:set_rows(#data)
-    self:update_view()
-    for k, track in pairs(self:get_tracks()) do
-      track:fill(#data)
-    end
-    self:refresh()
-  end
-  self:get_tracks()[track]:load(data)
 end
 
 function tracker.tracker_clock()
@@ -107,6 +30,53 @@ function tracker.tracker_clock()
   end
 end
 
+function tracker:render()
+  graphics:update_tracker_view()
+  -- graphics:draw_highlight()
+  graphics:draw_cols()
+  graphics:draw_tracks()
+  graphics:draw_hud()
+  graphics:draw_terminal()
+  graphics:draw_command_processing()
+end
+
+function tracker:refresh()
+  local e = 0
+  for track_key, track in pairs(self:get_tracks()) do
+    track:refresh()
+    local te = track:get_extents()
+    if e < te then e = te end
+  end
+  self:set_extents(e)
+  graphics:set_tracker_view_dirty(true)
+end
+
+function tracker:get_all_slots()
+  local slots = {}
+  for track_key, track in pairs(self:get_tracks()) do
+    for slot_key, slot in pairs(track:get_slots()) do
+      table.insert(slots, slot)
+    end
+  end
+  return slots
+end
+
+function tracker:load_track(track, data)
+  -- compare incoming rows with existing rows
+  -- if incoming is larger, we need to add more rows
+  if #data > self:get_rows() then
+    self:set_rows(#data)
+    for k, track in pairs(self:get_tracks()) do
+      track:fill(#data)
+    end
+    self:refresh()
+  end
+  self:get_tracks()[track]:load(data)
+  graphics:set_tracker_view_dirty(true)
+end
+
+
+
 
 function tracker:focus_slot(x, y)
   self:unfocus()
@@ -117,13 +87,13 @@ function tracker:focus_slot(x, y)
       if slot:get_y() == y then
         self:set_focused(true)
         self:set_focused_index(slot:get_index())
-        self:set_view("x", x)
-        self:set_view("y", y)
+        graphics:set_view_x(x)
+        graphics:set_view_y(y)
         slot:set_focus(true)
       end
     end
   end
-  tracker:update_view()
+  graphics:set_tracker_view_dirty(true)
 end
 
 function tracker:focus_track(x)
@@ -134,7 +104,7 @@ function tracker:focus_track(x)
     self:get_tracks()[x]:focus()
     tracker:set_focused(true)
   end
-  tracker:update_view()
+  graphics:set_tracker_view_dirty(true)
 end
 
 function tracker:unfocus()
@@ -146,7 +116,7 @@ function tracker:unfocus()
       slot:set_focus(false)
     end
   end
-  tracker:update_view()
+  graphics:set_tracker_view_dirty(true)
 end
 
 function tracker:get_focused_slots()
@@ -245,29 +215,6 @@ function tracker:get_not_empty_slots()
   return slots
 end
 
-function tracker:handle_arrow(direction)
-      if direction == "UP"    then self:pan_y(-1)
-  elseif direction == "LEFT"  then self:pan_x(-1)
-  elseif direction == "DOWN"  then self:pan_y(1)
-  elseif direction == "RIGHT" then self:pan_x(1)
-  end
-end
-
-function tracker:pan_x(d)
-  self.view.x = util.clamp(self.view.x + d, 1, self.cols)
-  self:update_view()
-end
-
-function tracker:pan_y(d)
-  self.view.y = util.clamp(self.view.y + d, 1, self.rows)
-  self:update_view()
-end
-
-function tracker:pan_to_y(y)
-  self.view.y = util.clamp(y, 1, self.rows)
-  self:update_view()
-end
-
 function tracker:is_in_bounds(x, y)
   local check = x <= #self:get_tracks() and x > 0
   if y ~= nil then
@@ -276,29 +223,22 @@ function tracker:is_in_bounds(x, y)
   return check
 end
 
-
-
 function tracker:update_slot(payload)
   self:focus_slot(payload.x, payload.y)
   self:get_tracks()[payload.y]:update_slot(payload)
 end
 
-
 function tracker:index(x, y)
   return y + ((x - 1) * self.rows)
-end
-
-function tracker:set_view(key, value)
-  self.view[key] = value
-end
-
-function tracker:get_view(key)
-  return self.view[key]
 end
 
 function tracker:set_message(s)
   self.message = true
   self.message_value = s
+end
+
+function tracker:get_message_value()
+  return self.message_value
 end
 
 function tracker:clear_message()

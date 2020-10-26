@@ -1,5 +1,15 @@
 fn = {}
 
+function fn.init()
+  fn.id_prefix = "ygg-"
+  fn.id_counter = 1000
+end
+
+function fn.id()
+  fn.id_counter = fn.id_counter + 1
+  return fn.id_prefix .. os.time(os.date("!*t")) .. "-" .. fn.id_counter
+end
+
 function fn.dirty_screen(bool)
   if bool == nil then return y.screen_dirty end
   y.screen_dirty = bool
