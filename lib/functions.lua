@@ -145,9 +145,22 @@ function fn.rerun()
   norns.script.load(norns.state.script)
 end
 
+
+
+-- dev
+
+
+
 function rerun()
   fn.rerun()
 end
 
+function s(x, y)
+  return tracker:get_track(x):get_slot(y)
+end
+
+function t(x)
+  return tracker:get_track(x)
+end
 
 return fn

@@ -14,8 +14,6 @@ function Track:new(x)
   return t
 end
 
-
-
 function Track:refresh()
   local e = 0
   local tracker_slot_view = tracker:get_slot_view()
@@ -53,7 +51,6 @@ function Track:fill(depth)
   self:refresh()
 end
 
-
 function Track:append_slot(slot)
   self.slots[#self.slots + 1] = slot
   self:refresh()
@@ -62,6 +59,12 @@ end
 function Track:update_slot(payload)
   local slot = self:get_slot(payload.y)
   if slot ~= nil then
+    if payload.y > self:get_depth() then
+      self:fill(payload.y)
+    end
+    if fn.table_contains_key(payload, "phenomenon") then
+      slot:set_phenomenon(payload.phenomenon)
+    end
     if fn.table_contains_key(payload, "midi_note") then
       slot:set_midi_note(payload.midi_note)
     end
@@ -107,6 +110,8 @@ end
 
 
 -- focus
+
+
 
 function Track:focus()
   local first_focus = false

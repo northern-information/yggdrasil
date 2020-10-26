@@ -18,14 +18,15 @@ function Slot:new(x, y)
   s.velocity = 127
   s.route = "synth"
   s.view = "midi"
+  s.phenomenon = nil
   s.extents = nil
   s:refresh()
   return s
 end
 
 function Slot:trigger()
-  if self:get_midi_note() == nil then return end
-  if self:get_route() == "synth" then
+  if self:get_phenomenon() == "p" then return end
+  if self:get_midi_note() ~= nil and self:get_route() == "synth" then
     synth:play(self:get_midi_note(), self:get_velocity())
   end
   graphics:register_slot_trigger(self:get_id())
@@ -33,26 +34,56 @@ end
 
 function Slot:to_string()
   local v = self:get_view()
+  local p = self:get_phenomenon()
   local out = ""
-      if v == "midi"   then out = self:get_midi_note() 
-  elseif v == "index"  then out = self:get_index()
-  elseif v == "ygg"    then out = self:get_ygg_note()
-  elseif v == "ipn"    then out = self:get_ipn_note()
-  elseif v == "freq"   then out = self:get_frequency()
+  if p ~= nil then
+        if p == "x"      then out = "x" end
+  else
+        if v == "midi"   then out = self:get_midi_note() 
+    elseif v == "index"  then out = self:get_index()
+    elseif v == "ygg"    then out = self:get_ygg_note()
+    elseif v == "ipn"    then out = self:get_ipn_note()
+    elseif v == "freq"   then out = self:get_frequency()
+    end
   end
   return out ~= nil and tostring(out) or "."
 end
 
 function Slot:refresh()
   local m = self:get_midi_note()
-  local extents = 0
   if m ~= nil then
     self:set_ygg_note(music:convert("midi_to_ygg", m))
     self:set_ipn_note(music:convert("midi_to_ipn", m))
     self:set_frequency(music:convert("midi_to_freq", m))
-    extents = screen.text_extents(self:to_string())
   end
-  self:set_extents(extents + 4) -- 4 is the "left padding" pixel adjustment
+  self:set_extents(screen.text_extents(self:to_string()) + 4) -- 4 is the "left padding" pixel adjustment
+end
+
+function Slot:clear()
+  self:clear_notes()
+  self:set_phenomenon(nil)
+  self:set_focus(false)
+  self:set_empty(true)
+end
+
+function Slot:clear_notes()
+  self:set_midi_note(nil)
+  self:set_ygg_note(nil)
+  self:set_ipn_note(nil)
+  self:set_frequency(nil)
+end
+
+
+-- primitive getters, setters, & checks
+
+function Slot:get_phenomenon()
+  return self.phenomenon
+end
+
+function Slot:set_phenomenon(s)
+  self.phenomenon = s
+  self:clear_notes()
+  self:set_empty(false)
 end
 
 function Slot:get_midi_note()
@@ -97,15 +128,6 @@ end
 
 function Slot:is_focus()
   return self.focus
-end
-
-function Slot:clear()
-  self:set_midi_note(nil)
-  self:set_ygg_note(nil)
-  self:set_ipn_note(nil)
-  self:set_frequency(nil)
-  self:set_focus(false)
-  self:set_empty(true)
 end
 
 function Slot:get_id()

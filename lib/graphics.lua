@@ -66,7 +66,7 @@ function graphics:update_tracker_view()
   local y = self:get_view_y()
   local x = self:get_view_x()
   if tracker:is_follow() then
-    local deepest = tracker:get_deepest_position()
+    local deepest = tracker:get_deepest_not_empty_position()
     x = deepest.x
     y = deepest.y
   end
@@ -80,6 +80,7 @@ end
 
 function graphics:draw_hud(view)
   if not self.hud then return end
+  self:draw_cols()
   local swm, sw, sh =  self:get_slot_width_min(), self:get_slot_width(), self:get_slot_height()
   self:rect(0, 0, swm, 64, 0)
   self:rect(0, 0, 128, sh, 0)
@@ -139,31 +140,33 @@ function graphics:draw_slots(track)
   local w = self:get_view_x_offset() * sw
   local h = self:get_view_y_offset() * sh
   for k, slot in pairs(slots) do
-    local triggered = slot_triggers[slot:get_id()]
-    if slot:is_focus() or triggered ~= nil then
-      local background = 15
-      local foreground = 0
-      if triggered ~= nil then
-        local l = slot_triggers[slot:get_id()].level
-        foreground = math.abs(15 - l)
-        background = l
+    if slot:get_y() <= track:get_depth() then
+      local triggered = slot_triggers[slot:get_id()]
+      if slot:is_focus() or triggered ~= nil then
+        local background = 15
+        local foreground = 0
+        if triggered ~= nil then
+          local l = slot_triggers[slot:get_id()].level
+          foreground = math.abs(15 - l)
+          background = l
+        end
+        self:rect(
+          ((slot:get_x() - 1) * sw) - w,
+          ((slot:get_y() - 1) * sh + 1) - h,
+          sw, sh, background
+        )
+        self:text_right(
+          (slot:get_x() * sw - 2) - w,
+          (slot:get_y() * sh) - h,
+          tostring(slot), foreground
+        )
+      else
+        self:text_right(
+          (slot:get_x() * sw - 2) - w,
+          (slot:get_y() * sh) - h,
+          tostring(slot), 15
+        )
       end
-      self:rect(
-        ((slot:get_x() - 1) * sw) - w,
-        ((slot:get_y() - 1) * sh + 1) - h,
-        sw, sh, background
-      )
-      self:text_right(
-        (slot:get_x() * sw - 2) - w,
-        (slot:get_y() * sh) - h,
-        tostring(slot), foreground
-      )
-    else
-      self:text_right(
-        (slot:get_x() * sw - 2) - w,
-        (slot:get_y() * sh) - h,
-        tostring(slot), 15
-      )
     end
   end
 end
@@ -231,6 +234,7 @@ function graphics:run_command()
 end
 
 function graphics:handle_arrow(direction)
+  tracker:set_follow(false)
       if direction == "UP"    then self:pan_y(-1)
   elseif direction == "LEFT"  then self:pan_x(-1)
   elseif direction == "DOWN"  then self:pan_y(1)
@@ -239,16 +243,19 @@ function graphics:handle_arrow(direction)
 end
 
 function graphics:pan_x(d)
+  tracker:set_follow(false)
   self:set_view_x(util.clamp(self:get_view_x() + d, 1, tracker:get_cols()))
   self:set_tracker_view_dirty(true)
 end
 
 function graphics:pan_y(d)
+  tracker:set_follow(false)
   self:set_view_y(util.clamp(self:get_view_y() + d, 1, tracker:get_rows()))
   self:set_tracker_view_dirty(true)
 end
 
 function graphics:pan_to_y(y)
+  tracker:set_follow(false)
   self:set_view_y(util.clamp(y, 1, tracker:get_rows()))
   self:set_tracker_view_dirty(true)
 end

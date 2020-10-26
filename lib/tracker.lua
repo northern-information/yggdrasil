@@ -30,15 +30,6 @@ function tracker.tracker_clock()
   end
 end
 
-function tracker:render()
-  graphics:update_tracker_view()
-  graphics:draw_cols()
-  graphics:draw_tracks()
-  graphics:draw_hud()
-  graphics:draw_terminal()
-  graphics:draw_command_processing()
-end
-
 function tracker:refresh()
   local e = 0
   for track_key, track in pairs(self:get_tracks()) do
@@ -48,6 +39,65 @@ function tracker:refresh()
   end
   self:set_extents(e)
   graphics:set_tracker_view_dirty(true)
+end
+
+function tracker:render()
+  graphics:update_tracker_view()
+  graphics:draw_tracks()
+  graphics:draw_hud()
+  graphics:draw_terminal()
+  graphics:draw_command_processing()
+end
+
+
+
+-- tracks
+
+
+
+function tracker:load_track(track_number, data)
+  -- compare incoming rows with existing rows
+  -- if incoming is larger, we need to add more rows
+  local track = self:get_track(track_number)
+  if #data > track:get_depth() then
+    self:set_rows(#data)
+    track:fill(#data)
+    self:refresh()
+  end
+  track:load(data)
+  graphics:set_tracker_view_dirty(true)
+end
+
+
+function tracker:set_track_depth(track, depth)
+  if depth > self:get_rows() then
+    self:set_rows(depth)
+  end
+  self:get_track(track):fill(depth)
+end
+
+function tracker:get_deepest_not_empty_position()
+  local x, y = 1, 1
+  for track_key, track in pairs(self:get_tracks()) do
+    local p = track:get_position()
+    if p > y  and not track:get_slot(p):is_empty() then
+      y = track:get_position()
+      x = track:get_x()
+    end
+  end
+  return { x = x, y = y }
+end
+
+
+
+-- slots
+
+
+
+function tracker:update_slot(payload)
+  self:focus_slot(payload.x, payload.y)
+  self:get_track(payload.x):update_slot(payload)
+  self:refresh()
 end
 
 function tracker:get_all_slots()
@@ -60,26 +110,33 @@ function tracker:get_all_slots()
   return slots
 end
 
-function tracker:load_track(track, data)
-  -- compare incoming rows with existing rows
-  -- if incoming is larger, we need to add more rows
-  if #data > self:get_rows() then
-    self:set_rows(#data)
-    for k, track in pairs(self:get_tracks()) do
-      track:fill(#data)
+function tracker:get_not_empty_slots()
+  local slots = {}
+  for track_keys, track in pairs(self:get_tracks()) do
+    for slot_keys, slot in pairs(track:get_slots()) do
+      if not slot:is_empty() then
+        table.insert(slots, slot)
+      end
     end
-    self:refresh()
   end
-  self:get_tracks()[track]:load(data)
-  graphics:set_tracker_view_dirty(true)
+  return slots
 end
 
 
-function tracker:set_track_depth(track, depth)
-  if depth > self:get_rows() then
-    self:set_rows(depth)
+
+-- focus
+
+
+
+function tracker:focus_track(x)
+  self:unfocus()
+  if not self:is_in_bounds(x) then
+    self:set_message("Track " .. x .. " is out of bounds.")
+  else
+    self:get_track(x):focus()
+    tracker:set_focused(true)
   end
-  self:get_track(track):fill(depth)
+  graphics:set_tracker_view_dirty(true)
 end
 
 function tracker:focus_slot(x, y)
@@ -95,29 +152,6 @@ function tracker:focus_slot(x, y)
         graphics:set_view_y(y)
         slot:set_focus(true)
       end
-    end
-  end
-  graphics:set_tracker_view_dirty(true)
-end
-
-function tracker:focus_track(x)
-  self:unfocus()
-  if not self:is_in_bounds(x) then
-    self:set_message("Track " .. x .. " is out of bounds.")
-  else
-    self:get_tracks()[x]:focus()
-    tracker:set_focused(true)
-  end
-  graphics:set_tracker_view_dirty(true)
-end
-
-function tracker:unfocus()
-  self:set_focused(false)
-  self:set_focused_index(0)
-  local slots = self:get_focused_slots()
-  for k, slot in pairs(slots) do
-    if slot ~= nil then
-      slot:set_focus(false)
     end
   end
   graphics:set_tracker_view_dirty(true)
@@ -144,15 +178,57 @@ function tracker:clear_focused_slots()
   end
 end
 
-function tracker:get_deepest_position()
-  local x, y = 1, 1
-  for track_key, track in pairs(self:get_tracks()) do
-    if track:get_position() > y then
-      y = track:get_position()
-      x = track:get_x()
+function tracker:cycle_focus(d)
+  self:set_follow(false)
+  if self:is_focused() then
+    local slots = self:collect_slots_for_focus()
+    local sorted_index = 0
+    for k, slot in pairs(slots) do
+      if slot:get_index() == self:get_focused_index() then
+        sorted_index = k
+      end
+    end
+    local direction = d > 0 and 1 or -1
+    next_focus = fn.cycle(sorted_index + direction, 1, #slots)
+    self:focus_slot(slots[next_focus].x, slots[next_focus].y)
+  end
+end
+
+function tracker:collect_slots_for_focus()
+  local out = {}
+  local slots = self:get_not_empty_slots()
+  local i = 1
+  for k, slot in fn.pairs_by_keys(slots) do
+      out[i] = slot
+      i = i + 1
+  end 
+  return out
+end
+
+function tracker:unfocus()
+  self:set_focused(false)
+  self:set_focused_index(0)
+  local slots = self:get_focused_slots()
+  for k, slot in pairs(slots) do
+    if slot ~= nil then
+      slot:set_focus(false)
     end
   end
-  return { x = x, y = y }
+  graphics:set_tracker_view_dirty(true)
+end
+
+
+
+-- primitive getters, setters, & checks
+
+
+
+function tracker:get_tracks()
+  return self.tracks
+end
+
+function tracker:get_track(x)
+  return self.tracks[x]
 end
 
 function tracker:toggle_playback()
@@ -192,57 +268,12 @@ function tracker:get_focused_index()
   return self.focused_index
 end
 
-function tracker:collect_slots_for_focus()
-  local out = {}
-  local slots = self:get_not_empty_slots()
-  local i = 1
-  for k, slot in fn.pairs_by_keys(slots) do
-      out[i] = slot
-      i = i + 1
-  end 
-  return out
-end
-
-function tracker:cycle_focus(d)
-  self:set_follow(false)
-  if self:is_focused() then
-    local slots = self:collect_slots_for_focus()
-    local sorted_index = 0
-    for k, slot in pairs(slots) do
-      if slot:get_index() == self:get_focused_index() then
-        sorted_index = k
-      end
-    end
-    local direction = d > 0 and 1 or -1
-    next_focus = fn.cycle(sorted_index + direction, 1, #slots)
-    self:focus_slot(slots[next_focus].x, slots[next_focus].y)
-  end
-end
-
-function tracker:get_not_empty_slots()
-  local slots = {}
-  for track_keys, track in pairs(self:get_tracks()) do
-    for slot_keys, slot in pairs(track:get_slots()) do
-      if not slot:is_empty() then
-        table.insert(slots, slot)
-      end
-    end
-  end
-  return slots
-end
-
 function tracker:is_in_bounds(x, y)
   local check = x <= #self:get_tracks() and x > 0
   if y ~= nil then
     check = y <= self:get_rows() and y > 0
   end
   return check
-end
-
-function tracker:update_slot(payload)
-  self:focus_slot(payload.x, payload.y)
-  local track = self:get_tracks()[payload.y]
-  track:update_slot(payload)
 end
 
 function tracker:index(x, y)
@@ -281,14 +312,6 @@ end
 
 function tracker:get_rows()
   return self.rows
-end
-
-function tracker:get_tracks()
-  return self.tracks
-end
-
-function tracker:get_track(x)
-  return self.tracks[x]
 end
 
 function tracker:set_slot_view(s)
