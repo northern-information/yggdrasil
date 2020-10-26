@@ -114,6 +114,10 @@ function keys:is_arrow(code)
   return (103 == code) or (106 == code) or (108 == code) or (105 == code)
 end
 
+function keys:is_hjkl(code)
+  return (35 == code) or (36 == code) or (37 == code) or (38 == code)
+end
+
 function keys:is_esc(code)
   return 1 == code
 end
@@ -130,7 +134,7 @@ function keys:handle_shift(val)
   end
 end
 
-function keys:shifted()
+function keys:is_shifted()
   return self.shift
 end
 

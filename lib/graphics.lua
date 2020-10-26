@@ -235,10 +235,10 @@ end
 
 function graphics:handle_arrow(direction)
   tracker:set_follow(false)
-      if direction == "UP"    then self:pan_y(-1)
-  elseif direction == "LEFT"  then self:pan_x(-1)
-  elseif direction == "DOWN"  then self:pan_y(1)
-  elseif direction == "RIGHT" then self:pan_x(1)
+      if direction == "UP"    or direction == "k" then self:pan_y(-1)
+  elseif direction == "LEFT"  or direction == "h" then self:pan_x(-1)
+  elseif direction == "DOWN"  or direction == "j" then self:pan_y(1)
+  elseif direction == "RIGHT" or direction == "l" then self:pan_x(1)
   end
 end
 

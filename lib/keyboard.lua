@@ -20,11 +20,13 @@ function keyboard.event(type, code, val)
   -- print("is letter:", keys:is_letter_code(code))
   -- print("is number:", keys:is_number_code(code))
   -- print("is backspace:", keys:is_backspace(code))
-
-  -- if keys.shift then ... end
   
   if keys:is_letter_code(code) or keys:is_number_code(code) or keys:is_symbol(code) then
-    buffer:add(keys:get_keycode(code))
+    if keys:is_hjkl(code) and keys:is_shifted() then
+      graphics:handle_arrow(keys:get_keycode(code))
+    else
+      buffer:add(keys:get_keycode(code))
+    end
   end
 
   if keys:is_spacebar(code) then
@@ -47,10 +49,14 @@ function keyboard.event(type, code, val)
     end
   end
 
+
+
   if keys:is_arrow(code) then
-    if keys:shifted() then
+    if keys:is_shifted() then
       graphics:handle_arrow(keys:get_keycode(code))
     else
+      if keys:get_keycode(code) == "RIGHT" then return end
+      if keys:get_keycode(code) == "LEFT" then return end
       if keys:get_keycode(code) == "UP" then
         buffer:up_history()
       elseif keys:get_keycode(code) == "DOWN" then
