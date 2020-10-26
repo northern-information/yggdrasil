@@ -65,6 +65,11 @@ end
 function graphics:update_tracker_view()
   local y = self:get_view_y()
   local x = self:get_view_x()
+  if tracker:is_follow() then
+    local deepest = tracker:get_deepest_position()
+    x = deepest.x
+    y = deepest.y
+  end
   self:set_slot_extents(tracker:get_extents())
   self:set_rows_above(y > 2)
   self:set_rows_below(y <= tracker:get_rows() - 5) -- todo what is this magic number

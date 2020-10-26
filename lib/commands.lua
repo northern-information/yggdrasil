@@ -20,6 +20,7 @@ function commands:run(c)
   end
       if self.class == "AAAA"                       then -- empty to easily sort below:
   elseif self.class == "BPM"                        then params:set("clock_tempo", self.payload.bpm)
+  elseif self.class == "DEPTH"                      then tracker:set_track_depth(self.payload.x, self.payload.depth)
   elseif self.class == "FOCUS_SLOT"                 then tracker:focus_slot(self.payload.x, self.payload.y)
   elseif self.class == "FOCUS_TRACK"                then tracker:focus_track(self.payload.x)
   elseif self.class == "FOLLOW"                     then tracker:toggle_follow()
@@ -77,6 +78,21 @@ function commands:register_all()
     end,
     signature = function(c)
       return #c == 2 and c[1] == "bpm" and fn.is_int(tonumber(c[2]))
+    end
+  })
+
+
+
+  self:register_class({
+    name = "DEPTH",
+    format_payload = function(c)
+      return {
+        x = tonumber(c[1]),
+        depth = fn.extract("depth", c[2])
+      }
+    end,
+    signature = function(c)
+      return #c == 2 and fn.is_int(tonumber(c[1])) and fn.is_depth_command(c[2])
     end
   })
 

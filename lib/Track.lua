@@ -36,15 +36,23 @@ end
 
 
 function Track:fill(depth)
-  local cached_depth = self.depth
-  if depth > self.depth then
-    self:set_depth(self.depth + depth)
-  end 
-  for y = cached_depth + 1, self.depth - cached_depth do
-    self:append_slot(Slot:new(self.x, y))
+  local cached_depth = self:get_depth()
+  if depth > self:get_depth() then
+    self:set_depth(depth)
+    for y = cached_depth + 1, depth do
+      self:append_slot(Slot:new(self.x, y))
+    end
+  elseif depth < self:get_depth() then
+    self:set_depth(depth)
+    for k, slot in pairs(self:get_slots()) do
+      if slot:get_y() > depth then
+        slot:clear()
+      end
+    end
   end
   self:refresh()
 end
+
 
 function Track:append_slot(slot)
   self.slots[#self.slots + 1] = slot
@@ -53,14 +61,16 @@ end
 
 function Track:update_slot(payload)
   local slot = self:get_slot(payload.y)
-  if fn.table_contains_key(payload, "midi_note") then
-    slot:set_midi_note(payload.midi_note)
+  if slot ~= nil then
+    if fn.table_contains_key(payload, "midi_note") then
+      slot:set_midi_note(payload.midi_note)
+    end
+    if fn.table_contains_key(payload, "velocity") then
+      slot:set_velocity(payload.velocity)
+    end
+    slot:refresh()
+    self:refresh()
   end
-  if fn.table_contains_key(payload, "velocity") then
-    slot:set_velocity(payload.velocity)
-  end
-  slot:refresh()
-  self:refresh()
 end
 
 

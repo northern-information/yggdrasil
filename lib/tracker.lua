@@ -32,7 +32,6 @@ end
 
 function tracker:render()
   graphics:update_tracker_view()
-  -- graphics:draw_highlight()
   graphics:draw_cols()
   graphics:draw_tracks()
   graphics:draw_hud()
@@ -76,7 +75,12 @@ function tracker:load_track(track, data)
 end
 
 
-
+function tracker:set_track_depth(track, depth)
+  if depth > self:get_rows() then
+    self:set_rows(depth)
+  end
+  self:get_track(track):fill(depth)
+end
 
 function tracker:focus_slot(x, y)
   self:unfocus()
@@ -140,6 +144,17 @@ function tracker:clear_focused_slots()
   end
 end
 
+function tracker:get_deepest_position()
+  local x, y = 1, 1
+  for track_key, track in pairs(self:get_tracks()) do
+    if track:get_position() > y then
+      y = track:get_position()
+      x = track:get_x()
+    end
+  end
+  return { x = x, y = y }
+end
+
 function tracker:toggle_playback()
   self:set_playback(not self.playback)
 end
@@ -162,6 +177,7 @@ end
 
 function tracker:set_focused(bool)
   self.focused = bool
+  if bool then self:set_follow(false) end
 end
 
 function tracker:is_focused()
@@ -225,7 +241,8 @@ end
 
 function tracker:update_slot(payload)
   self:focus_slot(payload.x, payload.y)
-  self:get_tracks()[payload.y]:update_slot(payload)
+  local track = self:get_tracks()[payload.y]
+  track:update_slot(payload)
 end
 
 function tracker:index(x, y)

@@ -32,6 +32,7 @@ function fn.split_semicolon(input)
     valid = false,
     payload = {}
   }
+print(input)
   for s in (input .. ";"):gmatch("([^;]*);") do 
     result.payload[#result.payload + 1] = s
   end
@@ -39,6 +40,14 @@ function fn.split_semicolon(input)
     result.valid = true
   end
   return result
+end
+
+function fn.is_depth_command(input)
+  local result = fn.split_semicolon(input)
+  if not result.valid then return false end
+  if #result.payload ~= 2 then return false end
+  if result.payload[1] ~= "depth" then return false end
+  return fn.is_int(tonumber(result.payload[2]))
 end
 
 function fn.is_velocity_command(input)
@@ -51,6 +60,9 @@ end
 
 function fn.extract(attribute, input)
   local result = fn.split_semicolon(input)
+  if attribute == "depth" and fn.is_depth_command(input) then
+    return tonumber(result.payload[2])
+  end
   if attribute == "velocity" and fn.is_velocity_command(input) then
     return tonumber(result.payload[2])
   end
