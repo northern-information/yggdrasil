@@ -15,17 +15,21 @@ function keyboard.event(type, code, val)
   if val == 0 then return end -- ignore other keyups
 
   print(code)
-  print(keys.shift)
+  print("")
   -- print(keys:get_keycode(code))
   -- print("is letter:", keys:is_letter_code(code))
   -- print("is number:", keys:is_number_code(code))
   -- print("is backspace:", keys:is_backspace(code))
   
   if keys:is_letter_code(code) or keys:is_number_code(code) or keys:is_symbol(code) then
-    if keys:is_hjkl(code) and keys:is_shifted() then
-      graphics:handle_arrow(keys:get_keycode(code))
+    if keys:is_shifted() then
+      if keys:is_hjkl(code) then
+        graphics:handle_arrow(keys:get_keycode(code))
+      elseif keys:is_number_code(code) or keys:is_symbol(code) then
+        buffer:add(keys:get_shifted_keycode(code))
+      end
     else
-      buffer:add(keys:get_keycode(code))
+      buffer:add(keys:get_keycode(code)) 
     end
   end
 

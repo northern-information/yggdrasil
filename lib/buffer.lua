@@ -10,7 +10,7 @@ end
 function buffer:execute()
   self:save_history()
   self:set_history_index(0)
-  commands:run(self.b)
+  runner:run(self.b)
   self:clear()
 end
 

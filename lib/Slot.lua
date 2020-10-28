@@ -10,7 +10,7 @@ function Slot:new(x, y)
   s.id = "slot-" .. fn.id()
   s.index = 0
   s.empty = true
-  s.focus = false
+  s.focused = false
   s.midi_note = nil
   s.ygg_note = nil
   s.ipn_note = nil
@@ -18,27 +18,53 @@ function Slot:new(x, y)
   s.velocity = 127
   s.route = "synth"
   s.view = "midi"
-  s.phenomenon = nil
+  s.phenomenon = false
+  s.phenomenon_class = ""
+  s.phenomenon_prefix = ""
+  s.phenomenon_value = nil
+  s.phenomenon_payload = {}
   s.extents = nil
   s:refresh()
   return s
 end
 
 function Slot:trigger()
-  if self:get_phenomenon() == "p" then return end
-  if self:get_midi_note() ~= nil and self:get_route() == "synth" then
-    synth:play(self:get_midi_note(), self:get_velocity())
-  end
+  -- if self:is_phenomenon() then
+  --   if self:get_phenomenon_class() == "ANCHOR" then
+  --     local position = self:get_phenomenon_value()
+  --     local y = self:get_y()
+
+
+print("trigger")
+-- does phenomenon need to be a class?
+
+
+  --     if position ~= y then
+  --       local track = tracker:get_track(y)
+  --       track:set_position(position)
+  --     end
+  --   else
+  --     tracker:get_track(self:get_x()):phenomenon(self:get_phenomenon_value())
+  --   end
+  -- elseif self:get_midi_note() ~= nil and self:get_route() == "synth" then
+  --   synth:play(self:get_midi_note(), self:get_velocity())
+  -- end
   graphics:register_slot_trigger(self:get_id())
 end
 
 function Slot:to_string()
-  local v = self:get_view()
-  local p = self:get_phenomenon()
   local out = ""
-  if p ~= nil then
-        if p == "x"      then out = "x" end
+  if self:is_phenomenon() then
+    local value = self:get_phenomenon_value()
+    local prefix = self:get_phenomenon_prefix()
+    if prefix ~= nil then
+      out = prefix
+    end
+    if value ~= nil then
+      out = out .. value
+    end
   else
+     local v = self:get_view()
         if v == "midi"   then out = self:get_midi_note() 
     elseif v == "index"  then out = self:get_index()
     elseif v == "ygg"    then out = self:get_ygg_note()
@@ -61,9 +87,17 @@ end
 
 function Slot:clear()
   self:clear_notes()
-  self:set_phenomenon(nil)
-  self:set_focus(false)
+  self:clear_phenomenon()
+  self:set_focused(false)
   self:set_empty(true)
+end
+
+function Slot:clear_phenomenon()
+  self:set_phenomenon_value(nil)
+  self:set_phenomenon_class("")
+  self:set_phenomenon_prefix("")
+  self:set_phenomenon_payload({})
+  self:set_phenomenon(false)
 end
 
 function Slot:clear_notes()
@@ -74,16 +108,59 @@ function Slot:clear_notes()
 end
 
 
+
 -- primitive getters, setters, & checks
 
-function Slot:get_phenomenon()
+
+
+function Slot:exotic_phenomenon(payload)
+  self:clear_notes()
+  self:set_phenomenon_payload(payload)
+  self:set_phenomenon_class(payload.class)
+  self:set_phenomenon_prefix(payload.prefix)
+  self:set_phenomenon_value(payload.value)
+  self:set_phenomenon(true)
+  self:set_empty(false)
+end
+
+function Slot:is_phenomenon()
   return self.phenomenon
 end
 
-function Slot:set_phenomenon(s)
-  self.phenomenon = s
-  self:clear_notes()
-  self:set_empty(false)
+function Slot:set_phenomenon(bool)
+  self.phenomenon = bool
+end
+
+function Slot:get_phenomenon_payload()
+  return self.phenomenon_payload
+end
+
+function Slot:set_phenomenon_payload(payload)
+  self.phenomenon_payload = payload
+end
+
+function Slot:get_phenomenon_class()
+  return self.phenomenon_class
+end
+
+function Slot:set_phenomenon_class(s)
+  self.phenomenon_class = s
+end
+
+function Slot:get_phenomenon_prefix()
+  return self.phenomenon_prefix
+end
+
+function Slot:set_phenomenon_prefix(s)
+  self.phenomenon_prefix = s
+end
+
+function Slot:get_phenomenon_value()
+  return self.phenomenon_value
+end
+
+function Slot:set_phenomenon_value(s)
+  self.phenomenon_value = s
 end
 
 function Slot:get_midi_note()
@@ -122,11 +199,11 @@ function Slot:set_frequency(f)
   self:set_empty(false)
 end
 
-function Slot:set_focus(bool)
+function Slot:set_focused(bool)
   self.focus = bool
 end
 
-function Slot:is_focus()
+function Slot:is_focused()
   return self.focus
 end
 
@@ -136,6 +213,10 @@ end
 
 function Slot:get_x()
   return self.x
+end
+
+function Slot:set_y(i)
+  self.y = i
 end
 
 function Slot:get_y()

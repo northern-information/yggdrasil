@@ -3,57 +3,80 @@ keys = {}
 function keys.init()
   keys.shift = false
   keys.codes = {
-    { k = 30,  v = "a" },
-    { k = 48,  v = "b" },
-    { k = 46,  v = "c" },
-    { k = 32,  v = "d" },
+    { k = 1,   v = "ESC" },
+    { k = 10,  v = "9" },
+    { k = 103, v = "UP" },
+    { k = 105, v = "LEFT" },
+    { k = 106, v = "RIGHT" },
+    { k = 108, v = "DOWN" },
+    { k = 11,  v = "0" },
+    { k = 14,  v = "BACKSPACE" },
+    { k = 15,  v = "TAB" },
+    { k = 16,  v = "q" },
+    { k = 17,  v = "w" },
     { k = 18,  v = "e" },
+    { k = 19,  v = "r" },
+    { k = 2,   v = "1" },
+    { k = 20,  v = "t" },
+    { k = 21,  v = "y" },
+    { k = 22,  v = "u" },
+    { k = 23,  v = "i" },
+    { k = 24,  v = "o" },
+    { k = 25,  v = "p" },
+    { k = 28,  v = "RETURN" },
+    { k = 3,   v = "2" },
+    { k = 30,  v = "a" },
+    { k = 31,  v = "s" },
+    { k = 32,  v = "d" },
     { k = 33,  v = "f" },
     { k = 34,  v = "g" },
     { k = 35,  v = "h" },
-    { k = 23,  v = "i" },
     { k = 36,  v = "j" },
     { k = 37,  v = "k" },
     { k = 38,  v = "l" },
-    { k = 50,  v = "m" },
-    { k = 49,  v = "n" },
-    { k = 24,  v = "o" },
-    { k = 25,  v = "p" },
-    { k = 16,  v = "q" },
-    { k = 19,  v = "r" },
-    { k = 31,  v = "s" },
-    { k = 20,  v = "t" },
-    { k = 22,  v = "u" },
-    { k = 47,  v = "v" },
-    { k = 17,  v = "w" },
-    { k = 45,  v = "x" },
-    { k = 21,  v = "y" },
-    { k = 44,  v = "z" },
-    { k = 11,  v = "0" },
-    { k = 2,   v = "1" },
-    { k = 3,   v = "2" },
+    { k = 39,  v = ";" },
     { k = 4,   v = "3" },
+    { k = 42,  v = "SHIFT" },
+    { k = 44,  v = "z" },
+    { k = 45,  v = "x" },
+    { k = 46,  v = "c" },
+    { k = 47,  v = "v" },
+    { k = 48,  v = "b" },
+    { k = 49,  v = "n" },
     { k = 5,   v = "4" },
+    { k = 50,  v = "m" },
+    { k = 51,  v = "," },
+    { k = 52,  v = "." },
+    { k = 53,  v = "/" },
+    { k = 54,  v = "SHIFT" },
+    { k = 57,  v = "SPACEBAR" },
+    { k = 58,  v = "CAPS" },
     { k = 6,   v = "5" },
     { k = 7,   v = "6" },
     { k = 8,   v = "7" },
     { k = 9,   v = "8" },
-    { k = 10,  v = "9" },
-    { k = 28,  v = "RETURN" },
-    { k = 14,  v = "BACKSPACE" },
-    { k = 57,  v = "SPACEBAR" },
-    { k = 42,  v = "SHIFT" },
-    { k = 54,  v = "SHIFT" },
-    { k = 39,  v = ";" },
-    { k = 51,  v = "," },
-    { k = 52,  v = "." },
-    { k = 15,  v = "TAB" },
-    { k = 103, v = "UP" },
-    { k = 106, v = "RIGHT" },
-    { k = 108, v = "DOWN" },
-    { k = 105, v = "LEFT" },
-    { k = 1,   v = "ESC" },
-    { k = 58,  v = "CAPS" },
+    -- { k = 41,  v = "`" },
+    -- { k = 13,  v = "=" },
+    { k = 12,  v = "-" },
+  }
+  keys.shift_codes = {
+    -- { k = 10,  v = "(" },
+    -- { k = 11,  v = ")" },
+    { k = 12,  v = "_" },
+    -- { k = 13,  v = "+" },
+    { k = 2,   v = "!" },
+    -- { k = 3,   v = "@" },
+    { k = 4,   v = "#" },
+    -- { k = 41,  v = "~" },
+    -- { k = 5,   v = "$" },
+    -- { k = 6,   v = "%" },
+    -- { k = 7,   v = "^" },
+    -- { k = 8,   v = "&" },
+    -- { k = 9,   v = "*" },
+    { k = 39,  v = ":" },
+    { k = 51,  v = "<" },
+    { k = 52,  v = ">" },
+    { k = 53,  v = "?" },
   }
 end
 
@@ -64,6 +87,15 @@ function keys:get_keycode(code)
     end
   end
 end
+
+function keys:get_shifted_keycode(code)
+  for foo, bar in pairs(self.shift_codes) do
+    if bar.k == code then
+      return bar.v
+    end
+  end
+end
+
 
 function keys:is_letter_code(code)
   -- a thru z
@@ -85,7 +117,7 @@ end
 
 function keys:is_symbol(code)
   local check = {
-    39, 51, 52
+    2, 4, 12, 39, 51, 52, 53
   }
   return fn.table_contains(check, code)
 end

@@ -10,7 +10,7 @@ include("lib/includes")
 function init()
   y = {}
   buffer.init()
-  commands.init()
+  runner.init()
   docs.init()
   filesystem.init()
   fn.init()

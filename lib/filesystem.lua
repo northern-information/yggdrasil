@@ -2,12 +2,12 @@ filesystem = {}
 
 function filesystem.init()
   filesystem.paths = {}
-  filesystem.paths["save_path"] = config.settings.save_path
-  filesystem.test_file = "what-is-love.txt"
+  filesystem:set_save_path(config.settings.save_path)
 end
 
+
 function filesystem:load()
-  local filename = self.paths.save_path .. self.test_file
+  local filename = self.paths.save_path .. self:get_load_file()
   local file = assert(io.open(filename, "r"))
   local col = {}
   for line in file:lines() do
@@ -15,6 +15,22 @@ function filesystem:load()
   end
   file:close()
   tracker:load_track(1, col)
+end
+
+function filesystem:set_load_file(s)
+  self.load_file = s
+end
+
+function filesystem:get_load_file()
+  return self.load_file
+end
+
+function filesystem:set_save_path(s)
+  self.paths.save_path = s
+end
+
+function filesystem:get_save_path()
+  return self.paths.save_path
 end
 
 return filesystem

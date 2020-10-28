@@ -142,7 +142,7 @@ function graphics:draw_slots(track)
   for k, slot in pairs(slots) do
     if slot:get_y() <= track:get_depth() then
       local triggered = slot_triggers[slot:get_id()]
-      if slot:is_focus() or triggered ~= nil then
+      if slot:is_focused() or triggered ~= nil then
         local background = 15
         local foreground = 0
         if triggered ~= nil then

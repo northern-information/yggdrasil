@@ -32,7 +32,6 @@ function fn.split_semicolon(input)
     valid = false,
     payload = {}
   }
-print(input)
   for s in (input .. ";"):gmatch("([^;]*);") do 
     result.payload[#result.payload + 1] = s
   end
@@ -42,19 +41,43 @@ print(input)
   return result
 end
 
-function fn.is_depth_command(input)
+function fn.split_symbol(input, symbol)
+  local result = {
+    valid = false,
+    payload = {}
+  }
+  if string.sub(input, 1, 1) == symbol then result.valid = true end
+  result.payload[1] = symbol
+  result.payload[2] = tonumber(string.sub(input, 2))
+  return result
+end
+
+function fn.validate_simple_command(input, command)
   local result = fn.split_semicolon(input)
   if not result.valid then return false end
   if #result.payload ~= 2 then return false end
-  if result.payload[1] ~= "depth" then return false end
+  if result.payload[1] ~= command then return false end
   return fn.is_int(tonumber(result.payload[2]))
 end
 
+function fn.is_depth_command(input)
+  return fn.validate_simple_command(input, "depth")
+end
+
+function fn.is_shift_command(input)
+  return fn.validate_simple_command(input, "shift")
+end
+
 function fn.is_velocity_command(input)
-  local result = fn.split_semicolon(input)
+  return fn.validate_simple_command(input, "vel")
+end
+
+function fn.is_anchor_command(input)
+  local symbol = "#"
+  local result = fn.split_symbol(input, symbol)
   if not result.valid then return false end
   if #result.payload ~= 2 then return false end
-  if result.payload[1] ~= "vel" then return false end
+  if not string.match(result.payload[1], symbol) then return false end
   return fn.is_int(tonumber(result.payload[2]))
 end
 
@@ -66,7 +89,31 @@ function fn.extract(attribute, input)
   if attribute == "velocity" and fn.is_velocity_command(input) then
     return tonumber(result.payload[2])
   end
+  if attribute == "shift" and fn.is_shift_command(input) then
+    return tonumber(result.payload[2])
+  end
 end
+
+function fn.shift_table(t, shift_amount)
+  if shift_amount == 0 then return t end
+  for i = 1, shift_amount do
+    local last_value = t[#t]
+    table.insert(t, 1, last_value)
+    table.remove(t, #t)
+  end
+  return t
+end
+
+function fn.reverse_shift_table(t, shift_amount)
+  if shift_amount == 0 then return t end
+  for i = 1, shift_amount do
+    local first_value = t[1]
+    table.remove(t, 1)
+    table.insert(t, #t + 1, first_value)
+  end
+  return t
+end
+
 
 function fn.table_contains(t, check)
   for k, v in pairs(t) do
@@ -115,7 +162,13 @@ end
 
 function fn.is_int(test)
   if test == nil then return false end
+  if not tonumber(test) then return false end
   return test == math.floor(test)
+end
+
+function fn.is_number(test)
+  if test == nil then return false end
+  return tonumber(test)
 end
 
 function fn.is_space(test)
@@ -126,8 +179,14 @@ end
 function fn.string_split(input_string, split_character)
   local s = split_character ~= nil and split_character or "%s"
   local t = {}
-  for str in string.gmatch(input_string, "([^" .. s .. "]+)") do
-    table.insert(t, str)
+  if split_character == "" then
+    for str in string.gmatch(input_string, ".") do
+      table.insert(t, str)
+    end
+  else
+    for str in string.gmatch(input_string, "([^" .. s .. "]+)") do
+      table.insert(t, str)
+    end
   end
   return t
 end
@@ -153,6 +212,14 @@ end
 
 function rerun()
   fn.rerun()
+end
+
+function cmd(s)
+  local t = fn.string_split(s, "")
+  for k, v in pairs(t) do
+    buffer:add(v)
+  end
+  buffer:execute()
 end
 
 function s(x, y)

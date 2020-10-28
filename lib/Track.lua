@@ -11,6 +11,7 @@ function Track:new(x)
   t.direction = "descend"
   t.slots = {}
   t.extents = 0
+  t.focused = false
   return t
 end
 
@@ -32,6 +33,22 @@ end
 --- slot management
 
 
+
+function Track:phenomenon(p)
+  if p == "x" then  
+    self:set_position(1)
+  elseif p == "?" then  
+    self:set_position(math.random(1, self:get_depth()))
+  elseif p == "!" then  
+    local slots = self:get_not_empty_slots()
+    self:set_position(slots[math.random(1, #slots)]:get_y())
+  elseif p == fn.is_anchor_command(p) then
+    local result = fn.split_symbol(p, "#")
+    tabutil.print(result.payload)
+    -- self:set_position(result.payload[2])
+  end
+  self:trigger()
+end
 
 function Track:fill(depth)
   local cached_depth = self:get_depth()
@@ -62,14 +79,15 @@ function Track:update_slot(payload)
     if payload.y > self:get_depth() then
       self:fill(payload.y)
     end
-    if fn.table_contains_key(payload, "phenomenon") then
-      slot:set_phenomenon(payload.phenomenon)
-    end
-    if fn.table_contains_key(payload, "midi_note") then
-      slot:set_midi_note(payload.midi_note)
-    end
-    if fn.table_contains_key(payload, "velocity") then
-      slot:set_velocity(payload.velocity)
+    if payload.phenomenon then
+      slot:exotic_phenomenon(payload)
+    else
+      if fn.table_contains_key(payload, "midi_note") then
+        slot:set_midi_note(payload.midi_note)
+      end
+      if fn.table_contains_key(payload, "velocity") then
+        slot:set_velocity(payload.velocity)
+      end
     end
     slot:refresh()
     self:refresh()
@@ -107,6 +125,26 @@ function Track:trigger()
   end
 end
 
+function Track:shift(i)
+  if i == 0 then
+    tracker:set_message("Cannot shift 0.")
+  else
+    if i < 0 then
+      self:set_slots(fn.reverse_shift_table(self:get_slots(), math.abs(i)))
+    elseif i > 0 then
+      self:set_slots(fn.shift_table(self:get_slots(), i))
+    end
+    self:update_slot_y()
+    self:refresh()
+  end
+end
+
+
+function Track:update_slot_y()
+  for k, slot in pairs(self:get_slots()) do
+    slot:set_y(k)
+  end
+end
 
 
 -- focus
@@ -114,9 +152,10 @@ end
 
 
 function Track:focus()
+  self:set_focused(true)
   local first_focus = false
   for k, slot in pairs(self:get_slots()) do
-    slot:set_focus(true)
+    slot:set_focused(true)
     tracker:set_focused_index(slot:get_index())
     if not first_focus then
       graphics:set_view_x(self:get_x())
@@ -150,7 +189,19 @@ end
 
 -- getters & setters
 
+function Track:get_not_empty_slots()
+  local slots = {}
+    for slot_keys, slot in pairs(self:get_slots()) do
+      if not slot:is_empty() then
+        table.insert(slots, slot)
+      end
+    end
+  return slots
+end
 
+function Track:set_slots(t)
+  self.slots = t
+end
 
 function Track:get_slots()
   return self.slots
@@ -200,3 +251,10 @@ function Track:get_extents()
   return self.extents
 end
 
+function Track:set_focused(bool)
+  self.focused = bool
+end
+
+function Track:is_focused()
+  return self.focused
+end
