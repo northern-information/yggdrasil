@@ -72,14 +72,17 @@ function tracker:update_track(payload)
   local track = self:get_track(payload.x)
   if track ~= nil then
     tracker:focus_track(payload.x)
-    if fn.table_contains_key(payload, "shift") then
-      track:shift(payload.shift)
+    if fn.table_contains_key(payload, "class") then
+      if payload.class == "SHIFT" then
+        track:shift(payload.value)
+      end
     end
     self:refresh()
   end
 end
 
 function tracker:set_track_depth(track, depth)
+print(track, depth)
   if depth > self:get_rows() then
     self:set_rows(depth)
   end
@@ -106,7 +109,10 @@ end
 
 function tracker:update_slot(payload)
   self:focus_slot(payload.x, payload.y)
-  self:get_track(payload.x):update_slot(payload)
+  local track = self:get_track(payload.x)
+  if track ~= nil then
+    track:update_slot(payload)
+  end
   self:refresh()
 end
 

@@ -230,4 +230,19 @@ function t(x)
   return tracker:get_track(x)
 end
 
+function debug_semiotic(semiotic)
+  if config.settings.debug_semiotic then
+    print("semiotic ### ")
+    tabutil.print(semiotic)
+    print("split --- ")
+    tabutil.print(semiotic.split)
+    print("#branches --- ")
+    print(#semiotic.branches)
+    print("branches --- ")
+    tabutil.print(semiotic.branches)
+    print("payload --- ")
+    tabutil.print(semiotic.payload)
+  end
+end
+
 return fn

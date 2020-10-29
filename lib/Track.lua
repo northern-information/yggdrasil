@@ -35,6 +35,8 @@ end
 
 
 function Track:phenomenon(p)
+  print("-===")
+  tabutil.print(p)
   if p == "x" then  
     self:set_position(1)
   elseif p == "?" then  
@@ -80,14 +82,13 @@ function Track:update_slot(payload)
       self:fill(payload.y)
     end
     if payload.phenomenon then
-      slot:exotic_phenomenon(payload)
-    else
-      if fn.table_contains_key(payload, "midi_note") then
-        slot:set_midi_note(payload.midi_note)
-      end
-      if fn.table_contains_key(payload, "velocity") then
-        slot:set_velocity(payload.velocity)
-      end
+      slot:run_phenomenon(payload)
+    end
+    if fn.table_contains_key(payload, "midi_note") then
+      slot:set_midi_note(payload.midi_note)
+    end
+    if fn.table_contains_key(payload, "velocity") then
+      slot:set_velocity(payload.velocity)
     end
     slot:refresh()
     self:refresh()

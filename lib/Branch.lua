@@ -1,6 +1,7 @@
 Branch = {}
 
 -- branches are the space delimited strings
+-- leaves are {!,#,;,:} delimited strings, inclusive of the delimiters
 
 function Branch:new(raw_input)
   local b = setmetatable({}, { __index = Branch })

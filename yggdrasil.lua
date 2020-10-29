@@ -11,6 +11,7 @@ function init()
   y = {}
   buffer.init()
   runner.init()
+  commands.init()
   docs.init()
   filesystem.init()
   fn.init()

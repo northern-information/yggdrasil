@@ -19,10 +19,7 @@ function Slot:new(x, y)
   s.route = "synth"
   s.view = "midi"
   s.phenomenon = false
-  s.phenomenon_class = ""
-  s.phenomenon_prefix = ""
-  s.phenomenon_value = nil
-  s.phenomenon_payload = {}
+  s.payload = {}
   s.extents = nil
   s:refresh()
   return s
@@ -36,7 +33,6 @@ function Slot:trigger()
 
 
 print("trigger")
--- does phenomenon need to be a class?
 
 
   --     if position ~= y then
@@ -55,14 +51,7 @@ end
 function Slot:to_string()
   local out = ""
   if self:is_phenomenon() then
-    local value = self:get_phenomenon_value()
-    local prefix = self:get_phenomenon_prefix()
-    if prefix ~= nil then
-      out = prefix
-    end
-    if value ~= nil then
-      out = out .. value
-    end
+    out = tostring(self.payload)
   else
      local v = self:get_view()
         if v == "midi"   then out = self:get_midi_note() 
@@ -87,17 +76,10 @@ end
 
 function Slot:clear()
   self:clear_notes()
-  self:clear_phenomenon()
+  self:set_payload({})
+  self:set_phenomenon(false)
   self:set_focused(false)
   self:set_empty(true)
-end
-
-function Slot:clear_phenomenon()
-  self:set_phenomenon_value(nil)
-  self:set_phenomenon_class("")
-  self:set_phenomenon_prefix("")
-  self:set_phenomenon_payload({})
-  self:set_phenomenon(false)
 end
 
 function Slot:clear_notes()
@@ -113,14 +95,15 @@ end
 
 
 
-function Slot:exotic_phenomenon(payload)
+function Slot:run_phenomenon(payload)
   self:clear_notes()
-  self:set_phenomenon_payload(payload)
-  self:set_phenomenon_class(payload.class)
-  self:set_phenomenon_prefix(payload.prefix)
-  self:set_phenomenon_value(payload.value)
+  self:set_payload(payload)
   self:set_phenomenon(true)
   self:set_empty(false)
+end
+
+function Slot:set_payload(payload)
+  self.payload = payload
 end
 
 function Slot:is_phenomenon()
@@ -129,38 +112,6 @@ end
 
 function Slot:set_phenomenon(bool)
   self.phenomenon = bool
-end
-
-function Slot:get_phenomenon_payload()
-  return self.phenomenon_payload
-end
-
-function Slot:set_phenomenon_payload(payload)
-  self.phenomenon_payload = payload
-end
-
-function Slot:get_phenomenon_class()
-  return self.phenomenon_class
-end
-
-function Slot:set_phenomenon_class(s)
-  self.phenomenon_class = s
-end
-
-function Slot:get_phenomenon_prefix()
-  return self.phenomenon_prefix
-end
-
-function Slot:set_phenomenon_prefix(s)
-  self.phenomenon_prefix = s
-end
-
-function Slot:get_phenomenon_value()
-  return self.phenomenon_value
-end
-
-function Slot:set_phenomenon_value(s)
-  self.phenomenon_value = s
 end
 
 function Slot:get_midi_note()

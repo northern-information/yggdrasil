@@ -41,6 +41,8 @@ commands = include("lib/commands")
 
 runner = include("lib/runner")
 
+include("lib/Interpreter")
+
 include("lib/Command")
 
 include("lib/Branch")
