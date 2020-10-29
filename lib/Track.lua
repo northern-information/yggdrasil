@@ -34,24 +34,6 @@ end
 
 
 
-function Track:phenomenon(p)
-  print("-===")
-  tabutil.print(p)
-  if p == "x" then  
-    self:set_position(1)
-  elseif p == "?" then  
-    self:set_position(math.random(1, self:get_depth()))
-  elseif p == "!" then  
-    local slots = self:get_not_empty_slots()
-    self:set_position(slots[math.random(1, #slots)]:get_y())
-  elseif p == fn.is_anchor_command(p) then
-    local result = fn.split_symbol(p, "#")
-    tabutil.print(result.payload)
-    -- self:set_position(result.payload[2])
-  end
-  self:trigger()
-end
-
 function Track:fill(depth)
   local cached_depth = self:get_depth()
   if depth > self:get_depth() then

@@ -73,8 +73,11 @@ function tracker:update_track(payload)
   if track ~= nil then
     tracker:focus_track(payload.x)
     if fn.table_contains_key(payload, "class") then
+      if payload.class == "DEPTH" then
+        self:set_track_depth(payload.x, payload.depth)
+      end
       if payload.class == "SHIFT" then
-        track:shift(payload.value)
+        track:shift(payload.shift)
       end
     end
     self:refresh()
@@ -82,7 +85,6 @@ function tracker:update_track(payload)
 end
 
 function tracker:set_track_depth(track, depth)
-print(track, depth)
   if depth > self:get_rows() then
     self:set_rows(depth)
   end

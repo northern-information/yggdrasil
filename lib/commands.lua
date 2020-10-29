@@ -82,12 +82,12 @@ self:register("DEPTH", {
   payload = function(branch)
     return {
       class = "DEPTH",
-      value = fn.extract("depth", branch[2].leaves[1]),
+      depth = fn.extract("depth", branch[2].leaves[1]),
       x = tonumber(branch[1].leaves[1]),
     }
   end,
   action = function(payload)
-    tracker:set_track_depth(payload.x, payload.value)
+    tracker:update_track(payload)
   end
 })
 
@@ -344,7 +344,7 @@ self:register("SHIFT", {
   payload = function(branch)
     return {
       class = "SHIFT",
-      value = fn.extract("shift", branch[2].leaves[1]),
+      shift = fn.extract("shift", branch[2].leaves[1]),
       x = tonumber(branch[1].leaves[1]),
     }
   end,

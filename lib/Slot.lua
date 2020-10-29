@@ -21,30 +21,34 @@ function Slot:new(x, y)
   s.phenomenon = false
   s.payload = {}
   s.extents = nil
+  s.left_padding = 4 -- pixel adjustment
   s:refresh()
   return s
 end
 
 function Slot:trigger()
-  -- if self:is_phenomenon() then
-  --   if self:get_phenomenon_class() == "ANCHOR" then
-  --     local position = self:get_phenomenon_value()
-  --     local y = self:get_y()
-
-
-print("trigger")
-
-
-  --     if position ~= y then
-  --       local track = tracker:get_track(y)
-  --       track:set_position(position)
-  --     end
-  --   else
-  --     tracker:get_track(self:get_x()):phenomenon(self:get_phenomenon_value())
-  --   end
-  -- elseif self:get_midi_note() ~= nil and self:get_route() == "synth" then
-  --   synth:play(self:get_midi_note(), self:get_velocity())
-  -- end
+  if self:is_phenomenon() then
+    local track = tracker:get_track(self:get_x())
+    local p = self.payload.class
+    if p == "ANCHOR" then
+      if self:get_y() ~= self.payload.value then
+        track:set_position(self.payload.value)
+      end
+    elseif p == "LUCK" then  
+      local slots = track:get_not_empty_slots()
+      local new_y = 0
+      repeat
+        new_y = slots[math.random(1, #slots)]:get_y()
+      until new_y ~= self:get_y()
+      track:set_position(new_y)
+    elseif p == "END" then  
+      track:set_position(0)
+    elseif p == "RANDOM" then  
+      track:set_position(math.random(1, track:get_depth()))
+    end
+  elseif self:get_midi_note() ~= nil and self:get_route() == "synth" then
+    synth:play(self:get_midi_note(), self:get_velocity())
+  end
   graphics:register_slot_trigger(self:get_id())
 end
 
@@ -71,7 +75,7 @@ function Slot:refresh()
     self:set_ipn_note(music:convert("midi_to_ipn", m))
     self:set_frequency(music:convert("midi_to_freq", m))
   end
-  self:set_extents(screen.text_extents(self:to_string()) + 4) -- 4 is the "left padding" pixel adjustment
+  self:set_extents(screen.text_extents(self:to_string()) + self.left_padding)
 end
 
 function Slot:clear()
