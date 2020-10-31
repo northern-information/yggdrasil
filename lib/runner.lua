@@ -3,14 +3,14 @@ runner = {}
 function runner.init() end
 
 function runner:run(raw_input)
-  local semiotic = Interpreter:new(raw_input)
-  debug_semiotic(semiotic)
-  if not semiotic:is_valid() then
-    tracker:set_message("Unfound: " .. tostring(semiotic))
+  local interpreter = Interpreter:new(raw_input)
+  debug_interpreter(interpreter)
+  if not interpreter:is_valid() then
+    tracker:set_message("Unfound: " .. tostring(interpreter))
   else
     graphics:run_command()
     tracker:clear_message()
-    semiotic:execute()
+    interpreter:execute()
   end
 end
 

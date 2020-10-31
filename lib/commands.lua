@@ -35,6 +35,7 @@ function commands:register_all()
 
 this is the only place you need to configure / add / modify commands! :)
 
+ - "invocations" defines the valid aliases
  - "signature" defines what string from the buffer fits with this command
  - "payload" defines how to format the string for execution
  - "action" combines the payload with the final executable method/function
@@ -88,25 +89,27 @@ self:register("BPM", {
 })
 
 
+
+-- very complicated... revisit after saving is figured out
 -- 1 cp 2
-self:register("COPY", {
-  invocations = { "copy", "cp" },
-  signature = function(branch, invocations)
-    return #branch == 3
-      and fn.is_int(branch[1].leaves[1]) 
-      and fn.is_invocation_match(branch[2], invocations)
-      and fn.is_int(branch[3].leaves[1])
-  end,
-  payload = function(branch)
-    return {
-      target = branch[1].leaves[1],
-      destination = branch[3].leaves[1],
-    }
-  end,
-  action = function(payload)
-     tracker:copy_track(payload.target, payload.destination)
-  end
-})
+-- self:register("COPY", {
+--   invocations = { "copy", "cp" },
+--   signature = function(branch, invocations)
+--     return #branch == 3
+--       and fn.is_int(branch[1].leaves[1]) 
+--       and fn.is_invocation_match(branch[2], invocations)
+--       and fn.is_int(branch[3].leaves[1])
+--   end,
+--   payload = function(branch)
+--     return {
+--       target = branch[1].leaves[1],
+--       destination = branch[3].leaves[1],
+--     }
+--   end,
+--   action = function(payload)
+--      tracker:copy_track(payload.target, payload.destination)
+--   end
+-- })
 
 
 
