@@ -3,6 +3,7 @@ keyboard = hid.connect()
 function keyboard.event(type, code, val)
 
   screen.ping()
+  graphics:ping_cursor_frame()
 
   if keys:is_shift(code) then
     keys:handle_shift(val)
@@ -16,11 +17,7 @@ function keyboard.event(type, code, val)
 
   print(code)
   print("")
-  -- print(keys:get_keycode(code))
-  -- print("is letter:", keys:is_letter_code(code))
-  -- print("is number:", keys:is_number_code(code))
-  -- print("is backspace:", keys:is_backspace(code))
-  
+
   if keys:is_letter_code(code) or keys:is_number_code(code) or keys:is_symbol(code) then
     if keys:is_shifted() then
       if keys:is_hjkl(code) then
@@ -52,8 +49,6 @@ function keyboard.event(type, code, val)
       buffer:backspace()
     end
   end
-
-
 
   if keys:is_arrow(code) then
     if keys:is_shifted() then

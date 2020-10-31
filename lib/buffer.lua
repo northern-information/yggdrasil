@@ -5,6 +5,7 @@ function buffer.init()
   buffer.tb = {}
   buffer.history_index = 0
   buffer.history = {}
+  buffer.extents = 0
 end
 
 function buffer:execute()
@@ -17,21 +18,25 @@ end
 function buffer:add(s)
   self.b = self.b .. s
   self.tb[#self.tb + 1] = s
+  self.extents = screen.text_extents(self.b)
 end
 
 function buffer:set(buffer_string, buffer_table)
   self.b = buffer_string
   self.tb = buffer_table
+  self.extents = screen.text_extents(self.b)
 end
 
 function buffer:clear()
   self.b = ""
   self.tb = {}
+  self.extents = 0
 end
 
 function buffer:backspace()
   self.b = self.b:sub(1, -2)
   self.tb[#self.tb] = nil
+  self.extents = screen.text_extents(self.b)
 end
 
 function buffer:get_history()
@@ -63,6 +68,14 @@ end
 
 function buffer:is_empty()
   return #buffer.tb == 0
+end
+
+function buffer:get()
+  return self.b
+end
+
+function buffer:get_extents()
+  return self.extents
 end
 
 return buffer

@@ -25,12 +25,12 @@ function Interpreter:parse()
 end
 
 function Interpreter:validate()
-  for k, v in pairs(commands:get_all()) do
-    if v.signature(self.branches) then
+  for k, command in pairs(commands:get_all()) do
+    if command.signature(self.branches, command.invocations) then
       self.class = k
       self.valid = true
-      self.payload = v.payload(self.branches)
-      self.action = v.action
+      self.payload = command.payload(self.branches)
+      self.action = command.action
     end
   end
 end

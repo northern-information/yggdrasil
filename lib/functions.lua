@@ -52,47 +52,78 @@ function fn.split_symbol(input, symbol)
   return result
 end
 
-function fn.validate_simple_command(input, command)
-  local result = fn.split_semicolon(input)
-  if not result.valid then return false end
-  if #result.payload ~= 2 then return false end
-  if result.payload[1] ~= command then return false end
-  return fn.is_int(tonumber(result.payload[2]))
-end
-
-function fn.is_depth_command(input)
-  return fn.validate_simple_command(input, "depth")
-end
-
-function fn.is_shift_command(input)
-  return fn.validate_simple_command(input, "shift")
-end
-
-function fn.is_velocity_command(input)
-  return fn.validate_simple_command(input, "vel")
-end
-
-function fn.is_anchor_command(input)
-  local symbol = "#"
-  local result = fn.split_symbol(input, symbol)
-  if not result.valid then return false end
-  if #result.payload ~= 2 then return false end
-  if not string.match(result.payload[1], symbol) then return false end
-  return fn.is_int(tonumber(result.payload[2]))
-end
-
-function fn.extract(attribute, input)
-  local result = fn.split_semicolon(input)
-  if attribute == "depth" and fn.is_depth_command(input) then
-    return tonumber(result.payload[2])
+function fn.validate_prefix_invocation(branch)
+  local result = false
+  for k, v in pairs(commands:get_prefixes()) do
+    if string.find(branch.leaves[1], v) then
+      result = true
+    end
   end
-  if attribute == "velocity" and fn.is_velocity_command(input) then
-    return tonumber(result.payload[2])
-  end
-  if attribute == "shift" and fn.is_shift_command(input) then
-    return tonumber(result.payload[2])
-  end
+  return result
 end
+
+function fn.validate_string_invocation(branch, invocation)
+  return #branch.leaves == 1
+    and type(branch.leaves[1]) == "string"
+    and branch.leaves[1] == invocation
+end
+
+function fn.validate_simple_invocation(branch, invocation)
+  return #branch.leaves == 3
+    and branch.leaves[1] == invocation
+    and branch.leaves[2] == ";"
+    and fn.is_number(branch.leaves[3])
+end
+
+-- #2     "validate_prefix_invocation"
+-- play   "validate_string_invocation"
+-- vel;3  "validate_simple_invocation"
+function fn.is_invocation_match(branch, invocations)
+  local result = false
+  for k, invocation in pairs(invocations) do
+    local is_prefix_invocation = fn.validate_prefix_invocation(branch)
+    local is_string_invocation = fn.validate_string_invocation(branch, invocation)
+    local is_simple_invocation = fn.validate_simple_invocation(branch, invocation)
+    if is_prefix_invocation or is_string_invocation or is_simple_invocation then
+      result = true
+    end
+  end
+  return result
+end
+
+-- function fn.is_depth_command(input)
+--   return fn.validate_simple_command(input, "depth")
+-- end
+
+-- function fn.is_shift_command(input)
+--   return fn.validate_simple_command(input, "shift")
+-- end
+
+-- function fn.is_velocity_command(input)
+--   return fn.validate_simple_command(input, "vel")
+-- end
+
+-- function fn.is_transpose_command(input)
+--   return fn.validate_simple_command(input, "t")
+-- end
+
+
+
+-- function fn.extract(attribute, input)
+--   local result = fn.split_semicolon(input)
+--   if attribute == "depth" and fn.is_depth_command(input) then
+--     return tonumber(result.payload[2])
+--   end
+--   if attribute == "tranpose" and fn.is_transpose_command(input) then
+--     return tonumber(result.payload[2])
+--   end
+--   if attribute == "velocity" and fn.is_velocity_command(input) then
+--     return tonumber(result.payload[2])
+--   end
+--   if attribute == "shift" and fn.is_shift_command(input) then
+--     return tonumber(result.payload[2])
+--   end
+-- end
 
 function fn.shift_table(t, shift_amount)
   if shift_amount == 0 then return t end
@@ -114,6 +145,20 @@ function fn.reverse_shift_table(t, shift_amount)
   return t
 end
 
+function fn.deep_copy(orig)
+  local orig_type = type(orig)
+  local copy
+  if orig_type == "table" then
+    copy = {}
+    for orig_key, orig_value in next, orig, nil do
+        copy[fn.deep_copy(orig_key)] = fn.deep_copy(orig_value)
+    end
+    setmetatable(copy, fn.deep_copy(getmetatable(orig)))
+  else -- number, string, boolean, etc
+    copy = orig
+  end
+  return copy
+end
 
 function fn.table_contains(t, check)
   for k, v in pairs(t) do
@@ -168,7 +213,7 @@ end
 
 function fn.is_number(test)
   if test == nil then return false end
-  return tonumber(test)
+  return type(tonumber(test)) == "number"
 end
 
 function fn.is_space(test)
@@ -208,7 +253,11 @@ end
 
 -- dev
 
-
+function print_matron_message(message)
+  print("") print("") print("")      
+  print(message)
+  print("") print("") print("")
+end
 
 function rerun()
   fn.rerun()
@@ -239,7 +288,12 @@ function debug_semiotic(semiotic)
     print("#branches --- ")
     print(#semiotic.branches)
     print("branches --- ")
-    tabutil.print(semiotic.branches)
+    for k, v in pairs(semiotic.branches) do
+      print("branch", k)
+      for kk, vv in pairs(v.leaves) do
+        print("leaf", kk, vv)
+      end
+    end
     print("payload --- ")
     tabutil.print(semiotic.payload)
   end

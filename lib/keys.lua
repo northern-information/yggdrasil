@@ -1,6 +1,9 @@
 keys = {}
 
 function keys.init()
+  keys.alt   = false
+  keys.ctrl  = false
+  keys.opt   = false
   keys.shift = false
   keys.codes = {
     { k = 1,   v = "ESC" },
@@ -9,6 +12,7 @@ function keys.init()
     { k = 105, v = "LEFT" },
     { k = 106, v = "RIGHT" },
     { k = 108, v = "DOWN" },
+    { k = 125, v = "OPT" },
     { k = 11,  v = "0" },
     { k = 14,  v = "BACKSPACE" },
     { k = 15,  v = "TAB" },
@@ -24,6 +28,7 @@ function keys.init()
     { k = 24,  v = "o" },
     { k = 25,  v = "p" },
     { k = 28,  v = "RETURN" },
+    { k = 29,  v = "CTRL" },
     { k = 3,   v = "2" },
     { k = 30,  v = "a" },
     { k = 31,  v = "s" },
@@ -49,6 +54,7 @@ function keys.init()
     { k = 52,  v = "." },
     { k = 53,  v = "/" },
     { k = 54,  v = "SHIFT" },
+    { k = 56,  v = "ALT" },
     { k = 57,  v = "SPACEBAR" },
     { k = 58,  v = "CAPS" },
     { k = 6,   v = "5" },
@@ -56,14 +62,14 @@ function keys.init()
     { k = 8,   v = "7" },
     { k = 9,   v = "8" },
     -- { k = 41,  v = "`" },
-    -- { k = 13,  v = "=" },
+    { k = 13,  v = "=" },
     { k = 12,  v = "-" },
   }
   keys.shift_codes = {
     -- { k = 10,  v = "(" },
     -- { k = 11,  v = ")" },
     { k = 12,  v = "_" },
-    -- { k = 13,  v = "+" },
+    { k = 13,  v = "+" },
     { k = 2,   v = "!" },
     -- { k = 3,   v = "@" },
     { k = 4,   v = "#" },
@@ -117,7 +123,7 @@ end
 
 function keys:is_symbol(code)
   local check = {
-    2, 4, 12, 39, 51, 52, 53
+    2, 4, 12, 13, 39, 51, 52, 53
   }
   return fn.table_contains(check, code)
 end
@@ -132,10 +138,6 @@ end
 
 function keys:is_spacebar(code)
   return 57 == code
-end
-
-function keys:is_shift(code)
-  return (42 == code) or (54 == code)
 end
 
 function keys:is_tab(code)
@@ -156,6 +158,58 @@ end
 
 function keys:is_caps(code)
   return 58 == code
+end
+
+function keys:is_ctrl(code)
+  return 29 == code
+end
+
+function keys:handle_ctrl(val)
+  if not self.ctrl and val == 1 then
+    self.ctrl = true
+  elseif val == 0 then
+    self.ctrl = false
+  end
+end
+
+function keys:is_ctrled()
+  return self.ctrl
+end
+
+function keys:is_opt(code)
+  return 125 == code
+end
+
+function keys:handle_opt(val)
+  if not self.opt and val == 1 then
+    self.opt = true
+  elseif val == 0 then
+    self.opt = false
+  end
+end
+
+function keys:is_opted()
+  return self.opt
+end
+
+function keys:is_alt(code)
+  return 56 == code
+end
+
+function keys:handle_alt(val)
+  if not self.alt and val == 1 then
+    self.alt = true
+  elseif val == 0 then
+    self.alt = false
+  end
+end
+
+function keys:is_alted()
+  return self.alt
+end
+
+function keys:is_shift(code)
+  return (42 == code) or (54 == code)
 end
 
 function keys:handle_shift(val)

@@ -5,6 +5,7 @@ function graphics.init()
   graphics.fps = 30
   graphics.frame = 0
   graphics.quarter_frame = 0
+  graphics.cursor_frame = 0
   graphics.run_command_frame = 0
   graphics.glow = 0
   graphics.glow_up = true
@@ -207,8 +208,12 @@ function graphics:draw_terminal()
   if message then
     self:text(5, 54, message_value, 1)
   end
-  self:text(1, 62, ">", self.glow)
-  self:text(6, 62, buffer.b, 15)
+  self:text(0, 62, buffer:get(), 15)
+  local adjust = 1
+  if buffer:get_extents() > 0 then
+    adjust = 3
+  end
+  self:mlrs(buffer:get_extents() + adjust, 56, 0, 7, self.cursor_frame)
 end
 
 function graphics:draw_command_processing()
@@ -273,8 +278,6 @@ function graphics:is_hud()
   return self.hud
 end
 
-
-
 function graphics:frame_clock()
   while true do
     graphics:handle_frames()
@@ -290,6 +293,11 @@ function graphics:handle_frames()
     self.glow_up =  not self.glow_up
   end
   self.glow = self.glow_up and self.frame % 16 or math.abs((self.frame % 16) - 16)
+  self.cursor_frame = fn.cycle(self.cursor_frame - 1, 0, 16)
+end
+
+function graphics:ping_cursor_frame()
+  self.cursor_frame = 16
 end
 
 function graphics:setup()

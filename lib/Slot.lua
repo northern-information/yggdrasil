@@ -30,21 +30,30 @@ function Slot:trigger()
   if self:is_phenomenon() then
     local track = tracker:get_track(self:get_x())
     local p = self.payload.class
+
+
     if p == "ANCHOR" then
       if self:get_y() ~= self.payload.value then
         track:set_position(self.payload.value)
       end
-    elseif p == "LUCK" then  
+
+
+    elseif p == "END" then  
+      track:set_position(0)
+
+
+    elseif p == "LUCKY" then  
       local slots = track:get_not_empty_slots()
       local new_y = 0
       repeat
         new_y = slots[math.random(1, #slots)]:get_y()
       until new_y ~= self:get_y()
       track:set_position(new_y)
-    elseif p == "END" then  
-      track:set_position(0)
+
+
     elseif p == "RANDOM" then  
       track:set_position(math.random(1, track:get_depth()))
+
     end
   elseif self:get_midi_note() ~= nil and self:get_route() == "synth" then
     synth:play(self:get_midi_note(), self:get_velocity())
@@ -116,6 +125,10 @@ end
 
 function Slot:set_phenomenon(bool)
   self.phenomenon = bool
+end
+
+function Slot:transpose_midi_note(semitones)
+  self:set_midi_note(util.clamp(self:get_midi_note() + semitones, 0, 127))
 end
 
 function Slot:get_midi_note()

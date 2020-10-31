@@ -66,6 +66,9 @@ function Track:update_slot(payload)
     if payload.phenomenon then
       slot:run_phenomenon(payload)
     end
+    if payload.class == "TRANSPOSE_SLOT" then  
+      slot:transpose_midi_note(payload.value)
+    end
     if fn.table_contains_key(payload, "midi_note") then
       slot:set_midi_note(payload.midi_note)
     end

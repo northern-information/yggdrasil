@@ -10,7 +10,7 @@ function tracker.init()
   tracker.slot_view = "midi"
   tracker.tracks = {}
   tracker.rows = 8
-  tracker.cols = 1
+  tracker.cols = 4
   tracker.extents = 0
   for x = 1, tracker.cols do
     tracker.tracks[x] = Track:new(x)

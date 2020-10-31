@@ -2,6 +2,7 @@ commands = {}
 
 function commands.init()
   commands.all = {}
+  commands.prefixes = { "#" }
   commands:register_all()
 end
 
@@ -9,8 +10,21 @@ function commands:get_all()
   return self.all
 end
 
+function commands:get_prefixes()
+  return self.prefixes
+end
+
 function commands:register(class, t)
-  table.insert(self.all, t)
+  for k, command in pairs(self.all) do
+    for kk, existing_invocation in pairs(command.invocations) do
+      for kkk, new_invocation in pairs(t.invocations) do
+        if existing_invocation == new_invocation then
+          print_matron_message("Error: Invocation " .. new_invocation .. " on " .. class .. " is already registered to " .. k .. "! Overwriting...")
+        end
+      end
+    end
+  end
+  self.all[class] = t
 end
 
 function commands:register_all()
@@ -30,20 +44,22 @@ this is the only place you need to configure / add / modify commands! :)
 
 -- 1 5 #1
 self:register("ANCHOR", {
-  signature = function(branch)
+  invocations = { "#" },
+  signature = function(branch, invocations)
     return #branch == 3
-       and fn.is_int(branch[1].leaves[1]) 
-       and fn.is_int(branch[2].leaves[1])
-       and fn.is_anchor_command(branch[3].leaves[1])
+      and fn.is_int(branch[1].leaves[1]) 
+      and fn.is_int(branch[2].leaves[1])
+      and fn.is_invocation_match(branch[3], invocations)
+      and fn.is_int(branch[3].leaves[2])
   end,
   payload = function(branch)
     return {
       class = "ANCHOR",
       phenomenon = true,
       prefix = "#",
-      value = tonumber(string.sub(branch[3].leaves[1], 2)),
-      x = tonumber(branch[1].leaves[1]), 
-      y = tonumber(branch[2].leaves[1]),
+      value = branch[3].leaves[2],
+      x = branch[1].leaves[1], 
+      y = branch[2].leaves[1],
     }
   end,
   action = function(payload)
@@ -55,14 +71,15 @@ self:register("ANCHOR", {
 
 -- bpm 127.3
 self:register("BPM", {
-  signature = function(branch)
+  invocations = { "bpm" },
+  signature = function(branch, invocations)
     return #branch == 2
-       and branch[1].leaves[1] == "bpm"
-       and fn.is_number(branch[2].leaves[1])
+      and fn.is_invocation_match(branch[1], invocations)
+      and fn.is_number(branch[2].leaves[1])
   end,
   payload = function(branch)
     return {
-      bpm = tonumber(branch[2].leaves[1])
+      bpm = branch[2].leaves[1]
     }
   end,
   action = function(payload)
@@ -74,16 +91,18 @@ self:register("BPM", {
 
 -- 1 depth;16
 self:register("DEPTH", {
-  signature = function(branch)
+  invocations = { "depth", "d" },
+  signature = function(branch, invocations)
     return #branch == 2
-       and fn.is_int(branch[1].leaves[1])
-       and fn.is_depth_command(branch[2].leaves[1])
+      and fn.is_int(branch[1].leaves[1])
+      and fn.is_invocation_match(branch[2], invocations)
+      and fn.is_int(branch[2].leaves[3])
   end,
   payload = function(branch)
     return {
       class = "DEPTH",
-      depth = fn.extract("depth", branch[2].leaves[1]),
-      x = tonumber(branch[1].leaves[1]),
+      depth = branch[2].leaves[3],
+      x = branch[1].leaves[1],
     }
   end,
   action = function(payload)
@@ -95,11 +114,12 @@ self:register("DEPTH", {
 
 -- 1 5 x
 self:register("END", {
-  signature = function(branch)
+  invocations = { "end", "x" },
+  signature = function(branch, invocations)
     return #branch == 3
        and fn.is_int(branch[1].leaves[1]) 
        and fn.is_int(branch[2].leaves[1])
-       and branch[3].leaves[1] == "x"
+      and fn.is_invocation_match(branch[3], invocations)
   end,
   payload = function(branch)
     return {
@@ -107,8 +127,8 @@ self:register("END", {
       phenomenon = true,
       prefix = "x",
       value = nil,
-      x = tonumber(branch[1].leaves[1]), 
-      y = tonumber(branch[2].leaves[1]),
+      x = branch[1].leaves[1], 
+      y = branch[2].leaves[1],
     }
   end,
   action = function(payload)
@@ -120,15 +140,16 @@ self:register("END", {
 
 -- 1 2
 self:register("FOCUS_SLOT", {
-  signature = function(branch)
-    return #branch == 2 
+  invocations = {},
+  signature = function(branch, invocations)
+    return #branch == 2
        and fn.is_int(branch[1].leaves[1]) 
        and fn.is_int(branch[2].leaves[1])
   end,
   payload = function(branch)
     return {
-      x = tonumber(branch[1].leaves[1]), 
-      y = tonumber(branch[2].leaves[1])
+      x = branch[1].leaves[1], 
+      y = branch[2].leaves[1]
     }
   end,
   action = function(payload)
@@ -140,13 +161,14 @@ self:register("FOCUS_SLOT", {
 
 -- 2
 self:register("FOCUS_TRACK", {
-  signature = function(branch)
+  invocations = {},
+  signature = function(branch, invocations)
     return #branch == 1
        and fn.is_int(branch[1].leaves[1])
   end,
   payload = function(branch)
     return {
-      x = tonumber(branch[1].leaves[1])
+      x = branch[1].leaves[1]
     }
   end,
   action = function(payload)
@@ -158,9 +180,10 @@ self:register("FOCUS_TRACK", {
 
 -- follow
 self:register("FOLLOW", {
-  signature = function(branch)
+  invocations = { "follow" },
+  signature = function(branch, invocations)
     return #branch == 1
-       and branch[1].leaves[1] == "follow"
+      and fn.is_invocation_match(branch[1], invocations)
   end,
   payload = function(branch)
     return {}
@@ -173,21 +196,22 @@ self:register("FOLLOW", {
 
 
 -- 3 4 !
-self:register("LUCK", {
-  signature = function(branch)
+self:register("LUCKY", {
+  invocations = { "lucky", "!" },
+  signature = function(branch, invocations)
     return #branch == 3
       and fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
-      and branch[3].leaves[1] == "!"
+      and fn.is_invocation_match(branch[3], invocations)
   end,
   payload = function(branch)
     return {
-        class = "LUCK",
+        class = "LUCKY",
         phenomenon = true,
         prefix = "!",
         value = nil,
-        x = tonumber(branch[1].leaves[1]), 
-        y = tonumber(branch[2].leaves[1]),
+        x = branch[1].leaves[1], 
+        y = branch[2].leaves[1],
     }
   end,
   action = function(payload)
@@ -199,7 +223,8 @@ self:register("LUCK", {
 
 -- 1 1 72
 self:register("SET_MIDI_NOTE", {
-  signature = function(branch)
+  invocations = {},
+  signature = function(branch, invocations)
     return #branch == 3
       and fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
@@ -208,9 +233,9 @@ self:register("SET_MIDI_NOTE", {
   payload = function(branch)
     return {
       class = "SET_MIDI_NOTE",
-      midi_note = tonumber(branch[3].leaves[1]),
-      x = tonumber(branch[1].leaves[1]),
-      y = tonumber(branch[2].leaves[1]),
+      midi_note = branch[3].leaves[1],
+      x = branch[1].leaves[1],
+      y = branch[2].leaves[1],
     }
   end,
   action = function(payload)
@@ -221,21 +246,22 @@ self:register("SET_MIDI_NOTE", {
 
 
 -- 1 1 72 vel;100
-self:register("SET_MIDI_NOTE_AND_VELOCITY", {
-  signature = function(branch)
+self:register("SET_MIDI_NOTE_AND_VELOCITY", { -- todo make midi note optional?
+  invocations = { "velocity", "vel" },
+  signature = function(branch, invocations)
     return #branch == 4
       and fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
       and fn.is_int(branch[3].leaves[1])
-      and fn.is_velocity_command(branch[4].leaves[1])
+      and fn.is_invocation_match(branch[4], invocations)
   end,
   payload = function(branch)
     return {
       class = "SET_MIDI_NOTE_AND_VELOCITY",
-      midi_note = tonumber(branch[3].leaves[1]),
-      velocity = fn.extract("velocity", branch[4].leaves[1]),
-      x = tonumber(branch[1].leaves[1]),
-      y = tonumber(branch[2].leaves[1]),
+      midi_note = branch[3].leaves[1],
+      velocity = branch[4].leaves[3],
+      x = branch[1].leaves[1],
+      y = branch[2].leaves[1],
     }
   end,
   action = function(payload)
@@ -247,9 +273,10 @@ self:register("SET_MIDI_NOTE_AND_VELOCITY", {
 
 -- oblique
 self:register("OBLIQUE", {
-  signature = function(branch)
+  invocations = { "oblique" },
+  signature = function(branch, invocations)
     return #branch == 1
-       and branch[1].leaves[1] == "oblique"
+      and fn.is_invocation_match(branch[1], invocations)
   end,
   payload = function(branch)
     return {}
@@ -263,9 +290,10 @@ self:register("OBLIQUE", {
 
 -- play
 self:register("PLAY", {
-  signature = function(branch)
+  invocations = { "play" },
+  signature = function(branch, invocations)
     return #branch == 1
-       and branch[1].leaves[1] == "play"
+      and fn.is_invocation_match(branch[1], invocations)
   end,
   payload = function(branch)
     return {}
@@ -279,11 +307,12 @@ self:register("PLAY", {
 
 -- 3 4 ?
 self:register("RANDOM", {
-  signature = function(branch)
+  invocations = { "random", "?" },
+  signature = function(branch, invocations)
     return #branch == 3
        and fn.is_int(branch[1].leaves[1])
        and fn.is_int(branch[2].leaves[1])
-       and branch[3].leaves[1] == "?"
+      and fn.is_invocation_match(branch[3], invocations)
   end,
   payload = function(branch)
     return {
@@ -291,8 +320,8 @@ self:register("RANDOM", {
         phenomenon = true,
         prefix = "?",
         value = nil,
-        x = tonumber(branch[1].leaves[1]), 
-        y = tonumber(branch[2].leaves[1]),
+        x = branch[1].leaves[1], 
+        y = branch[2].leaves[1],
     }
   end,
   action = function(payload)
@@ -304,9 +333,10 @@ self:register("RANDOM", {
 
 -- rerun
 self:register("RERUN", {
-  signature = function(branch)
+  invocations = { "rerun" },
+  signature = function(branch, invocations)
     return #branch == 1
-       and branch[1].leaves[1] == "rerun"
+      and fn.is_invocation_match(branch[1], invocations)
   end,
   payload = function(branch)
     return {}
@@ -320,9 +350,10 @@ self:register("RERUN", {
 
 -- screenshot
 self:register("SCREENSHOT", {
-  signature = function(branch)
+  invocations = { "screenshot" },
+  signature = function(branch, invocations)
     return #branch == 1
-       and branch[1].leaves[1] == "screenshot"
+      and fn.is_invocation_match(branch[1], invocations)
   end,
   payload = function(branch)
     return {}
@@ -336,16 +367,17 @@ self:register("SCREENSHOT", {
 
 -- 1 shift;5
 self:register("SHIFT", {
-  signature = function(branch)
+  invocations = { "shift", "s" },
+  signature = function(branch, invocations)
     return #branch == 2
        and fn.is_int(branch[1].leaves[1])
-       and fn.is_shift_command(branch[2].leaves[1])
+      and fn.is_invocation_match(branch[2], invocations)
   end,
   payload = function(branch)
     return {
       class = "SHIFT",
-      shift = fn.extract("shift", branch[2].leaves[1]),
-      x = tonumber(branch[1].leaves[1]),
+      shift = branch[2].leaves[3],
+      x = branch[1].leaves[1],
     }
   end,
   action = function(payload)
@@ -357,9 +389,10 @@ self:register("SHIFT", {
 
 -- stop
 self:register("STOP", {
-  signature = function(branch)
+  invocations = { "stop" },
+  signature = function(branch, invocations)
     return #branch == 1
-       and branch[1].leaves[1] == "stop"
+      and fn.is_invocation_match(branch[1], invocations)
   end,
   payload = function(branch)
     return {}
@@ -371,11 +404,38 @@ self:register("STOP", {
 
 
 
--- view {midi,ipn,ygg,freq,index}
+-- 1 1 t;1
+self:register("TRANSPOSE_SLOT", {
+  invocations = { "transpose", "trans", "t" },
+  signature = function(branch, invocations)
+    return #branch == 3
+      and fn.is_int(branch[1].leaves[1])
+      and fn.is_int(branch[2].leaves[1])
+      and fn.is_invocation_match(branch[3], invocations)
+      and fn.is_int(branch[3].leaves[3])
+  end,
+  payload = function(branch)
+    return {
+      class = "TRANSPOSE_SLOT",
+      value = branch[3].leaves[3],
+      x = branch[1].leaves[1],
+      y = branch[2].leaves[1]
+    }
+  end,
+  action = function(payload)
+    tracker:update_slot(payload)
+  end
+})
+
+
+
+-- view midi
 self:register("VIEW", {
-  signature = function(branch)
+  invocations = { "view", "v" },
+  signature = function(branch, invocations)
     return #branch == 2
-       and branch[1].leaves[1] == "view"
+      and fn.is_invocation_match(branch[1], invocations)
+      and fn.table_contains({ "midi", "ipn", "ygg", "freq", "index" }, branch[2].leaves[1])
   end,
   payload = function(branch)
     return {
