@@ -18,6 +18,8 @@ end
 function Track:refresh()
   local e = 0
   local tracker_slot_view = tracker:get_slot_view()
+  self:update_slot_x()
+  self:update_slot_y()
   for k, slot in pairs(self.slots) do
     slot:set_index(tracker:index(slot:get_x(), slot:get_y()))
     slot:set_view(tracker_slot_view)
@@ -80,7 +82,11 @@ function Track:update_slot(payload)
   end
 end
 
-
+function Track:remove_slot(y)
+  table.remove(self.slots, y)
+  self:set_depth(#self.slots)
+  self:refresh()
+end
 
 --- tracking
 
@@ -129,6 +135,12 @@ end
 function Track:update_slot_y()
   for k, slot in pairs(self:get_slots()) do
     slot:set_y(k)
+  end
+end
+
+function Track:update_slot_x()
+  for k, slot in pairs(self:get_slots()) do
+    slot:set_x(self:get_x())
   end
 end
 
@@ -199,6 +211,10 @@ end
 
 function Track:to_string()
   return self:get_x()
+end
+
+function Track:set_x(x)
+  self.x = x
 end
 
 function Track:get_x()

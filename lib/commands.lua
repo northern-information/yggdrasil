@@ -88,6 +88,27 @@ self:register("BPM", {
 })
 
 
+-- 1 cp 2
+self:register("COPY", {
+  invocations = { "copy", "cp" },
+  signature = function(branch, invocations)
+    return #branch == 3
+      and fn.is_int(branch[1].leaves[1]) 
+      and fn.is_invocation_match(branch[2], invocations)
+      and fn.is_int(branch[3].leaves[1])
+  end,
+  payload = function(branch)
+    return {
+      target = branch[1].leaves[1],
+      destination = branch[3].leaves[1],
+    }
+  end,
+  action = function(payload)
+     tracker:copy_track(payload.target, payload.destination)
+  end
+})
+
+
 
 -- 1 depth;16
 self:register("DEPTH", {
@@ -138,41 +159,37 @@ self:register("END", {
 
 
 
+-- 1
 -- 1 2
-self:register("FOCUS_SLOT", {
+self:register("FOCUS", {
   invocations = {},
   signature = function(branch, invocations)
-    return #branch == 2
-       and fn.is_int(branch[1].leaves[1]) 
-       and fn.is_int(branch[2].leaves[1])
+    return (
+      #branch == 1
+      and fn.is_int(branch[1].leaves[1])
+      
+    ) or (
+     #branch == 2
+      and fn.is_int(branch[1].leaves[1]) 
+      and fn.is_int(branch[2].leaves[1])
+    )
   end,
   payload = function(branch)
+    local y = nil
+    if branch[2] ~= nil then
+      y = fn.is_int(branch[2].leaves[1]) and branch[2].leaves[1] or nil
+    end
     return {
       x = branch[1].leaves[1], 
-      y = branch[2].leaves[1]
+      y = y
     }
   end,
   action = function(payload)
-    tracker:focus_slot(payload.x, payload.y)
-  end
-})
-
-
-
--- 2
-self:register("FOCUS_TRACK", {
-  invocations = {},
-  signature = function(branch, invocations)
-    return #branch == 1
-       and fn.is_int(branch[1].leaves[1])
-  end,
-  payload = function(branch)
-    return {
-      x = branch[1].leaves[1]
-    }
-  end,
-  action = function(payload)
-    tracker:focus_track(payload.x)
+    if payload.y ~= nil then
+      tracker:focus_slot(payload.x, payload.y)
+    else
+      tracker:focus_track(payload.x)
+    end
   end
 })
 
@@ -326,6 +343,36 @@ self:register("RANDOM", {
   end,
   action = function(payload)
     tracker:update_slot(payload)
+  end
+})
+
+
+
+-- 1 rm
+-- 1 2 rm
+self:register("REMOVE", {
+  invocations = { "remove", "rm" },
+  signature = function(branch, invocations)
+    return (
+      #branch == 2
+      and fn.is_int(branch[1].leaves[1])
+      and fn.is_invocation_match(branch[2], invocations)
+    ) or (
+      #branch == 3
+      and fn.is_int(branch[1].leaves[1])
+      and fn.is_int(branch[2].leaves[1])
+      and fn.is_invocation_match(branch[3], invocations)
+    )
+  end,
+  payload = function(branch)
+    return {
+        class = "REMOVE",
+        x = branch[1].leaves[1], 
+        y = fn.is_int(branch[2].leaves[1]) and branch[2].leaves[1] or nil,
+    }
+  end,
+  action = function(payload)
+    tracker:remove(payload.x, payload.y)
   end
 })
 

@@ -179,6 +179,10 @@ function Slot:get_id()
   return self.id
 end
 
+function Slot:set_x(x)
+  self.x = x
+end
+
 function Slot:get_x()
   return self.x
 end

@@ -15,6 +15,8 @@ function keyboard.event(type, code, val)
 
   if val == 0 then return end -- ignore other keyups
 
+  keys:set_last_space(false)
+
   print(code)
   print("")
 
@@ -34,6 +36,7 @@ function keyboard.event(type, code, val)
     if buffer:is_empty() then
       tracker:toggle_playback()
     else
+      keys:set_last_space(true)
       buffer:add(" ")
     end
   end
@@ -79,7 +82,7 @@ function keyboard.event(type, code, val)
     end
   end
 
-  if keys:is_caps(code) then
+  if keys:is_tab(code) then
     graphics:toggle_hud()
   end
 

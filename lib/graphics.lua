@@ -211,7 +211,10 @@ function graphics:draw_terminal()
   self:text(0, 62, buffer:get(), 15)
   local adjust = 1
   if buffer:get_extents() > 0 then
-    adjust = 3
+    adjust = adjust + 2
+  end
+  if keys:is_last_space() then
+    adjust = adjust + 2
   end
   self:mlrs(buffer:get_extents() + adjust, 56, 0, 7, self.cursor_frame)
 end

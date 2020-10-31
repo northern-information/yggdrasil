@@ -32,6 +32,9 @@ end
 
 function tracker:refresh()
   local e = 0
+  for k, track in pairs(self:get_tracks()) do
+    track:set_x(k)
+  end
   for track_key, track in pairs(self:get_tracks()) do
     track:refresh()
     local te = track:get_extents()
@@ -103,6 +106,31 @@ function tracker:get_deepest_not_empty_position()
   return { x = x, y = y }
 end
 
+function tracker:remove(x, y)
+  if y ~= nil then
+    tracker:remove_slot(x, y)
+  else
+    tracker:remove_track(x)
+  end
+end
+
+function tracker:remove_slot(track, y)
+  self:get_track(track):remove_slot(y)
+  self:refresh()
+end
+
+function tracker:remove_track(track)
+  table.remove(tracker.tracks, track)
+  self:set_cols(#tracker.tracks)
+  self:refresh()
+end
+
+-- revisit after saving is figured out
+-- function tracker:copy_track(target, destination)
+--   self.tracks[destination] = fn.deep_copy(self:get_track(target))  
+--   self:set_cols(#tracker.tracks)
+--   self:refresh()
+-- end
 
 
 -- slots
