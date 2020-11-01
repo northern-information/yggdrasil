@@ -112,9 +112,12 @@ function graphics:draw_slots(track)
   for k, slot in pairs(slots) do
     if slot:get_y() <= track:get_depth() then
       local triggered = slot_triggers[slot:get_id()]
+      
+    -- print("slot:is_selected()")
+
       if slot:is_focused() or triggered ~= nil then
-        local background = 15
-        local foreground = 0
+        local background = 1
+        local foreground = 15
         if triggered ~= nil then
           local l = slot_triggers[slot:get_id()].level
           foreground = math.abs(15 - l)
