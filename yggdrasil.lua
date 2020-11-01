@@ -15,6 +15,7 @@ function init()
   docs.init()
   filesystem.init()
   fn.init()
+  view.init()
   graphics.init()
   keys.init()
   music.init()
@@ -38,9 +39,9 @@ function enc(e, d)
   if e == 1 then
     tracker:cycle_focus(d)
   elseif e == 2 then
-    graphics:pan_x(d)
+    view:pan_x(d)
   elseif e == 3 then
-    graphics:pan_y(d)
+    view:pan_y(d)
   end
   fn.dismiss_messages()
   fn.dirty_screen(true)

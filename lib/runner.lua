@@ -8,7 +8,7 @@ function runner:run(raw_input)
   if not interpreter:is_valid() then
     tracker:set_message("Unfound: " .. tostring(interpreter))
   else
-    graphics:run_command()
+    graphics:draw_run_command()
     tracker:clear_message()
     interpreter:execute()
   end

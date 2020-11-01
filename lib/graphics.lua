@@ -9,7 +9,6 @@ function graphics.init()
   graphics.run_command_frame = 0
   graphics.glow = 0
   graphics.glow_up = true
-  graphics.hud = true
   graphics.command_icon = {}
   -- splash screen
   graphics.ni_splash_lines_open = {}
@@ -23,29 +22,15 @@ function graphics.init()
   graphics.yggdrasil_splash_done = false
   graphics.yggdrasil_gui_scale = 2
   graphics.yggdrasil_gui_segments = graphics:get_yggdrasil_segments(0, 50, graphics.yggdrasil_gui_scale)
-  -- tracker view
-  graphics.slot_width_min = 16
-  graphics.slot_width = graphics.slot_width_min
-  graphics.slot_height = 7
-  graphics.tracker_view_dirty = true
-  graphics.view_x = 1
-  graphics.view_x_offset = 0
-  graphics.view_y = 1
-  graphics.view_y_offset = 0
-  graphics.rows_above = nil
-  graphics.rows_below = nil
-  graphics.rows_per_view = 7
-  graphics.cols_per_view = 8
-  graphics.slot_extents = graphics.slot_width_min
   -- slots
   graphics.slot_triggers = {}
 end
 
 function graphics.redraw_clock()
   while true do
-    if graphics:is_tracker_dirty() then
-      graphics:update_tracker_view()
-      graphics:set_tracker_view_dirty(false)
+    if view:is_tracker_dirty() then
+      view:refresh()
+      view:set_tracker_view_dirty(false)
       fn.dirty_screen(true)
     end
     if fn.dirty_screen() then
@@ -63,40 +48,24 @@ end
 
 
 
-function graphics:update_tracker_view()
-  local y = self:get_view_y()
-  local x = self:get_view_x()
-  if tracker:is_follow() then
-    local deepest = tracker:get_deepest_not_empty_position()
-    x = deepest.x
-    y = deepest.y
-  end
-  self:set_slot_extents(tracker:get_extents())
-  self:set_rows_above(y > 2)
-  self:set_rows_below(y <= tracker:get_rows() - 5) -- todo what is this magic number
-  self:set_cols_per_view(math.floor(128 / self:get_slot_width()))
-  self:set_view_x_offset(x - math.ceil(self:get_cols_per_view() / 2))
-  self:set_view_y_offset(y - math.ceil(self:get_rows_per_view() / 2))
-end
-
-function graphics:draw_hud(view)
-  if not self.hud then return end
+function graphics:draw_hud()
+  if not view:is_hud() then return end
   self:draw_cols()
-  local swm, sw, sh =  self:get_slot_width_min(), self:get_slot_width(), self:get_slot_height()
+  local swm, sw, sh =  view:get_slot_width_min(), view:get_slot_width(), view:get_slot_height()
   self:rect(0, 0, swm, 64, 0)
   self:rect(0, 0, 128, sh, 0)
   -- vertical indicator to scroll up
-  if self:get_rows_above()then
+  if view:get_rows_above()then
     for i = 1, 16 do
       self:mls(swm, sh - 1 + i, swm, sh + i, 16 - i)
     end
   end
   -- horizontal rule under the top numbers
-  if self:get_rows_above() then
+  if view:get_rows_above() then
     self:mls(swm - 1, sh, 128, sh, 15)
   end
   -- vertical indicator to scroll down
-  if self:get_rows_below() then
+  if view:get_rows_below() then
     local adjust_y = tracker:has_message() and -9 or 0
     for i = 1, 16 do 
       self:mls(swm, 56 - i + adjust_y, swm, 55 - i + adjust_y, 16 - i)
@@ -104,11 +73,11 @@ function graphics:draw_hud(view)
   end
   -- col numbers, start at 2 because of the column HUD
   local start = 2
-  if self:get_slot_extents() > swm then
+  if view:get_slot_extents() > swm then
     start = 1
   end
-  for i = start, self:get_cols_per_view() do
-    local value = i + self:get_view_x_offset()
+  for i = start, view:get_cols_per_view() do
+    local value = i + view:get_view_x_offset()
     self:text_right(
       (i * sw - 2),
       (sh - 2),
@@ -117,8 +86,8 @@ function graphics:draw_hud(view)
     )
   end
   -- row numbers, start at 2 because of the row HUD
-  for i = 2, self:get_rows_per_view() + 2 do
-    local value = i + self:get_view_y_offset()
+  for i = 2, view:get_rows_per_view() + 2 do
+    local value = i + view:get_view_y_offset()
     self:text_right(
       (swm - 3),
       (i * sh),
@@ -137,9 +106,9 @@ end
 function graphics:draw_slots(track)
   local slots = track:get_slots()
   local slot_triggers = self:get_slot_triggers()
-  local sw, sh = self:get_slot_width(), self:get_slot_height()
-  local w = self:get_view_x_offset() * sw
-  local h = self:get_view_y_offset() * sh
+  local sw, sh = view:get_slot_width(), view:get_slot_height()
+  local w = view:get_view_x_offset() * sw
+  local h = view:get_view_y_offset() * sh
   for k, slot in pairs(slots) do
     if slot:get_y() <= track:get_depth() then
       local triggered = slot_triggers[slot:get_id()]
@@ -172,22 +141,20 @@ function graphics:draw_slots(track)
   end
 end
 
-
-
 function graphics:draw_cols()
-  for i = 1, self:get_cols_per_view() do
-    local x = (i - 1) * self:get_slot_width()
-    local value = i + self:get_view_x_offset()
+  for i = 1, view:get_cols_per_view() do
+    local x = (i - 1) * view:get_slot_width()
+    local value = i + view:get_view_x_offset()
     if value > 1 and value <= tracker:get_cols() + 1 then
-      for ii = 1, (self:get_rows_per_view() * 2) do
-        if self:get_rows_above() and (
-            (self:get_view_y_offset() > 0  and not self:is_hud()) or
-            (self:get_view_y_offset() > -1 and     self:is_hud())
+      for ii = 1, (view:get_rows_per_view() * 2) do
+        if view:get_rows_above() and (
+            (view:get_view_y_offset() > 0  and not view:is_hud()) or
+            (view:get_view_y_offset() > -1 and     view:is_hud())
           ) then
-          local adjust_y = self:is_hud() and self:get_slot_height() or -1
+          local adjust_y = view:is_hud() and view:get_slot_height() or -1
           self:mls(x, ii - 1 + adjust_y, x, ii + adjust_y, 16 - ii)
         end
-        if self:get_rows_below() then
+        if view:get_rows_below() then
           local adjust_y = tracker:has_message() and -9 or 0
           self:mls(x, 56 - ii + adjust_y, x, 55 - ii + adjust_y, 16 - ii)
         end
@@ -236,36 +203,9 @@ function graphics:draw_command_processing()
   end
 end
 
-function graphics:run_command()
+function graphics:draw_run_command()
   self.command_icon = {0, 0, 0, 0, 0}
   self.run_command_frame = self.frame + 30
-end
-
-function graphics:handle_arrow(direction)
-  tracker:set_follow(false)
-      if direction == "UP"    or direction == "k" then self:pan_y(-1)
-  elseif direction == "LEFT"  or direction == "h" then self:pan_x(-1)
-  elseif direction == "DOWN"  or direction == "j" then self:pan_y(1)
-  elseif direction == "RIGHT" or direction == "l" then self:pan_x(1)
-  end
-end
-
-function graphics:pan_x(d)
-  tracker:set_follow(false)
-  self:set_view_x(util.clamp(self:get_view_x() + d, 1, tracker:get_cols()))
-  self:set_tracker_view_dirty(true)
-end
-
-function graphics:pan_y(d)
-  tracker:set_follow(false)
-  self:set_view_y(util.clamp(self:get_view_y() + d, 1, tracker:get_rows()))
-  self:set_tracker_view_dirty(true)
-end
-
-function graphics:pan_to_y(y)
-  tracker:set_follow(false)
-  self:set_view_y(util.clamp(y, 1, tracker:get_rows()))
-  self:set_tracker_view_dirty(true)
 end
 
 
@@ -273,13 +213,6 @@ end
 
 
 
-function graphics:toggle_hud()
-  self.hud = not self.hud
-end
-
-function graphics:is_hud()
-  return self.hud
-end
 
 function graphics:frame_clock()
   while true do
@@ -320,118 +253,8 @@ end
 
 
 
--- tracker view
+-- slots
 
-
-
-function graphics:set_slot_width(i)
-  self.slot_width = i
-end
-
-function graphics:get_slot_width()
-  return self.slot_width
-end
-
-function graphics:set_slot_height(i)
-  self.slot_height = i
-end
-
-function graphics:get_slot_height()
-  return self.slot_height
-end
-
-function graphics:set_tracker_view_dirty(bool)
-  self.tracker_view_dirty = bool
-end
-
-function graphics:is_tracker_dirty(bool)
-  return self.tracker_view_dirty
-end
-
-function graphics:get_view_x()
-  return self.view_x
-end
-
-function graphics:set_view_x(i)
-  self.view_x = i
-end
-
-function graphics:get_view_y()
-  return self.view_y
-end
-
-function graphics:set_view_y(i)
-  self.view_y = i
-end
-
-function graphics:get_rows_above()
-  return self.rows_above
-end
-
-function graphics:set_rows_above(i)
-  self.rows_above = i
-end
-
-function graphics:get_rows_below()
-  return self.rows_below
-end
-
-function graphics:set_rows_below(i)
-  self.rows_below = i
-end
-
-function graphics:get_rows_per_view()
-  return self.rows_per_view
-end
-
-function graphics:set_rows_per_view(i)
-  self.rows_per_view = i
-end
-
-function graphics:get_cols_per_view()
-  return self.cols_per_view
-end
-
-function graphics:set_cols_per_view(i)
-  self.cols_per_view = i
-end
-
-function graphics:get_view_x_offset()
-  return self.view_x_offset
-end
-
-function graphics:set_view_x_offset(i)
-  self.view_x_offset = i
-end
-
-function graphics:get_view_y_offset()
-  return self.view_y_offset
-end
-
-function graphics:set_view_y_offset(i)
-  self.view_y_offset = i
-end
-
-function graphics:get_slot_extents()
-  return self.slot_extents
-end
-
-function graphics:set_slot_extents(i)
-  self.slot_extents = i
-  if i > self:get_slot_width_min() then
-    self.slot_width = i
-  else
-    self.slot_width = self:get_slot_width_min()
-  end
-end
-
-function graphics:get_slot_width_min()
-  return self.slot_width_min 
-end
-
-function graphics:set_slot_width_min(i)
-  self.slot_width_min  = i
-end
 
 function graphics:get_slot_triggers()
   return self.slot_triggers

@@ -19,8 +19,8 @@ fn = include("lib/functions")
 -- exposed norns parameters
 parameters = include("lib/parameters")
 
--- everything you see on the screen
-graphics = include("lib/graphics")
+-- handle view logic
+view = include("lib/view")
 
 -- manipulate files
 filesystem = include("lib/filesystem")
@@ -61,6 +61,9 @@ synth = include("lib/synth")
 
 -- documentation
 docs = include("lib/docs")
+
+-- everything you see on the screen
+graphics = include("lib/graphics")
 
 -- dev only stuff
 dev = io.open(_path["code"] .. lib .. "dev.lua", "r")
