@@ -24,10 +24,9 @@ end
 function page:render()
   graphics:setup()
       if page.error            then self:error_message()
+  elseif self.active_page == 0 then graphics:splash()
   elseif self.active_page == 1 then self:tracker()
   elseif self.active_page == 2 then self:dev()
-  elseif self.active_page == 3 then self:gamma()
-  elseif self.active_page == 0 then graphics:splash()
   end
   fn.dirty_screen(true)
   graphics:teardown()
@@ -41,12 +40,8 @@ function page:dev()
   graphics:yggdrasil()
 end
 
-function page:gamma()
-  print("page gamma")
-end
-
 function page:error_message()
-  print("error message", self.error_code)
+  print("Error:", self.error_code)
 end
 
 function page:set_error(i)

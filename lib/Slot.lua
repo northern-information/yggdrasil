@@ -120,7 +120,9 @@ function Slot:set_phenomenon(bool)
 end
 
 function Slot:transpose_midi_note(semitones)
-  self:set_midi_note(util.clamp(self:get_midi_note() + semitones, 0, 127))
+  if self:get_midi_note() ~= nil then
+    self:set_midi_note(util.clamp(self:get_midi_note() + semitones, 0, 127))
+  end
 end
 
 function Slot:get_midi_note()

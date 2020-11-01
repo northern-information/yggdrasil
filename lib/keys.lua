@@ -1,10 +1,12 @@
 keys = {}
 
 function keys.init()
+  keys.y_mode  = false
   keys.alt   = false
   keys.ctrl  = false
   keys.opt   = false
   keys.shift = false
+  keys.caps  = false
   keys.last_space = false
   keys.codes = {
     { k = 1,   v = "ESC" },
@@ -161,6 +163,18 @@ function keys:is_caps(code)
   return 58 == code
 end
 
+function keys:handle_caps(val)
+  if not self.caps and val == 1 then
+    self.caps = true
+  elseif val == 0 then
+    self.caps = false
+  end
+end
+
+function keys:is_capsed()
+  return self.caps
+end
+
 function keys:is_ctrl(code)
   return 29 == code
 end
@@ -231,6 +245,14 @@ end
 
 function keys:is_last_space()
   return self.last_space
+end
+
+function keys:is_y_mode()
+  return self.y_mode
+end
+
+function keys:toggle_y_mode()
+  self.y_mode = not self.y_mode
 end
 
 return keys

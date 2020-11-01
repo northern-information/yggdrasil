@@ -110,6 +110,10 @@ function graphics:draw_hud_foreground()
       15
     )
   end
+  if keys:is_y_mode() then
+    self:mls(6, 0, 3, 3, self.cursor_frame)
+    self:mls(9, 0, 0, 9, self.cursor_frame)
+  end
 end
 
 function graphics:draw_tracks()
@@ -130,9 +134,10 @@ function graphics:draw_slots(track)
       if slot:is_selected() or triggered ~= nil then
         local background = 15
         local foreground = 0
-        if (view:get_x() == slot:get_x()) and (view:get_y() == slot:get_y()) then
-          background = 1
-          foreground = 15
+        if ((view:get_x() == slot:get_x()) and (view:get_y() == slot:get_y()))
+          and #tracker:get_track(slot:get_x()):get_selected_slots() > 1 then
+            background = 1
+            foreground = 15
         end
         if triggered ~= nil then
           local l = slot_triggers[slot:get_id()].level
@@ -202,7 +207,9 @@ function graphics:draw_terminal()
   if keys:is_last_space() then
     adjust = adjust + 2
   end
-  self:mlrs(buffer:get_extents() + adjust, 56, 0, 7, self.cursor_frame)
+  if not keys:is_y_mode() then
+    self:mlrs(buffer:get_extents() + adjust, 56, 0, 7, self.cursor_frame)
+  end
 end
 
 function graphics:draw_command_processing()

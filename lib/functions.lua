@@ -68,6 +68,23 @@ function fn.print_matron_message(message)
 end
 
 
+function fn.decrement_increment(i)
+  local slots = tracker:get_selected_slots()
+  if #slots > 0 then
+    for k, slot in pairs(slots) do
+      if slot:get_midi_note() ~= nil then
+        tracker:update_slot({
+          class = "TRANSPOSE_SLOT",
+          x = slot:get_x(),
+          y = slot:get_y(),
+          value = i
+        })
+      end
+    end    
+  end
+end
+
+
 
 --- value checking and manipulation
 

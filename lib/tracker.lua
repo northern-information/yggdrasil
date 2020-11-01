@@ -139,7 +139,6 @@ end
 
 
 function tracker:update_slot(payload)
-  self:select_slot(payload.x, payload.y)
   local track = self:get_track(payload.x)
   if track ~= nil then
     track:update_slot(payload)
@@ -313,7 +312,6 @@ end
 function tracker:get_selected_index()
   return self.selected_index
 end
-
 
 function tracker:get_tracks()
   return self.tracks

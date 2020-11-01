@@ -16,10 +16,12 @@ end
 
 function commands:register(t)
   local class = self:extract_class(t)
-  --[[ loop through all registered classes
-       then all their invocations
-       then all the incomping invocations
-       and alert if there are duplicates ]]
+  --[[
+  loop through all registered classes
+  then all their invocations
+  then all the incomping invocations
+  and alert if there are duplicates
+  ]]
   for k, command in pairs(self.all) do
     for kk, existing_invocation in pairs(command.invocations) do
       for kkk, new_invocation in pairs(t.invocations) do
@@ -29,14 +31,19 @@ function commands:register(t)
       end
     end
   end
-  self.all[class] = t
+  if class == "RERUN" then
+    self.all[class] = t
+  end
 end
 
---[[ to keep with DRY principals this allows
-     us to only type the classname once
-     it also serves as a mini-validation and
-     check against some of the structures of the
-     command composition ]]
+--[[
+to keep with DRY principals this allows
+us to only type the class name once in a definition
+it also serves as a mini-validation and
+check against some of the structures of the
+command composition. it is simply extracting
+the classname from the payload.
+]]
 function commands:extract_class(t)
   local dummy_branches = {}
   local dummy_branch = Branch:new("stub;1;2;3;4")
@@ -46,18 +53,13 @@ function commands:extract_class(t)
 end
 
 --[[
-
 this is the only place you need to configure / add / modify commands! :)
-
  - "invocations" defines the valid aliases
  - "signature" defines what string from the buffer fits with this command
  - "payload" defines how to format the string for execution
  - "action" combines the payload with the final executable method/function
-
 note, new "prefixes" are a special matching case and still need to be added in .init()
-
 ]]
-
 function commands:register_all()
 
 -- ANCHOR
@@ -102,13 +104,13 @@ self:register{
         and fn.is_int(branch[1].leaves[1]) 
         and Validator:new(branch[2], invocations):ok()
         and fn.is_int(branch[3].leaves[1])
-      ) or {
+      ) or (
         #branch == 4
         and fn.is_int(branch[1].leaves[1]) 
         and fn.is_int(branch[2].leaves[1])
         and Validator:new(branch[3], invocations):ok()
         and fn.is_int(branch[4].leaves[1])
-      }
+      )
   end,
   payload = function(branch)
     local value = 0
@@ -446,7 +448,7 @@ self:register{
   invocations = { "rerun" },
   signature = function(branch, invocations)
     return #branch == 1
-      and Validator:new(branch[1], invocations)
+      and Validator:new(branch[1], invocations):ok()
   end,
   payload = function(branch)
     return {

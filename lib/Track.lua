@@ -223,6 +223,16 @@ function Track:get_not_empty_slots()
   return slots
 end
 
+function Track:get_selected_slots()
+  local slots = {}
+    for slot_keys, slot in pairs(self:get_slots()) do
+      if slot:is_selected() then
+        table.insert(slots, slot)
+      end
+    end
+  return slots
+end
+
 function Track:set_slots(t)
   self.slots = t
 end
