@@ -1,8 +1,8 @@
 tracker = {}
 
 function tracker.init()
-  tracker.focused = false
-  tracker.focused_index = 0
+  tracker.selected = false
+  tracker.selected_index = 0
   tracker.follow = false
   tracker.message = false
   tracker.message_value = ""
@@ -46,17 +46,40 @@ end
 
 function tracker:render()
   view:refresh()
+  graphics:draw_hud_background()
+  graphics:draw_focus()
   graphics:draw_tracks()
-  graphics:draw_hud()
+  graphics:draw_hud_foreground()
   graphics:draw_terminal()
   graphics:draw_command_processing()
 end
 
 
 
--- tracks
+-- tracks management
 
+function tracker:update_every_other(payload)
+  self:select_track(payload.x)
+  if self:is_selected() then
+    self:get_track(payload.x):update_every_other(payload)
+  end
+end
 
+function tracker:update_track(payload)
+  local track = self:get_track(payload.x)
+  if track ~= nil then
+    tracker:select_track(payload.x)
+    if fn.table_contains_key(payload, "class") then
+      if payload.class == "DEPTH" then
+        self:set_track_depth(payload.x, payload.depth)
+      end
+      if payload.class == "SHIFT" then
+        track:shift(payload.shift)
+      end
+    end
+    self:refresh()
+  end
+end
 
 function tracker:load_track(track_number, data)
   -- compare incoming rows with existing rows
@@ -69,22 +92,6 @@ function tracker:load_track(track_number, data)
   end
   track:load(data)
   view:set_tracker_dirty(true)
-end
-
-function tracker:update_track(payload)
-  local track = self:get_track(payload.x)
-  if track ~= nil then
-    tracker:focus_track(payload.x)
-    if fn.table_contains_key(payload, "class") then
-      if payload.class == "DEPTH" then
-        self:set_track_depth(payload.x, payload.depth)
-      end
-      if payload.class == "SHIFT" then
-        track:shift(payload.shift)
-      end
-    end
-    self:refresh()
-  end
 end
 
 function tracker:set_track_depth(track, depth)
@@ -125,20 +132,14 @@ function tracker:remove_track(track)
   self:refresh()
 end
 
--- revisit after saving is figured out
--- function tracker:copy_track(target, destination)
---   self.tracks[destination] = fn.deep_copy(self:get_track(target))  
---   self:set_cols(#tracker.tracks)
---   self:refresh()
--- end
 
 
--- slots
+-- slot management
 
 
 
 function tracker:update_slot(payload)
-  self:focus_slot(payload.x, payload.y)
+  self:select_slot(payload.x, payload.y)
   local track = self:get_track(payload.x)
   if track ~= nil then
     track:update_slot(payload)
@@ -170,44 +171,44 @@ end
 
 
 
--- focus
+-- select
 
 
 
-function tracker:focus_track(x)
-  self:unfocus()
+function tracker:select_track(x)
+  self:deselect()
   if not self:is_in_bounds(x) then
     self:set_message("Track " .. x .. " is out of bounds.")
   else
-    self:get_track(x):focus()
-    self:set_focused(true)
+    self:get_track(x):select()
+    self:set_selected(true)
   end
   view:set_tracker_dirty(true)
 end
 
-function tracker:focus_slot(x, y)
-  self:unfocus()
+function tracker:select_slot(x, y)
+  self:deselect()
   if not self:is_in_bounds(x, y) then
     self:set_message(x .. "/" .. y .. " is out of bounds.")
   else
     for k, slot in pairs(self:get_track(x):get_slots()) do
       if slot:get_y() == y then
-        self:set_focused(true)
-        self:set_focused_index(slot:get_index())
+        self:set_selected(true)
+        self:set_selected_index(slot:get_index())
         view:set_x(x)
         view:set_y(y)
-        slot:set_focused(true)
+        slot:set_selected(true)
       end
     end
   end
   view:set_tracker_dirty(true)
 end
 
-function tracker:get_focused_slots()
+function tracker:get_selected_slots()
   local out = {}
   for track_key, track in pairs(self:get_tracks()) do
     for slot_key, slot in pairs(track:get_slots()) do
-      if slot:is_focused() then
+      if slot:is_selected() then
         table.insert(out, slot)
       end
     end
@@ -215,8 +216,8 @@ function tracker:get_focused_slots()
   return out
 end
 
-function tracker:clear_focused_slots()
-  local slots = self:get_focused_slots()
+function tracker:clear_selected_slots()
+  local slots = self:get_selected_slots()
   for k, slot in pairs(slots) do
     if slot ~= nil then
       slot:clear()
@@ -224,33 +225,33 @@ function tracker:clear_focused_slots()
   end
 end
 
-function tracker:get_focused_tracks()
+function tracker:get_selected_tracks()
   local out = {}
   for track_key, track in pairs(self:get_tracks()) do
-    if track:is_focused() then
+    if track:is_selected() then
       table.insert(out, track)
     end
   end
   return out
 end
 
-function tracker:cycle_focus(d)
+function tracker:cycle_select(d)
   self:set_follow(false)
-  if self:is_focused() then
-    local slots = self:collect_slots_for_focus()
+  if self:is_selected() then
+    local slots = self:collect_slots_for_select()
     local sorted_index = 0
     for k, slot in pairs(slots) do
-      if slot:get_index() == self:get_focused_index() then
+      if slot:get_index() == self:get_selected_index() then
         sorted_index = k
       end
     end
     local direction = d > 0 and 1 or -1
-    next_focus = fn.cycle(sorted_index + direction, 1, #slots)
-    self:focus_slot(slots[next_focus].x, slots[next_focus].y)
+    next_select = fn.cycle(sorted_index + direction, 1, #slots)
+    self:select_slot(slots[next_select].x, slots[next_select].y)
   end
 end
 
-function tracker:collect_slots_for_focus()
+function tracker:collect_slots_for_select()
   local out = {}
   local slots = self:get_not_empty_slots()
   local i = 1
@@ -261,17 +262,17 @@ function tracker:collect_slots_for_focus()
   return out
 end
 
-function tracker:unfocus()
-  self:set_focused(false)
-  self:set_focused_index(0)
-  for k, tracks in pairs(self:get_focused_tracks()) do
+function tracker:deselect()
+  self:set_selected(false)
+  self:set_selected_index(0)
+  for k, tracks in pairs(self:get_selected_tracks()) do
     if track ~= nil then
-      track:set_focused(false)
+      track:set_selected(false)
     end
   end
-  for k, slot in pairs(self:get_focused_slots()) do
+  for k, slot in pairs(self:get_selected_slots()) do
     if slot ~= nil then
-      slot:set_focused(false)
+      slot:set_selected(false)
     end
   end
   view:set_tracker_dirty(true)
@@ -281,6 +282,37 @@ end
 
 -- primitive getters, setters, & checks
 
+
+
+function tracker:is_in_bounds(x, y)
+  local x_ok = (x <= #self:get_tracks()) and (x > 0)
+  local y_ok = true
+  if y ~= nil then
+    y_ok = (y <= self:get_rows()) and (y > 0)
+  end
+  return x_ok and y_ok
+end
+
+function tracker:index(x, y)
+  return y + ((x - 1) * self.rows)
+end
+
+function tracker:set_selected(bool)
+  self.selected = bool
+  if bool then self:set_follow(false) end
+end
+
+function tracker:is_selected()
+  return self.selected
+end
+
+function tracker:set_selected_index(index)
+  self.selected_index = index
+end
+
+function tracker:get_selected_index()
+  return self.selected_index
+end
 
 
 function tracker:get_tracks()
@@ -309,36 +341,6 @@ end
 
 function tracker:is_follow()
   return self.follow
-end
-
-function tracker:set_focused(bool)
-  self.focused = bool
-  if bool then self:set_follow(false) end
-end
-
-function tracker:is_focused()
-  return self.focused
-end
-
-function tracker:set_focused_index(index)
-  self.focused_index = index
-end
-
-function tracker:get_focused_index()
-  return self.focused_index
-end
-
-function tracker:is_in_bounds(x, y)
-  local x_ok = (x <= #self:get_tracks()) and (x > 0)
-  local y_ok = true
-  if y ~= nil then
-    y_ok = (y <= self:get_rows()) and (y > 0)
-  end
-  return x_ok and y_ok
-end
-
-function tracker:index(x, y)
-  return y + ((x - 1) * self.rows)
 end
 
 function tracker:set_message(s)

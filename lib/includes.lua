@@ -37,21 +37,14 @@ keys = include("lib/keys")
 -- liminal space for all the characters
 buffer = include("lib/buffer")
 
+-- registered text-based commands
 commands = include("lib/commands")
 
+-- executes valid commands
 runner = include("lib/runner")
 
-include("lib/Interpreter")
-
-include("lib/Command")
-
-include("lib/Branch")
-
+-- core of yggdrasil
 tracker = include("lib/tracker")
-
-include("lib/Track")
-
-include("lib/Slot")
 
 -- essentially musicutil abstractions
 music = include("lib/music")
@@ -64,6 +57,25 @@ docs = include("lib/docs")
 
 -- everything you see on the screen
 graphics = include("lib/graphics")
+
+-- "words" of commands
+include("lib/Branch")
+
+-- "sentences" entered into the buffer
+include("lib/Command")
+
+-- translates text commands into programmatic meaning
+include("lib/Interpreter")
+
+-- works with the interpreter to validated command invocations
+include("lib/Validator")
+
+-- organizes slots
+include("lib/Track")
+
+-- smallest musical unit
+include("lib/Slot")
+
 
 -- dev only stuff
 dev = io.open(_path["code"] .. lib .. "dev.lua", "r")

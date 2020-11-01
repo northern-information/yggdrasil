@@ -10,7 +10,7 @@ function Slot:new(x, y)
   s.id = "slot-" .. fn.id()
   s.index = 0
   s.empty = true
-  s.focused = false
+  s.selected = false
   s.midi_note = nil
   s.ygg_note = nil
   s.ipn_note = nil
@@ -21,27 +21,30 @@ function Slot:new(x, y)
   s.phenomenon = false
   s.payload = {}
   s.extents = nil
-  s.left_padding = 4 -- pixel adjustment
   s:refresh()
   return s
+end
+
+function Slot:refresh()
+  local m = self:get_midi_note()
+  if m ~= nil then
+    self:set_ygg_note(music:convert("midi_to_ygg", m))
+    self:set_ipn_note(music:convert("midi_to_ipn", m))
+    self:set_frequency(music:convert("midi_to_freq", m))
+  end
+  self:set_extents(screen.text_extents(self:to_string()) + view:get_slot_left_padding())
 end
 
 function Slot:trigger()
   if self:is_phenomenon() then
     local track = tracker:get_track(self:get_x())
     local p = self.payload.class
-
-
     if p == "ANCHOR" then
       if self:get_y() ~= self.payload.value then
         track:set_position(self.payload.value)
       end
-
-
     elseif p == "END" then  
       track:set_position(0)
-
-
     elseif p == "LUCKY" then  
       local slots = track:get_not_empty_slots()
       local new_y = 0
@@ -49,11 +52,8 @@ function Slot:trigger()
         new_y = slots[math.random(1, #slots)]:get_y()
       until new_y ~= self:get_y()
       track:set_position(new_y)
-
-
     elseif p == "RANDOM" then  
       track:set_position(math.random(1, track:get_depth()))
-
     end
   elseif self:get_midi_note() ~= nil and self:get_route() == "synth" then
     synth:play(self:get_midi_note(), self:get_velocity())
@@ -77,21 +77,11 @@ function Slot:to_string()
   return out ~= nil and tostring(out) or "."
 end
 
-function Slot:refresh()
-  local m = self:get_midi_note()
-  if m ~= nil then
-    self:set_ygg_note(music:convert("midi_to_ygg", m))
-    self:set_ipn_note(music:convert("midi_to_ipn", m))
-    self:set_frequency(music:convert("midi_to_freq", m))
-  end
-  self:set_extents(screen.text_extents(self:to_string()) + self.left_padding)
-end
-
 function Slot:clear()
   self:clear_notes()
   self:set_payload({})
   self:set_phenomenon(false)
-  self:set_focused(false)
+  self:set_selected(false)
   self:set_empty(true)
 end
 
@@ -102,18 +92,20 @@ function Slot:clear_notes()
   self:set_frequency(nil)
 end
 
-
-
--- primitive getters, setters, & checks
-
-
-
 function Slot:run_phenomenon(payload)
   self:clear_notes()
   self:set_payload(payload)
   self:set_phenomenon(true)
   self:set_empty(false)
 end
+
+
+
+-- primitive getters, setters, & checks
+
+
+
+
 
 function Slot:set_payload(payload)
   self.payload = payload
@@ -167,12 +159,12 @@ function Slot:set_frequency(f)
   self:set_empty(false)
 end
 
-function Slot:set_focused(bool)
-  self.focus = bool
+function Slot:set_selected(bool)
+  self.select = bool
 end
 
-function Slot:is_focused()
-  return self.focus
+function Slot:is_selected()
+  return self.select
 end
 
 function Slot:get_id()

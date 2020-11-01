@@ -47,10 +47,25 @@ end
 -- tracker
 
 
+function graphics:draw_focus()
+  local sw, sh = view:get_slot_width(), view:get_slot_height()
+  local w = view:get_x_offset() * sw
+  local h = view:get_y_offset() * sh
+  self:rect(
+    ((view:get_x() - 1) * sw) - w,
+    ((view:get_y() - 1) * sh + 1) - h,
+    sw, sh, 1
+  )
+end
 
-function graphics:draw_hud()
+
+function graphics:draw_hud_background()
   if not view:is_hud() then return end
   self:draw_cols()
+end
+
+function graphics:draw_hud_foreground()
+  if not view:is_hud() then return end
   local swm, sw, sh =  view:get_slot_width_min(), view:get_slot_width(), view:get_slot_height()
   self:rect(0, 0, swm, 64, 0)
   self:rect(0, 0, 128, sh, 0)
@@ -112,12 +127,13 @@ function graphics:draw_slots(track)
   for k, slot in pairs(slots) do
     if slot:get_y() <= track:get_depth() then
       local triggered = slot_triggers[slot:get_id()]
-      
-    -- print("slot:is_selected()")
-
-      if slot:is_focused() or triggered ~= nil then
-        local background = 1
-        local foreground = 15
+      if slot:is_selected() or triggered ~= nil then
+        local background = 15
+        local foreground = 0
+        if (view:get_x() == slot:get_x()) and (view:get_y() == slot:get_y()) then
+          background = 1
+          foreground = 15
+        end
         if triggered ~= nil then
           local l = slot_triggers[slot:get_id()].level
           foreground = math.abs(15 - l)

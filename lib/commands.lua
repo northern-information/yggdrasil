@@ -45,11 +45,7 @@ function commands:extract_class(t)
   return result.class
 end
 
-function commands:register_all()
-
 --[[
-
-# command definitions
 
 this is the only place you need to configure / add / modify commands! :)
 
@@ -58,7 +54,11 @@ this is the only place you need to configure / add / modify commands! :)
  - "payload" defines how to format the string for execution
  - "action" combines the payload with the final executable method/function
 
+note, new "prefixes" are a special matching case and still need to be added in .init()
+
 ]]
+
+function commands:register_all()
 
 -- ANCHOR
 -- 1 5 #1
@@ -68,7 +68,7 @@ self:register{
     return #branch == 3
       and fn.is_int(branch[1].leaves[1]) 
       and fn.is_int(branch[2].leaves[1])
-      and fn.is_invocation_match(branch[3], invocations)
+      and Validator:new(branch[3], invocations):ok()
       and fn.is_int(branch[3].leaves[2])
   end,
   payload = function(branch)
@@ -87,13 +87,63 @@ self:register{
 }
 
 
+
+-- ARPEGGIO
+-- 1 arp 60
+-- 2 arp;3 60;61
+-- 1 3 arp 60
+-- 1 3 arp 60;63;65
+-- 1 3 arp;2 60;63;65
+self:register{
+  invocations = { "arpeggio", "arp", "a" },
+  signature = function(branch, invocations)
+    return (
+        #branch == 3
+        and fn.is_int(branch[1].leaves[1]) 
+        and Validator:new(branch[2], invocations):ok()
+        and fn.is_int(branch[3].leaves[1])
+      ) or {
+        #branch == 4
+        and fn.is_int(branch[1].leaves[1]) 
+        and fn.is_int(branch[2].leaves[1])
+        and Validator:new(branch[3], invocations):ok()
+        and fn.is_int(branch[4].leaves[1])
+      }
+  end,
+  payload = function(branch)
+    local value = 0
+    local midi_notes = {}
+    local y = 1
+    if #branch == 3 then
+      value = branch[2].leaves[3] ~= nil and branch[2].leaves[3] or 0
+      midi_notes = fn.table_remove_semicolons(branch[3].leaves)
+    elseif #branch == 4 then
+      y = branch[2].leaves[1]
+      value = branch[3].leaves[3] ~= nil and branch[3].leaves[3] or 0
+      midi_notes = fn.table_remove_semicolons(branch[4].leaves)
+    end
+    return {
+      class = "ARPEGGIO",
+      value = value,
+      midi_notes = midi_notes,
+      x = branch[1].leaves[1],
+      y = y,
+    }
+  end,
+  action = function(payload)
+     tracker:update_every_other(payload)
+  end
+}
+
+
+
 -- BPM
 -- bpm 127.3
 self:register{
   invocations = { "bpm" },
   signature = function(branch, invocations)
     return #branch == 2
-      and fn.is_invocation_match(branch[1], invocations)
+      and Validator:new(branch[1], invocations):ok()
       and fn.is_number(branch[2].leaves[1])
   end,
   payload = function(branch)
@@ -107,6 +157,8 @@ self:register{
   end
 }
 
+
+
 -- DEPTH
 -- 1 depth;16
 self:register{
@@ -114,7 +166,7 @@ self:register{
   signature = function(branch, invocations)
     return #branch == 2
       and fn.is_int(branch[1].leaves[1])
-      and fn.is_invocation_match(branch[2], invocations)
+      and Validator:new(branch[2], invocations):ok()
       and fn.is_int(branch[2].leaves[3])
   end,
   payload = function(branch)
@@ -130,6 +182,7 @@ self:register{
 }
 
 
+
 -- END
 -- 1 5 x
 self:register{
@@ -138,7 +191,7 @@ self:register{
     return #branch == 3
        and fn.is_int(branch[1].leaves[1]) 
        and fn.is_int(branch[2].leaves[1])
-      and fn.is_invocation_match(branch[3], invocations)
+      and Validator:new(branch[3], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -154,6 +207,7 @@ self:register{
      tracker:update_slot(payload)
   end
 }
+
 
 
 -- FOCUS
@@ -184,12 +238,13 @@ self:register{
   end,
   action = function(payload)
     if payload.y ~= nil then
-      tracker:focus_slot(payload.x, payload.y)
+      tracker:select_slot(payload.x, payload.y)
     else
-      tracker:focus_track(payload.x)
+      tracker:select_track(payload.x)
     end
   end
 }
+
 
 
 -- FOLLOW
@@ -197,7 +252,7 @@ self:register{
   invocations = { "follow" },
   signature = function(branch, invocations)
     return #branch == 1
-      and fn.is_invocation_match(branch[1], invocations)
+      and Validator:new(branch[1], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -210,6 +265,7 @@ self:register{
 }
 
 
+
 -- LUCKY
 -- 3 4 !
 self:register{
@@ -218,7 +274,7 @@ self:register{
     return #branch == 3
       and fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
-      and fn.is_invocation_match(branch[3], invocations)
+      and Validator:new(branch[3], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -234,6 +290,7 @@ self:register{
     tracker:update_slot(payload)
   end
 }
+
 
 
 -- SET_MIDI_NOTE
@@ -260,6 +317,7 @@ self:register{
 }
 
 
+
 -- SET_MIDI_NOTE_AND_VELOCITY
 -- 1 1 72 vel;100
 self:register{ -- todo make midi note optional?
@@ -269,7 +327,7 @@ self:register{ -- todo make midi note optional?
       and fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
       and fn.is_int(branch[3].leaves[1])
-      and fn.is_invocation_match(branch[4], invocations)
+      and Validator:new(branch[4], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -292,7 +350,7 @@ self:register{
   invocations = { "oblique" },
   signature = function(branch, invocations)
     return #branch == 1
-      and fn.is_invocation_match(branch[1], invocations)
+      and Validator:new(branch[1], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -311,7 +369,7 @@ self:register{
   invocations = { "play" },
   signature = function(branch, invocations)
     return #branch == 1
-      and fn.is_invocation_match(branch[1], invocations)
+      and Validator:new(branch[1], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -324,6 +382,7 @@ self:register{
 }
 
 
+
 -- RANDOM
 -- 3 4 ?
 self:register{
@@ -332,7 +391,7 @@ self:register{
     return #branch == 3
        and fn.is_int(branch[1].leaves[1])
        and fn.is_int(branch[2].leaves[1])
-      and fn.is_invocation_match(branch[3], invocations)
+      and Validator:new(branch[3], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -350,6 +409,7 @@ self:register{
 }
 
 
+
 -- REMOVE
 -- 1 rm
 -- 1 2 rm
@@ -359,12 +419,12 @@ self:register{
     return (
       #branch == 2
       and fn.is_int(branch[1].leaves[1])
-      and fn.is_invocation_match(branch[2], invocations)
+      and Validator:new(branch[2], invocations):ok()
     ) or (
       #branch == 3
       and fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
-      and fn.is_invocation_match(branch[3], invocations)
+      and Validator:new(branch[3], invocations):ok()
     )
   end,
   payload = function(branch)
@@ -386,7 +446,7 @@ self:register{
   invocations = { "rerun" },
   signature = function(branch, invocations)
     return #branch == 1
-      and fn.is_invocation_match(branch[1], invocations)
+      and Validator:new(branch[1], invocations)
   end,
   payload = function(branch)
     return {
@@ -405,7 +465,7 @@ self:register{
   invocations = { "screenshot" },
   signature = function(branch, invocations)
     return #branch == 1
-      and fn.is_invocation_match(branch[1], invocations)
+      and Validator:new(branch[1], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -418,6 +478,7 @@ self:register{
 }
 
 
+
 -- SHIFT
 -- 1 shift;5
 self:register{
@@ -425,7 +486,7 @@ self:register{
   signature = function(branch, invocations)
     return #branch == 2
        and fn.is_int(branch[1].leaves[1])
-      and fn.is_invocation_match(branch[2], invocations)
+      and Validator:new(branch[2], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -446,7 +507,7 @@ self:register{
   invocations = { "stop" },
   signature = function(branch, invocations)
     return #branch == 1
-      and fn.is_invocation_match(branch[1], invocations)
+      and Validator:new(branch[1], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -459,6 +520,7 @@ self:register{
 }
 
 
+
 -- TRANSPOSE_SLOT
 -- 1 1 t;1
 self:register{
@@ -467,7 +529,7 @@ self:register{
     return #branch == 3
       and fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
-      and fn.is_invocation_match(branch[3], invocations)
+      and Validator:new(branch[3], invocations):ok()
       and fn.is_int(branch[3].leaves[3])
   end,
   payload = function(branch)
@@ -490,7 +552,7 @@ self:register{
   invocations = { "view", "v" },
   signature = function(branch, invocations)
     return #branch == 2
-      and fn.is_invocation_match(branch[1], invocations)
+      and Validator:new(branch[1], invocations):ok()
       and fn.table_contains({ "midi", "ipn", "ygg", "freq", "index" }, branch[2].leaves[1])
   end,
   payload = function(branch)

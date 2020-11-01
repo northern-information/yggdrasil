@@ -2,7 +2,7 @@ fn = {}
 
 
 
--- global yggdrasil functions that don't fit elsewhere
+-- global yggdrasil functions
 
 
 
@@ -66,6 +66,8 @@ function fn.print_matron_message(message)
   print(message)
   print("") print("") print("")
 end
+
+
 
 --- value checking and manipulation
 
@@ -173,52 +175,13 @@ function fn.pairs_by_keys(t)
   return iterator
 end
 
-
-
-
-
-
-
---- validation - make this into a class, perhaps?
-
-
--- #2     "validate_prefix_invocation"
--- play   "validate_string_invocation"
--- vel;3  "validate_simple_invocation"
-function fn.is_invocation_match(branch, invocations)
-  local result = false
-  for k, invocation in pairs(invocations) do
-    local is_prefix_invocation = fn.validate_prefix_invocation(branch)
-    local is_string_invocation = fn.validate_string_invocation(branch, invocation)
-    local is_simple_invocation = fn.validate_simple_invocation(branch, invocation)
-    if is_prefix_invocation or is_string_invocation or is_simple_invocation then
-      result = true
+function fn.table_remove_semicolons(t)
+  for k, v in pairs(t) do
+    if string.find(v, ";") then
+      table.remove(t, k)
     end
   end
-  return result
-end
-
-function fn.validate_prefix_invocation(branch)
-  local result = false
-  for k, v in pairs(commands:get_prefixes()) do
-    if string.find(branch.leaves[1], v) then
-      result = true
-    end
-  end
-  return result
-end
-
-function fn.validate_string_invocation(branch, invocation)
-  return #branch.leaves == 1
-    and type(branch.leaves[1]) == "string"
-    and branch.leaves[1] == invocation
-end
-
-function fn.validate_simple_invocation(branch, invocation)
-  return #branch.leaves == 3
-    and branch.leaves[1] == invocation
-    and branch.leaves[2] == ";"
-    and fn.is_number(branch.leaves[3])
+  return t
 end
 
 return fn

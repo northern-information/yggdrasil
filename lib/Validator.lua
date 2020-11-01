@@ -1,0 +1,54 @@
+Validator = {}
+
+function Validator:new(branch, invocations)
+  local v = setmetatable({}, { 
+    __index = Validator,
+  })
+  v.branch = branch
+  v.invocations = invocations
+  v.is_valid = v:is_invocation_match()
+  return v
+end
+
+function Validator:ok()
+  return self.is_valid
+end
+
+function Validator:is_invocation_match()
+  local result = false
+  for k, invocation in pairs(self.invocations) do
+    local is_prefix_invocation = self:validate_prefix_invocation()
+    local is_string_invocation = self:validate_string_invocation(invocation)
+    local is_simple_invocation = self:validate_simple_invocation(invocation)
+    if is_prefix_invocation or is_string_invocation or is_simple_invocation then
+      result = true
+    end
+  end
+  return result
+end
+
+-- i.e. "#2"
+function Validator:validate_prefix_invocation()
+  local result = false
+  for k, v in pairs(commands:get_prefixes()) do
+    if string.find(self.branch.leaves[1], v) then
+      result = true
+    end
+  end
+  return result
+end
+
+-- i.e. "play"
+function Validator:validate_string_invocation(invocation)
+  return #self.branch.leaves == 1
+    and type(self.branch.leaves[1]) == "string"
+    and self.branch.leaves[1] == invocation
+end
+
+-- i.e. "vel;3"
+function Validator:validate_simple_invocation(invocation)
+ return #self.branch.leaves == 3
+    and self.branch.leaves[1] == invocation
+    and self.branch.leaves[2] == ";"
+    and fn.is_number(self.branch.leaves[3])
+end

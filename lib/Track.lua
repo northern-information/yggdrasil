@@ -11,7 +11,7 @@ function Track:new(x)
   t.direction = "descend"
   t.slots = {}
   t.extents = 0
-  t.focused = false
+  t.selected = false
   return t
 end
 
@@ -30,63 +30,21 @@ function Track:refresh()
   self:set_extents(e)
 end
 
-
-
---- slot management
-
-
-
-function Track:fill(depth)
-  local cached_depth = self:get_depth()
-  if depth > self:get_depth() then
-    self:set_depth(depth)
-    for y = cached_depth + 1, depth do
-      self:append_slot(Slot:new(self.x, y))
-    end
-  elseif depth < self:get_depth() then
-    self:set_depth(depth)
-    for k, slot in pairs(self:get_slots()) do
-      if slot:get_y() > depth then
-        slot:clear()
-      end
-    end
-  end
-  self:refresh()
-end
-
-function Track:append_slot(slot)
-  self.slots[#self.slots + 1] = slot
-  self:refresh()
-end
-
-function Track:update_slot(payload)
-  local slot = self:get_slot(payload.y)
-  if slot ~= nil then
-    if payload.y > self:get_depth() then
-      self:fill(payload.y)
-    end
-    if payload.phenomenon then
-      slot:run_phenomenon(payload)
-    end
-    if payload.class == "TRANSPOSE_SLOT" then  
-      slot:transpose_midi_note(payload.value)
-    end
-    if fn.table_contains_key(payload, "midi_note") then
-      slot:set_midi_note(payload.midi_note)
-    end
-    if fn.table_contains_key(payload, "velocity") then
-      slot:set_velocity(payload.velocity)
-    end
-    slot:refresh()
-    self:refresh()
+function Track:select()
+  self:set_selected(true)
+  local first_select = false
+  for k, slot in pairs(self:get_slots()) do
+    slot:set_selected(true)
+    tracker:set_selected_index(slot:get_index())
+    if not first_select then
+      view:set_x(self:get_x())
+      view:set_y(slot:get_y())
+      first_select = true
+    end 
   end
 end
 
-function Track:remove_slot(y)
-  table.remove(self.slots, y)
-  self:set_depth(#self.slots)
-  self:refresh()
-end
+
 
 --- tracking
 
@@ -117,6 +75,12 @@ function Track:trigger()
   end
 end
 
+
+
+-- transformations
+
+
+
 function Track:shift(i)
   if i == 0 then
     tracker:set_message("Cannot shift 0.")
@@ -131,36 +95,85 @@ function Track:shift(i)
   end
 end
 
+function Track:fill(depth)
+  local cached_depth = self:get_depth()
+  if depth > self:get_depth() then
+    self:set_depth(depth)
+    for y = cached_depth + 1, depth do
+      self:append_slot(Slot:new(self.x, y))
+    end
+  elseif depth < self:get_depth() then
+    self:set_depth(depth)
+    for k, slot in pairs(self:get_slots()) do
+      if slot:get_y() > depth then
+        slot:clear()
+      end
+    end
+  end
+  self:refresh()
+end
 
-function Track:update_slot_y()
-  for k, slot in pairs(self:get_slots()) do
-    slot:set_y(k)
+
+
+--- slot management
+
+
+
+function Track:update_every_other(payload)
+  local start_y = payload.y
+  local gap = payload.value
+  local notes = payload.midi_notes
+  if start_y > self:get_depth() then
+    tracker:set_message("Error: " .. start_y .. " is deeper than track " .. self:get_x() .. ".")
+  else
+    local slots = self:get_slots()
+    local next_y_update = start_y
+    local next_note_index = 1
+    for i = 1, self:get_depth() do
+      if i == next_y_update then
+        self:update_slot{
+          y = next_y_update,
+          midi_note = notes[next_note_index]
+        }
+        next_y_update = next_y_update + 1 + gap -- the "1" simply accounts for this slot
+        next_note_index = fn.cycle(next_note_index + 1, 1, #notes)
+      end
+    end
   end
 end
 
-function Track:update_slot_x()
-  for k, slot in pairs(self:get_slots()) do
-    slot:set_x(self:get_x())
+function Track:update_slot(payload)
+  local slot = self:get_slot(payload.y)
+  if slot ~= nil then
+    if payload.y > self:get_depth() then
+      self:fill(payload.y)
+    end
+    if payload.phenomenon then
+      slot:run_phenomenon(payload)
+    end
+    if payload.class == "TRANSPOSE_SLOT" then  
+      slot:transpose_midi_note(payload.value)
+    end
+    if fn.table_contains_key(payload, "midi_note") then
+      slot:set_midi_note(payload.midi_note)
+    end
+    if fn.table_contains_key(payload, "velocity") then
+      slot:set_velocity(payload.velocity)
+    end
+    slot:refresh()
+    self:refresh()
   end
 end
 
+function Track:append_slot(slot)
+  self.slots[#self.slots + 1] = slot
+  self:refresh()
+end
 
--- focus
-
-
-
-function Track:focus()
-  self:set_focused(true)
-  local first_focus = false
-  for k, slot in pairs(self:get_slots()) do
-    slot:set_focused(true)
-    tracker:set_focused_index(slot:get_index())
-    if not first_focus then
-      view:set_x(self:get_x())
-      view:set_y(slot:get_y())
-      first_focus = true
-    end 
-  end
+function Track:remove_slot(y)
+  table.remove(self.slots, y)
+  self:set_depth(#self.slots)
+  self:refresh()
 end
 
 
@@ -186,6 +199,19 @@ end
 
 
 -- getters & setters
+
+
+function Track:update_slot_y()
+  for k, slot in pairs(self:get_slots()) do
+    slot:set_y(k)
+  end
+end
+
+function Track:update_slot_x()
+  for k, slot in pairs(self:get_slots()) do
+    slot:set_x(self:get_x())
+  end
+end
 
 function Track:get_not_empty_slots()
   local slots = {}
@@ -253,10 +279,10 @@ function Track:get_extents()
   return self.extents
 end
 
-function Track:set_focused(bool)
-  self.focused = bool
+function Track:set_selected(bool)
+  self.selected = bool
 end
 
-function Track:is_focused()
-  return self.focused
+function Track:is_selected()
+  return self.selected
 end

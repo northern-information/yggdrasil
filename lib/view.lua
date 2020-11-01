@@ -17,6 +17,7 @@ function view.init()
   view.rows_per_view = 7
   view.cols_per_view = 8
   view.slot_extents = view.slot_width_min
+  view.slot_left_padding = 4
 end
 
 function view:refresh()
@@ -173,6 +174,10 @@ end
 
 function view:set_slot_width_min(i)
   self.slot_width_min  = i
+end
+
+function view:get_slot_left_padding()
+  return self.slot_left_padding
 end
 
 function view:toggle_hud()

@@ -1,4 +1,4 @@
--- k1: exit   e1: focus
+-- k1: exit   e1: select
 --
 --
 --      e2: pan x     e3: pan y
@@ -37,7 +37,7 @@ end
 
 function enc(e, d)
   if e == 1 then
-    tracker:cycle_focus(d)
+    tracker:cycle_select(d)
   elseif e == 2 then
     view:pan_x(d)
   elseif e == 3 then

@@ -46,8 +46,8 @@ function keyboard.event(type, code, val)
   end
 
   if keys:is_backspace(code) then
-    if buffer:is_empty() and tracker:is_focused() then
-      tracker:clear_focused_slots()
+    if buffer:is_empty() and tracker:is_selected() then
+      tracker:clear_selected_slots()
     else
       buffer:backspace()
     end
@@ -66,8 +66,8 @@ function keyboard.event(type, code, val)
   if keys:is_esc(code) then
     if tracker:has_message() then
       tracker:clear_message()
-    elseif tracker:is_focused() then
-      tracker:unfocus()
+    elseif tracker:is_selected() then
+      tracker:deselect()
     end
   end
 
