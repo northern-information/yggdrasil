@@ -30,7 +30,7 @@ function graphics.redraw_clock()
   while true do
     if view:is_tracker_dirty() then
       view:refresh()
-      view:set_tracker_view_dirty(false)
+      view:set_tracker_dirty(false)
       fn.dirty_screen(true)
     end
     if fn.dirty_screen() then
@@ -77,7 +77,7 @@ function graphics:draw_hud()
     start = 1
   end
   for i = start, view:get_cols_per_view() do
-    local value = i + view:get_view_x_offset()
+    local value = i + view:get_x_offset()
     self:text_right(
       (i * sw - 2),
       (sh - 2),
@@ -87,7 +87,7 @@ function graphics:draw_hud()
   end
   -- row numbers, start at 2 because of the row HUD
   for i = 2, view:get_rows_per_view() + 2 do
-    local value = i + view:get_view_y_offset()
+    local value = i + view:get_y_offset()
     self:text_right(
       (swm - 3),
       (i * sh),
@@ -107,8 +107,8 @@ function graphics:draw_slots(track)
   local slots = track:get_slots()
   local slot_triggers = self:get_slot_triggers()
   local sw, sh = view:get_slot_width(), view:get_slot_height()
-  local w = view:get_view_x_offset() * sw
-  local h = view:get_view_y_offset() * sh
+  local w = view:get_x_offset() * sw
+  local h = view:get_y_offset() * sh
   for k, slot in pairs(slots) do
     if slot:get_y() <= track:get_depth() then
       local triggered = slot_triggers[slot:get_id()]
@@ -144,12 +144,12 @@ end
 function graphics:draw_cols()
   for i = 1, view:get_cols_per_view() do
     local x = (i - 1) * view:get_slot_width()
-    local value = i + view:get_view_x_offset()
+    local value = i + view:get_x_offset()
     if value > 1 and value <= tracker:get_cols() + 1 then
       for ii = 1, (view:get_rows_per_view() * 2) do
         if view:get_rows_above() and (
-            (view:get_view_y_offset() > 0  and not view:is_hud()) or
-            (view:get_view_y_offset() > -1 and     view:is_hud())
+            (view:get_y_offset() > 0  and not view:is_hud()) or
+            (view:get_y_offset() > -1 and     view:is_hud())
           ) then
           local adjust_y = view:is_hud() and view:get_slot_height() or -1
           self:mls(x, ii - 1 + adjust_y, x, ii + adjust_y, 16 - ii)

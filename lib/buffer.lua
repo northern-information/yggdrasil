@@ -55,11 +55,23 @@ end
 function buffer:up_history()
   local check = self.history_index + 1
   self:set_history_index(check > #self.history and #self.history or check)
+  self:history_cleanup()
 end
 
 function buffer:down_history()
   local check = self.history_index - 1
   self:set_history_index(check < 1 and 0 or check)
+  self:history_cleanup()
+end
+
+function buffer:history_cleanup()
+  local history = self:get_history()
+  if history ~= nil then
+    buffer:clear()
+    buffer:set(history.history_string, history.history_table)
+  else
+    buffer:clear()
+  end
 end
 
 function buffer:set_history_index(i)

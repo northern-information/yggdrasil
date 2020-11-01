@@ -156,8 +156,8 @@ function Track:focus()
     slot:set_focused(true)
     tracker:set_focused_index(slot:get_index())
     if not first_focus then
-      view:set_view_x(self:get_x())
-      view:set_view_y(slot:get_y())
+      view:set_x(self:get_x())
+      view:set_y(slot:get_y())
       first_focus = true
     end 
   end

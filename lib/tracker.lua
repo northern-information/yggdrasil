@@ -41,7 +41,7 @@ function tracker:refresh()
     if e < te then e = te end
   end
   self:set_extents(e)
-  view:set_tracker_view_dirty(true)
+  view:set_tracker_dirty(true)
 end
 
 function tracker:render()
@@ -68,7 +68,7 @@ function tracker:load_track(track_number, data)
     self:refresh()
   end
   track:load(data)
-  view:set_tracker_view_dirty(true)
+  view:set_tracker_dirty(true)
 end
 
 function tracker:update_track(payload)
@@ -182,7 +182,7 @@ function tracker:focus_track(x)
     self:get_track(x):focus()
     self:set_focused(true)
   end
-  view:set_tracker_view_dirty(true)
+  view:set_tracker_dirty(true)
 end
 
 function tracker:focus_slot(x, y)
@@ -194,13 +194,13 @@ function tracker:focus_slot(x, y)
       if slot:get_y() == y then
         self:set_focused(true)
         self:set_focused_index(slot:get_index())
-        view:set_view_x(x)
-        view:set_view_y(y)
+        view:set_x(x)
+        view:set_y(y)
         slot:set_focused(true)
       end
     end
   end
-  view:set_tracker_view_dirty(true)
+  view:set_tracker_dirty(true)
 end
 
 function tracker:get_focused_slots()
@@ -274,7 +274,7 @@ function tracker:unfocus()
       slot:set_focused(false)
     end
   end
-  view:set_tracker_view_dirty(true)
+  view:set_tracker_dirty(true)
 end
 
 

@@ -23,7 +23,7 @@ function keyboard.event(type, code, val)
   if keys:is_letter_code(code) or keys:is_number_code(code) or keys:is_symbol(code) then
     if keys:is_shifted() then
       if keys:is_hjkl(code) then
-        view:handle_arrow(keys:get_keycode(code))
+        view:handle_pan(keys:get_keycode(code))
       elseif keys:is_number_code(code) or keys:is_symbol(code) then
         buffer:add(keys:get_shifted_keycode(code))
       end
@@ -54,23 +54,12 @@ function keyboard.event(type, code, val)
   end
 
   if keys:is_arrow(code) then
-    if keys:is_shifted() then
-      view:handle_arrow(keys:get_keycode(code))
-    else
-      if keys:get_keycode(code) == "RIGHT" then return end
-      if keys:get_keycode(code) == "LEFT" then return end
-      if keys:get_keycode(code) == "UP" then
-        buffer:up_history()
-      elseif keys:get_keycode(code) == "DOWN" then
-        buffer:down_history()
-      end
-      local history = buffer:get_history()
-      if history ~= nil then
-        buffer:clear()
-        buffer:set(history.history_string, history.history_table)
-      else
-        buffer:clear()
-      end
+    if keys:get_keycode(code) == "RIGHT" then return end
+    if keys:get_keycode(code) == "LEFT" then return end
+    if keys:get_keycode(code) == "UP" then
+      buffer:up_history()
+    elseif keys:get_keycode(code) == "DOWN" then
+      buffer:down_history()
     end
   end
 
