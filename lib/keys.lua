@@ -15,6 +15,7 @@ function keys.init()
     { k = 105, v = "LEFT" },
     { k = 106, v = "RIGHT" },
     { k = 108, v = "DOWN" },
+    { k = 111, v = "DELETE" },
     { k = 125, v = "OPT" },
     { k = 11,  v = "0" },
     { k = 14,  v = "BACKSPACE" },
@@ -135,8 +136,8 @@ function keys:is_return(code)
   return 28 == code
 end
 
-function keys:is_backspace(code)
-  return 14 == code
+function keys:is_backspace_or_delete(code)
+  return (14 == code) or (111 == code)
 end
 
 function keys:is_spacebar(code)

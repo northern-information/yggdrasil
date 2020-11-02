@@ -47,7 +47,7 @@ function keyboard.event(type, code, val)
     end
   end
 
-  if keys:is_backspace(code) then
+  if keys:is_backspace_or_delete(code) then
     if buffer:is_empty() and tracker:is_selected() then
       tracker:clear_selected_slots()
     else
