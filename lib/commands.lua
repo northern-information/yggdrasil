@@ -713,7 +713,7 @@ self:register{
   signature = function(branch, invocations)
     return #branch == 2
       and Validator:new(branch[1], invocations):ok()
-      and fn.table_contains({ "midi", "ipn", "ygg", "freq", "index", "mixer", "tracker" }, branch[2].leaves[1])
+      and fn.table_contains({ "midi", "ipn", "ygg", "freq", "vel", "index", "mixer", "tracker" }, branch[2].leaves[1])
   end,
   payload = function(branch)
     return {
