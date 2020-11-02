@@ -9,6 +9,7 @@ function mixer:render()
   view:refresh()
   -- mute
   -- solo
+  -- enable
   -- shadow
   -- clade
     -- midi

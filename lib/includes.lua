@@ -13,72 +13,31 @@ if config_ ~= nil then
   include(lib .. "config_")
 end
 
--- global untilities
-fn = include("lib/functions")
+fn          = include("lib/functions")    -- global untilities
+parameters  = include("lib/parameters")   -- exposed norns parameters
+view        = include("lib/view")         -- handle view logic
+filesystem  = include("lib/filesystem")   -- manipulate files
+page        = include("lib/page")         -- mvc "controller" for the page
+keyboard    = include("lib/keyboard")     -- clickity-clack keyboard stuff
+keys        = include("lib/keys")         -- keycodes, keycodes everywhere
+buffer      = include("lib/buffer")       -- liminal space for all the characters
+commands    = include("lib/commands")     -- registered text-based commands
+runner      = include("lib/runner")       -- executes valid commands
+tracker     = include("lib/tracker")      -- core of yggdrasil
+clades      = include("lib/clades")       -- rich visual data
+mixer       = include("lib/mixer")        -- audio mixing and routing
+music       = include("lib/music")        -- essentially musicutil abstractions
+synth       = include("lib/synth")        -- supercollider
+docs        = include("lib/docs")         -- documentation
+graphics    = include("lib/graphics")     -- everything you see on the screen
 
--- exposed norns parameters
-parameters = include("lib/parameters")
-
--- handle view logic
-view = include("lib/view")
-
--- manipulate files
-filesystem = include("lib/filesystem")
-
--- "controller" for the page
-page = include("lib/page")
-
--- clickity-clack keyboard stuff
-keyboard = include("lib/keyboard")
-
--- keycodes, keycodes everywhere
-keys = include("lib/keys")
-
--- liminal space for all the characters
-buffer = include("lib/buffer")
-
--- registered text-based commands
-commands = include("lib/commands")
-
--- executes valid commands
-runner = include("lib/runner")
-
--- core of yggdrasil
-tracker = include("lib/tracker")
-
--- audio mixing and routing
-mixer = include("lib/mixer")
-
--- essentially musicutil abstractions
-music = include("lib/music")
-
--- supercollider
-synth = include("lib/synth")
-
--- documentation
-docs = include("lib/docs")
-
--- everything you see on the screen
-graphics = include("lib/graphics")
-
--- "words" of commands
-include("lib/Branch")
-
--- "sentences" entered into the buffer
-include("lib/Command")
-
--- translates text commands into programmatic meaning
-include("lib/Interpreter")
-
--- works with the interpreter to validated command invocations
-include("lib/Validator")
-
--- organizes slots
-include("lib/Track")
-
--- smallest musical unit
-include("lib/Slot")
-
+-- classes
+include("lib/Branch")       -- "words" of commands
+include("lib/Command")      -- "sentences" entered into the buffer
+include("lib/Interpreter")  -- translates text commands into programmatic meaning
+include("lib/Slot")         -- smallest musical unit
+include("lib/Track")        -- organizes slots
+include("lib/Validator")    -- works with the interpreter to validate command invocations
 
 -- dev only stuff
 dev = io.open(_path["code"] .. lib .. "dev.lua", "r")

@@ -6,7 +6,19 @@ function dev:scene(i)
   if i == 1 then
     filesystem:set_load_file(config.settings.load_file)
     filesystem:load()
-    view:set_index(2)
+    view:set_index(4)
+    local clades = {}
+    table.insert(clades, "MIDI")
+    table.insert(clades, "CROW")
+    table.insert(clades, "SYNTH")
+    table.insert(clades, "SAMPLER")
+    local tracks = tracker:get_tracks()
+    for k, track in pairs(tracks) do
+      track:set_clade(clades[math.random(1, 4)])
+    end
+    -- tracker:disable(1)
+    -- tracker:disable(3)
+    -- tracker:solo(1)
   elseif i == 2 then
 
   end

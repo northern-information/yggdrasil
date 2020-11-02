@@ -27,6 +27,7 @@ function page:render()
   elseif self.active_page == 0 then graphics:splash()
   elseif self.active_page == 1 then tracker:render()
   elseif self.active_page == 2 then mixer:render()
+  elseif self.active_page == 3 then clades:render()
   end
   fn.dirty_screen(true)
   graphics:teardown()

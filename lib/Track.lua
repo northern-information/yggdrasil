@@ -14,8 +14,9 @@ function Track:new(x)
   t.extents = 0
   t.selected = false
   -- mixer
-  t.mute = false
-  t.solo = false
+  t.enabled = true
+  t.muted = false
+  t.soloed = false
   t.level = 1.0
   t.shadow = false
   t.clade = config.settings.default_clade
@@ -55,8 +56,9 @@ end
 
 function Track:clear()
   self:clear_slots()
-  self:set_mute(false)
-  self:set_solo(false)
+  self:unmute()
+  self:unsolo()
+  self:enable()
   self:set_level(1.0)
 end
 
@@ -74,11 +76,7 @@ function Track:advance()
 end
 
 function Track:trigger()
-  for k, slot in pairs(self.slots) do
-    if slot:get_y() == self:get_position() then
-      slot:trigger()
-    end
-  end
+  self:get_slot(self:get_position()):trigger()
 end
 
 
@@ -317,31 +315,70 @@ function Track:is_selected()
   return self.selected
 end
 
+
+
 function Track:is_muted()
-  return self.mute
+  return self.muted
 end
 
-function Track:set_mute(bool)
-  self.mute = bool
+function Track:set_muted(bool)
+  self.muted = bool
 end
 
-function Track:toggle_mute()
-  self.mute = (not self.mute)
+function Track:toggle_muted()
+  self.muted = (not self.muted)
 end
+
+function Track:mute()
+  self:set_muted(true)
+end
+
+function Track:unmute()
+  self:set_muted(false)
+end
+
 
 function Track:is_soloed()
-  return self.solo
+  return self.soloed
 end
 
-function Track:set_solo(bool)
-  self.solo = bool
+function Track:set_soloed(bool)
+  self.soloed = bool
 end
 
 function Track:toggle_solo()
-  self.solo = (not self.solo)
+  self.soloed = (not self.soloed)
 end
 
-function Track:is_shadowed()
+function Track:solo()
+  self:set_soloed(true)
+end
+
+function Track:unsolo()
+  self:set_soloed(false)
+end
+
+function Track:is_enabled()
+  return self.enabled
+end
+
+function Track:set_enabled(bool)
+  self.enabled = bool
+end
+
+function Track:toggle_enabled()
+  self:set_enabled(not self:get_enabed())
+end
+
+function Track:disable()
+  self:set_enabled(false)
+end
+
+function Track:enable()
+  self:set_enabled(true)
+end
+
+function Track:is_shadow()
   return self:get_shadow() ~= false
 end
 

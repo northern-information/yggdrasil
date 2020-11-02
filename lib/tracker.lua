@@ -9,10 +9,12 @@ function tracker.init()
   tracker.playback = false
   tracker.track_view = "midi"
   tracker.tracks = {}
-  tracker.rows = 8
-  tracker.cols = 4
+  tracker.rows = config.settings.default_rows
+  tracker.cols = config.settings.default_cols
   tracker.extents = 0
   tracker.info = false
+  -- mixer
+  tracker.any_soloed = false
   for x = 1, tracker.cols do
     tracker:append_track_after(x - 1)
   end
@@ -32,9 +34,14 @@ end
 
 function tracker:refresh()
   local e = 0
+  self:set_any_soloed(false)
   for k, track in pairs(self:get_tracks()) do
     track:set_x(k)
     track:set_view(self:get_track_view())
+    if track:is_soloed() then
+      print(tostring(track) .. " is soloed.")
+      self:set_any_soloed(true)
+    end
   end
   for track_key, track in pairs(self:get_tracks()) do
     track:refresh()
@@ -60,6 +67,24 @@ end
 
 -- tracks management
 
+
+
+function tracker:filter_tracks(state, clade_name)
+  local out = {}
+  local tracks = tracker:get_tracks()
+  for k, track in pairs(tracks) do
+    if (state == "MUTED"    and track:is_muted())
+    or (state == "SOLOED"   and track:is_soloed())
+    or (state == "ENABLED"  and track:is_enabled())
+    or (state == "DISABLED" and not track:is_enabled())
+    or (state == "SHADOWED" and track:is_shadowed())
+    or (state == "CLADE"    and track:get_clade() == clade_name)
+    then
+      table.insert(out, track)
+    end
+  end
+  return out
+end
 
 
 function tracker:update_every_other(payload)
@@ -297,7 +322,9 @@ function tracker:deselect()
 end
 
 
+
 -- music!
+
 
 
 function tracker:chord(payload)
@@ -320,8 +347,92 @@ end
 
 
 
+-- mixer
+
+
+
+function tracker:solo(x)
+  tracker:get_track(x):solo()
+  self:refresh()
+end
+
+function tracker:solo_all()
+  local tracks = self:get_tracks()
+  for k, track in pairs(tracks) do
+    track:solo()
+  end
+  self:refresh()
+end
+
+function tracker:unsolo(x)
+  tracker:get_track(x):unsolo()
+  self:refresh()
+end
+
+function tracker:unsolo_all()
+  local tracks = self:get_tracks()
+  for k, track in pairs(tracks) do
+    track:unsolo()
+  end
+  self:refresh()
+end
+
+function tracker:mute(x)
+  tracker:get_track(x):mute()
+  self:refresh()
+end
+
+function tracker:mute_all()
+  local tracks = self:get_tracks()
+  for k, track in pairs(tracks) do
+    track:mute()
+  end
+  self:refresh()
+end
+
+function tracker:unmute(x)
+  tracker:get_track(x):unmute()
+  self:refresh()
+end
+
+function tracker:unmute_all()
+  local tracks = self:get_tracks()
+  for k, track in pairs(tracks) do
+    track:unmute()
+  end
+  self:refresh()
+end
+
+function tracker:enable(x)
+  tracker:get_track(x):enable()
+  self:refresh()
+end
+
+function tracker:enable_all()
+  local tracks = self:get_tracks()
+  for k, track in pairs(tracks) do
+    track:enable()
+  end
+  self:refresh()
+end
+
+function tracker:disable(x)
+  tracker:get_track(x):disable()
+  self:refresh()
+end
+
+function tracker:disable_all()
+  local tracks = self:get_tracks()
+  for k, track in pairs(tracks) do
+    track:disable()
+  end
+  self:refresh()
+end
+
+
 
 -- primitive getters, setters, & checks
+
 
 
 
@@ -452,6 +563,14 @@ end
 
 function tracker:is_info()
   return self.info
+end
+
+function tracker:set_any_soloed(bool)
+  self.any_soloed = bool
+end
+
+function tracker:is_any_soloed()
+  return self.any_soloed
 end
 
 return tracker

@@ -22,6 +22,7 @@ function init()
   page.init()
   parameters.init()
   synth.init()
+  clades.init()
   mixer.init()
   tracker.init()
   tracker:refresh()
@@ -40,9 +41,17 @@ function enc(e, d)
   if e == 1 then
     tracker:cycle_select(d)
   elseif e == 2 then
-    view:pan_x(d)
+    if not view:is_transposed() then
+      view:pan_x(d)
+    else
+      view:pan_y(d)
+    end
   elseif e == 3 then
-    view:pan_y(d)
+    if not view:is_transposed() then
+      view:pan_y(d)
+    else
+      view:pan_x(d)
+    end
   end
   fn.dismiss_messages()
   fn.dirty_screen(true)

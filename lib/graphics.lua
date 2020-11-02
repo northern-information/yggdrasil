@@ -191,6 +191,90 @@ function graphics:draw_cols()
   end
 end
 
+
+-- clades
+
+function graphics:draw_clades()
+  local clade_x = 77
+  local track_x = 32
+  local bg = 1
+  local fg = 15
+  local is_any_soloed = tracker:is_any_soloed()
+  -- rightmost column
+  local clades = {}
+  clades[1] = { name = "SYNTH", wired = false, y = 0 }
+  clades[2] = { name = "MIDI", wired = false, y = 0 }
+  clades[3] = { name = "SAMPLER", wired = false, y = 0 }
+  clades[4] = { name = "CROW", wired = false, y = 0 }
+  local tracks = tracker:get_tracks()
+  for k, track in pairs(tracks) do
+    for kk, clade in pairs(clades) do
+      -- things get confusing because x and y are transposed
+      if track:is_enabled()
+        and not track:is_muted()
+        and (track:is_soloed() or not is_any_soloed)
+        and track:get_clade() == clade.name
+        and track:get_x() > view:get_y_offset()
+        and track:get_x() < view:get_y_offset() + view:get_rows_per_view() + 3 then
+          clades[kk].wired = true
+      end
+    end
+  end
+  for k, clade in pairs(clades) do
+    local y = (k * 14) - 9
+    clades[k]["y"] = y
+    self:rect(87, y - 5, 38, 9, bg)
+    self:mlrs(125, y, 3, 0, bg)
+    if clade.wired then
+      self:mlrs(clade_x, y, 23, 0, bg)
+    end
+    self:text(89, y + 2, clade.name, fg)
+  end
+  -- tracks
+  for i = 1, view:get_rows_per_view() + 2 do
+    -- leftmost column
+    local value = i + view:get_y_offset()
+    local track = tracker:get_track(value)
+    local track_y = (i * 8) - 4
+    if track ~= nil then
+      -- track background
+      self:mlrs(0, track_y, 3, 0, bg)
+      self:rect(3, track_y - 4, 16, 7, bg)
+      if track:is_enabled() 
+        and not track:is_muted()
+        and (track:is_soloed() or not is_any_soloed) then
+          self:mlrs(track_x - 13, track_y, 13, 0, bg)
+      else
+          self:mlrs(track_x - 15, track_y, 5, 0, bg)
+          self:rect(track_x - 10, track_y - 2, 3, 3, bg)
+      end
+      -- type
+      local adjust_a_single_pixel_for_number_1_because_typography = value == 1 and 1 or 0
+      self:text(
+        (5 + adjust_a_single_pixel_for_number_1_because_typography),
+        (i * 8) - 2,
+        ((value < 1 or value > tracker:get_cols()) and "" or value),
+        fg
+      )
+      -- the web
+      for k, clade in pairs(clades) do
+        if track:is_enabled() 
+          and not track:is_muted() 
+          and (track:is_soloed() or not is_any_soloed)
+          and track:get_clade() == clade.name then
+            self:mls(track_x, track_y, clade_x, clade.y, bg)
+        end
+      end
+    end
+  end
+end
+
+
+
+
+-- terminal
+
+
 function graphics:draw_terminal()
   local message = tracker:has_message()
   local message_value = tracker:get_message_value()

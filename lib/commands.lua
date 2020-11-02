@@ -213,6 +213,31 @@ self:register{
 }
 
 
+
+-- CLADE
+-- 1 clade midi
+self:register{
+  invocations = { "clade" },
+  signature = function(branch, invocations)
+    return #branch == 3
+      and fn.is_int(branch[1].leaves[1])
+      and Validator:new(branch[2], invocations):ok()
+      and fn.table_contains({ "synth", "midi", "sampler", "crow" }, branch[3].leaves[1])
+  end,
+  payload = function(branch)
+    return {
+      class = "CLADE",
+      clade = string.upper(branch[3].leaves[1]),
+      x = branch[1].leaves[1],
+    }
+  end,
+  action = function(payload)
+    tracker:update_track(payload)
+  end
+}
+
+
+
 -- CLEAR
 self:register{
   invocations = { "clear" },
@@ -251,6 +276,72 @@ self:register{
   end,
   action = function(payload)
     tracker:update_track(payload)
+  end
+}
+
+
+
+-- DISABLE
+-- disable
+-- 1 disable
+self:register{
+  invocations = { "disable" },
+  signature = function(branch, invocations)
+    return 
+      (
+        #branch == 1
+        and Validator:new(branch[1], invocations):ok()
+      ) or (
+        #branch == 2
+        and fn.is_int(branch[1].leaves[1])
+        and Validator:new(branch[2], invocations):ok()
+      )
+  end,
+  payload = function(branch)
+    return {
+        class = "DISABLE",
+        x = #branch == 2 and branch[1].leaves[1] or nil
+    }
+  end,
+  action = function(payload)
+    if payload.x ~= nil then
+      tracker:disable(payload.x)
+    else
+      tracker:disable_all()
+    end
+  end
+}
+
+
+
+-- ENABLE
+-- enable
+-- 1 enable
+self:register{
+  invocations = { "enable" },
+  signature = function(branch, invocations)
+    return 
+      (
+        #branch == 1
+        and Validator:new(branch[1], invocations):ok()
+      ) or (
+        #branch == 2
+        and fn.is_int(branch[1].leaves[1])
+        and Validator:new(branch[2], invocations):ok()
+      )
+  end,
+  payload = function(branch)
+    return {
+        class = "ENABLE",
+        x = #branch == 2 and branch[1].leaves[1] or nil
+    }
+  end,
+  action = function(payload)
+    if payload.x ~= nil then
+      tracker:enable(payload.x)
+    else
+      tracker:enable_all()
+    end
   end
 }
 
@@ -407,6 +498,39 @@ self:register{
 
 
 
+-- MUTE
+-- mute
+-- 1 mute
+self:register{
+  invocations = { "mute" },
+  signature = function(branch, invocations)
+    return 
+      (
+        #branch == 1
+        and Validator:new(branch[1], invocations):ok()
+      ) or (
+        #branch == 2
+        and fn.is_int(branch[1].leaves[1])
+        and Validator:new(branch[2], invocations):ok()
+      )
+  end,
+  payload = function(branch)
+    return {
+        class = "MUTE",
+        x = #branch == 2 and branch[1].leaves[1] or nil
+    }
+  end,
+  action = function(payload)
+    if payload.x ~= nil then
+      tracker:mute(payload.x)
+    else
+      tracker:mute_all()
+    end
+  end
+}
+
+
+
 -- NEW
 self:register{
   invocations = { "new" },
@@ -421,58 +545,6 @@ self:register{
   end,
   action = function(payload)
     fn.new()
-  end
-}
-
-
-
--- SET_MIDI_NOTE
--- 1 1 72
-self:register{
-  invocations = {},
-  signature = function(branch, invocations)
-    return #branch == 3
-      and fn.is_int(branch[1].leaves[1])
-      and fn.is_int(branch[2].leaves[1])
-      and fn.is_int(branch[3].leaves[1])
-  end,
-  payload = function(branch)
-    return {
-      class = "SET_MIDI_NOTE",
-      midi_note = branch[3].leaves[1],
-      x = branch[1].leaves[1],
-      y = branch[2].leaves[1],
-    }
-  end,
-  action = function(payload)
-    tracker:update_slot(payload)
-  end
-}
-
-
-
--- SET_MIDI_NOTE_AND_VELOCITY
--- 1 1 72 vel;100
-self:register{ -- todo make midi note optional?
-  invocations = { "velocity", "vel" },
-  signature = function(branch, invocations)
-    return #branch == 4
-      and fn.is_int(branch[1].leaves[1])
-      and fn.is_int(branch[2].leaves[1])
-      and fn.is_int(branch[3].leaves[1])
-      and Validator:new(branch[4], invocations):ok()
-  end,
-  payload = function(branch)
-    return {
-      class = "SET_MIDI_NOTE_AND_VELOCITY",
-      midi_note = branch[3].leaves[1],
-      velocity = branch[4].leaves[3],
-      x = branch[1].leaves[1],
-      y = branch[2].leaves[1],
-    }
-  end,
-  action = function(payload)
-    tracker:update_slot(payload)
   end
 }
 
@@ -497,7 +569,7 @@ self:register{
 
 
 
--- play
+-- PLAY
 self:register{
   invocations = { "play" },
   signature = function(branch, invocations)
@@ -639,6 +711,58 @@ self:register{
 
 
 
+-- SET_MIDI_NOTE
+-- 1 1 72
+self:register{
+  invocations = {},
+  signature = function(branch, invocations)
+    return #branch == 3
+      and fn.is_int(branch[1].leaves[1])
+      and fn.is_int(branch[2].leaves[1])
+      and fn.is_int(branch[3].leaves[1])
+  end,
+  payload = function(branch)
+    return {
+      class = "SET_MIDI_NOTE",
+      midi_note = branch[3].leaves[1],
+      x = branch[1].leaves[1],
+      y = branch[2].leaves[1],
+    }
+  end,
+  action = function(payload)
+    tracker:update_slot(payload)
+  end
+}
+
+
+
+-- SET_MIDI_NOTE_AND_VELOCITY
+-- 1 1 72 vel;100
+self:register{ -- todo make midi note optional?
+  invocations = { "velocity", "vel" },
+  signature = function(branch, invocations)
+    return #branch == 4
+      and fn.is_int(branch[1].leaves[1])
+      and fn.is_int(branch[2].leaves[1])
+      and fn.is_int(branch[3].leaves[1])
+      and Validator:new(branch[4], invocations):ok()
+  end,
+  payload = function(branch)
+    return {
+      class = "SET_MIDI_NOTE_AND_VELOCITY",
+      midi_note = branch[3].leaves[1],
+      velocity = branch[4].leaves[3],
+      x = branch[1].leaves[1],
+      y = branch[2].leaves[1],
+    }
+  end,
+  action = function(payload)
+    tracker:update_slot(payload)
+  end
+}
+
+
+
 -- SHIFT
 -- 1 shift;5
 self:register{
@@ -657,6 +781,39 @@ self:register{
   end,
   action = function(payload)
     tracker:update_track(payload)
+  end
+}
+
+
+
+-- SOLO
+-- solo
+-- 1 solo
+self:register{
+  invocations = { "solo" },
+  signature = function(branch, invocations)
+    return 
+      (
+        #branch == 1
+        and Validator:new(branch[1], invocations):ok()
+      ) or (
+        #branch == 2
+        and fn.is_int(branch[1].leaves[1])
+        and Validator:new(branch[2], invocations):ok()
+      )
+  end,
+  payload = function(branch)
+    return {
+        class = "SOLO",
+        x = #branch == 2 and branch[1].leaves[1] or nil
+    }
+  end,
+  action = function(payload)
+    if payload.x ~= nil then
+      tracker:solo(payload.x)
+    else
+      tracker:solo_all()
+    end
   end
 }
 
@@ -707,13 +864,79 @@ self:register{
 
 
 
+-- UNMUTE
+-- unmute
+-- 1 unmute
+self:register{
+  invocations = { "unmute" },
+  signature = function(branch, invocations)
+    return 
+      (
+        #branch == 1
+        and Validator:new(branch[1], invocations):ok()
+      ) or (
+        #branch == 2
+        and fn.is_int(branch[1].leaves[1])
+        and Validator:new(branch[2], invocations):ok()
+      )
+  end,
+  payload = function(branch)
+    return {
+        class = "UNMUTE",
+        x = #branch == 2 and branch[1].leaves[1] or nil
+    }
+  end,
+  action = function(payload)
+    if payload.x ~= nil then
+      tracker:unmute(payload.x)
+    else
+      tracker:unmute_all()
+    end
+  end
+}
+
+
+
+-- UNSOLO
+-- unsolo
+-- 1 unsolo
+self:register{
+  invocations = { "unsolo" },
+  signature = function(branch, invocations)
+    return 
+      (
+        #branch == 1
+        and Validator:new(branch[1], invocations):ok()
+      ) or (
+        #branch == 2
+        and fn.is_int(branch[1].leaves[1])
+        and Validator:new(branch[2], invocations):ok()
+      )
+  end,
+  payload = function(branch)
+    return {
+        class = "UNSOLO",
+        x = #branch == 2 and branch[1].leaves[1] or nil
+    }
+  end,
+  action = function(payload)
+    if payload.x ~= nil then
+      tracker:unsolo(payload.x)
+    else
+      tracker:unsolo_all()
+    end
+  end
+}
+
+
+
 -- VIEW
 self:register{
   invocations = { "view", "v" },
   signature = function(branch, invocations)
     return #branch == 2
       and Validator:new(branch[1], invocations):ok()
-      and fn.table_contains({ "midi", "ipn", "ygg", "freq", "vel", "index", "mixer", "tracker" }, branch[2].leaves[1])
+      and fn.table_contains({ "midi", "ipn", "ygg", "freq", "vel", "index", "tracker", "hud", "mixer", "clades" }, branch[2].leaves[1])
   end,
   payload = function(branch)
     return {

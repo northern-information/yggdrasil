@@ -36,8 +36,8 @@ function Slot:refresh()
 end
 
 function Slot:trigger()
+  local track = tracker:get_track(self:get_x())
   if self:is_phenomenon() then
-    local track = tracker:get_track(self:get_x())
     local p = self.payload.class
     if p == "ANCHOR" then
       if self:get_y() ~= self.payload.value then
@@ -57,8 +57,19 @@ function Slot:trigger()
     elseif p == "REVERSE" then  
       track:reverse_direction()
     end
-  elseif self:get_midi_note() ~= nil and self:get_clade() == "synth" then
-    synth:play(self:get_midi_note(), self:get_velocity())
+  elseif track:is_enabled()
+    and not track:is_muted()
+    and (track:is_soloed() or not tracker:is_any_soloed()) then
+    local clade = self:get_clade()
+    if clade == "SYNTH" and self:get_midi_note() ~= nil then
+      synth:play(self:get_midi_note(), self:get_velocity())
+    elseif clade == "MIDI" then
+      print("trigger crow")
+    elseif clade == "SAMPLER" then
+      print("trigger crow")
+    elseif clade == "CROW" then 
+      print("trigger crow")
+    end
   end
   graphics:register_slot_trigger(self:get_id())
 end
