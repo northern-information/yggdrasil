@@ -152,6 +152,14 @@ function keys:is_arrow(code)
   return (103 == code) or (106 == code) or (108 == code) or (105 == code)
 end
 
+function keys:is_f(code)
+  return 33 == code
+end
+
+function keys:is_g(code)
+  return 34 == code
+end
+
 function keys:is_hjkl(code)
   return (35 == code) or (36 == code) or (37 == code) or (38 == code)
 end

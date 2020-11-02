@@ -46,6 +46,9 @@ runner = include("lib/runner")
 -- core of yggdrasil
 tracker = include("lib/tracker")
 
+-- audio mixing and routing
+mixer = include("lib/mixer")
+
 -- essentially musicutil abstractions
 music = include("lib/music")
 

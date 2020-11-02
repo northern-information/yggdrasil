@@ -1,8 +1,11 @@
 view = {}
 
 function view.init()
-  -- hud
-  view.hud = true
+  -- page
+  view.index = 1
+  view.tracker = false
+  view.hud = false
+  view.mixer = false
   -- tracker
   view.slot_width_min = 16
   view.slot_width = view.slot_width_min
@@ -21,6 +24,23 @@ function view.init()
 end
 
 function view:refresh()
+  local index = self:get_index()
+  if index == 1 then
+    self:set_tracker(true)
+    self:set_hud(false)
+    self:set_mixer(false)
+    page:select(1)
+  elseif index == 2 then
+    self:set_tracker(true)
+    self:set_hud(true)
+    self:set_mixer(false)
+    page:select(1)
+  elseif index == 3 then
+    self:set_tracker(false)
+    self:set_hud(false)
+    self:set_mixer(true)
+    page:select(2)
+  end
   local y = self:get_y()
   local x = self:get_x()
   if tracker:is_follow() then
@@ -63,9 +83,22 @@ function view:pan_to_y(y)
   self:set_tracker_dirty(true)
 end
 
+function view:cycle()
+  self:set_index(fn.cycle(self:get_index() + 1, 1, 3))
+  self:refresh()
+end
+
 
 
 -- getters & setters
+
+function view:set_index(i)
+  self.index = i
+end
+
+function view:get_index()
+  return self.index
+end
 
 function view:set_tracker_dirty(bool)
   self.tracker_dirty = bool
@@ -180,12 +213,28 @@ function view:get_slot_left_padding()
   return self.slot_left_padding
 end
 
-function view:toggle_hud()
-  self.hud = not self.hud
+function view:set_hud(bool)
+  self.hud = bool
 end
 
 function view:is_hud()
   return self.hud
+end
+
+function view:set_tracker(bool)
+  self.tracker = bool
+end
+
+function view:is_tracker()
+  return self.tracker
+end
+
+function view:set_mixer(bool)
+  self.mixer = bool
+end
+
+function view:is_mixer()
+  return self.mixer
 end
 
 return view

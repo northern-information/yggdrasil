@@ -20,8 +20,8 @@ function graphics.init()
   graphics.yggdrasil_splash_scale = 6
   graphics.yggdrasil_splash_segments = graphics:get_yggdrasil_segments(0, 35, graphics.yggdrasil_splash_scale)
   graphics.yggdrasil_splash_done = false
-  graphics.yggdrasil_gui_scale = 2
-  graphics.yggdrasil_gui_segments = graphics:get_yggdrasil_segments(0, 50, graphics.yggdrasil_gui_scale)
+  graphics.yggdrasil_gui_scale = 3
+  graphics.yggdrasil_gui_segments = graphics:get_yggdrasil_segments(0, 40, graphics.yggdrasil_gui_scale)
   -- slots
   graphics.slot_triggers = {}
 end
@@ -103,8 +103,9 @@ function graphics:draw_hud_foreground()
   -- row numbers, start at 2 because of the row HUD
   for i = 2, view:get_rows_per_view() + 2 do
     local value = i + view:get_y_offset()
+    local adjust_a_single_pixel_for_number_1_because_typography = value == 1 and 1 or 0
     self:text_right(
-      (swm - 3),
+      (swm - 3 - adjust_a_single_pixel_for_number_1_because_typography),
       (i * sh),
       ((value < 1 or value > tracker:get_rows()) and "" or value),
       15
@@ -193,14 +194,21 @@ end
 function graphics:draw_terminal()
   local message = tracker:has_message()
   local message_value = tracker:get_message_value()
+  local info = tracker:is_info()
   local height = 9
+  
   if message then
     height = 18
+  elseif info then
+    height = 40
   end
   self:mls(0, 64 - height, 128, 64 - height - 1, 15)
   self:rect(0, 64 - height, 128, height, 0)
   if message then
     self:text(5, 54, message_value, 1)
+  elseif info then
+    self:draw_yggdrasil_gui_logo()
+    self:text(64, 40, fn.get_semver_string(), 1)
   end
   self:text(0, 62, buffer:get(), 15)
   local adjust = 1

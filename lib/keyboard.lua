@@ -19,6 +19,10 @@ function keyboard.event(type, code, val)
   if keys:is_y_mode() then
     if keys:is_hjkl(code) then
       view:handle_pan(keys:get_keycode(code))
+    elseif keys:is_f(code) then
+      fn.decrement_increment(keys:is_shifted() and -12 or -1)
+    elseif keys:is_g(code) then
+      fn.decrement_increment(keys:is_shifted() and 12 or 1)
     end
   else
     if keys:is_letter_code(code) or keys:is_number_code(code) or keys:is_symbol(code) then
@@ -36,14 +40,6 @@ function keyboard.event(type, code, val)
     else
       keys:set_last_space(true)
       buffer:add(" ")
-    end
-  end
-
-  if keys:is_return(code) then
-    if buffer:is_empty() then
-      tracker:select_slot(view:get_x(), view:get_y())
-    elseif not buffer:is_empty() then
-      buffer:execute()
     end
   end
 
@@ -66,15 +62,26 @@ function keyboard.event(type, code, val)
 
   if keys:is_esc(code) then
         if tracker:has_message() then tracker:clear_message()
+    elseif tracker:is_info() then tracker:set_info(false)
     elseif tracker:is_selected() then tracker:deselect()
     end
   end
 
-  if keys:is_tab(code) then view:toggle_hud() end
+  if keys:is_tab(code) then view:cycle() end
 
   if keys:is_caps(code) then keys:toggle_y_mode() end
 
-  fn.dirty_screen(true)
+  if keys:is_return(code) then
+    if buffer:is_empty() then
+      tracker:select_slot(view:get_x(), view:get_y())
+    elseif not buffer:is_empty() then
+      buffer:execute()
+    end
+  end
+
+  if keys ~= nil then
+    fn.dirty_screen(true)
+  end
 
 end
 

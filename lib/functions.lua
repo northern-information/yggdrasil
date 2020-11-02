@@ -16,6 +16,10 @@ function fn.id()
   return fn.id_prefix .. os.time(os.date("!*t")) .. "-" .. fn.id_counter
 end
 
+function fn.get_semver_string()
+  return "v" .. config.settings.version_major .. "." .. config.settings.version_minor .. "." .. config.settings.version_patch
+end
+
 function fn.dirty_screen(bool)
   if bool == nil then return y.screen_dirty end
   y.screen_dirty = bool
@@ -30,6 +34,7 @@ end
 
 function fn.dismiss_messages()
   tracker:clear_message()
+  tracker:set_info(false)
   fn.break_splash(true)
 end
 
@@ -67,7 +72,6 @@ function fn.print_matron_message(message)
   print("") print("") print("")
 end
 
-
 function fn.decrement_increment(i)
   local slots = tracker:get_selected_slots()
   if #slots > 0 then
@@ -84,7 +88,12 @@ function fn.decrement_increment(i)
   end
 end
 
-
+function fn.new()
+  for x = 1, tracker:get_cols() do tracker:remove(1) end
+  tracker:set_cols(config.settings.default_cols)
+  tracker:set_rows(config.settings.default_rows)
+  for x = 1, tracker:get_cols() do tracker:append_track_after(x - 1) end
+end
 
 --- value checking and manipulation
 

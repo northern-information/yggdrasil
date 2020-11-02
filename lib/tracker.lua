@@ -7,11 +7,12 @@ function tracker.init()
   tracker.message = false
   tracker.message_value = ""
   tracker.playback = false
-  tracker.slot_view = "midi"
+  tracker.track_view = "midi"
   tracker.tracks = {}
   tracker.rows = 8
-  tracker.cols = 1
+  tracker.cols = 4
   tracker.extents = 0
+  tracker.info = false
   for x = 1, tracker.cols do
     tracker:append_track_after(x - 1)
   end
@@ -33,6 +34,7 @@ function tracker:refresh()
   local e = 0
   for k, track in pairs(self:get_tracks()) do
     track:set_x(k)
+    track:set_view(self:get_track_view())
   end
   for track_key, track in pairs(self:get_tracks()) do
     track:refresh()
@@ -77,6 +79,12 @@ function tracker:update_track(payload)
       end
       if payload.class == "SHIFT" then
         track:shift(payload.shift)
+      end
+      if payload.class == "CLADE" then
+        track:set_clade(payload.clade)
+      end
+      if payload.class == "SHADOW" then
+        track:set_shadow(payload.shadow)
       end
     end
     self:refresh()
@@ -134,6 +142,15 @@ function tracker:remove_track(track)
   self:refresh()
 end
 
+function tracker:clear_tracks()
+  for i = 1, self:get_cols() do
+    self:clear_track(i)
+  end
+end
+
+function tracker:clear_track(i)
+  self:get_track(i):clear()
+end
 
 
 -- slot management
@@ -408,13 +425,13 @@ function tracker:get_rows()
   return self.rows
 end
 
-function tracker:set_slot_view(s)
-  self.slot_view = s
+function tracker:set_track_view(s)
+  self.track_view = s
   self:refresh()
 end
 
-function tracker:get_slot_view()
-  return self.slot_view
+function tracker:get_track_view()
+  return self.track_view
 end
 
 function tracker:set_extents(i)
@@ -423,6 +440,18 @@ end
 
 function tracker:get_extents()
   return self.extents
+end
+
+function tracker:toggle_info()
+  self:set_info(not self.info)
+end
+
+function tracker:set_info(bool)
+  self.info = bool
+end
+
+function tracker:is_info()
+  return self.info
 end
 
 return tracker

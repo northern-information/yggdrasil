@@ -6,9 +6,9 @@ function dev:scene(i)
   if i == 1 then
     filesystem:set_load_file(config.settings.load_file)
     filesystem:load()
-    page:select(1)
+    view:set_index(2)
   elseif i == 2 then
-    page:select(2)
+
   end
 end
 

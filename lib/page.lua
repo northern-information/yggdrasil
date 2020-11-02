@@ -25,19 +25,11 @@ function page:render()
   graphics:setup()
       if page.error            then self:error_message()
   elseif self.active_page == 0 then graphics:splash()
-  elseif self.active_page == 1 then self:tracker()
-  elseif self.active_page == 2 then self:dev()
+  elseif self.active_page == 1 then tracker:render()
+  elseif self.active_page == 2 then mixer:render()
   end
   fn.dirty_screen(true)
   graphics:teardown()
-end
-
-function page:tracker()
-  tracker:render()
-end
-
-function page:dev()
-  graphics:yggdrasil()
 end
 
 function page:error_message()

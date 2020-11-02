@@ -8,21 +8,30 @@ function Track:new(x)
   t.x = x ~= nil and x or 0
   t.depth = 0
   t.position = 0
-  t.direction = "descend"
+  t.descend = true
+  t.view = ""
   t.slots = {}
   t.extents = 0
   t.selected = false
+  -- mixer
+  t.mute = false
+  t.solo = false
+  t.level = 1.0
+  t.shadow = false
+  t.clade = config.settings.default_clade
   return t
 end
 
 function Track:refresh()
   local e = 0
-  local tracker_slot_view = tracker:get_slot_view()
+  local tracker_slot_view = tracker:get_track_view()
   self:update_slot_x()
   self:update_slot_y()
   for k, slot in pairs(self.slots) do
     slot:set_index(tracker:index(slot:get_x(), slot:get_y()))
     slot:set_view(tracker_slot_view)
+    slot:set_clade(self:get_clade())
+    slot:set_view(self:get_view())
     slot:refresh()
     local se = slot:get_extents()
     if e < se then e = se end
@@ -44,27 +53,24 @@ function Track:select()
   end
 end
 
-
+function Track:clear()
+  self:clear_slots()
+  self:set_mute(false)
+  self:set_solo(false)
+  self:set_level(1.0)
+end
 
 --- tracking
 
 
 
 function Track:advance()
-  if self:get_direction() == "descend" then
-    self:descend()
-  elseif self:get_direction() == "ascend" then
-    self:ascend()
+  if self:is_descending() then
+    self:set_position(self:get_position() + 1)
+  elseif not self:is_descending() then
+    self:set_position(self:get_position() - 1)
   end
   self:trigger()
-end
-
-function Track:ascend()
-  self:set_position(self:get_position() - 1)
-end
-
-function Track:descend()
-  self:set_position(self:get_position() + 1)
 end
 
 function Track:trigger()
@@ -176,6 +182,16 @@ function Track:remove_slot(y)
   self:refresh()
 end
 
+function Track:clear_slots()
+  for i = 1, self:get_depth() do
+    self:clear_slot(i)
+  end
+end
+
+function Track:clear_slot(y)
+  self:get_slot(y):clear()
+end
+
 
 
 -- load, copy, paste, update slots
@@ -273,12 +289,16 @@ function Track:get_position()
   return self.position
 end
 
-function Track:get_direction()
-  return self.direction
+function Track:reverse_direction()
+  self:set_descend(not self:is_descending())
 end
 
-function Track:set_direction(s)
-  self.direction = s
+function Track:is_descending()
+  return self.descend
+end
+
+function Track:set_descend(bool)
+  self.descend = bool
 end
 
 function Track:set_extents(i)
@@ -295,4 +315,64 @@ end
 
 function Track:is_selected()
   return self.selected
+end
+
+function Track:is_muted()
+  return self.mute
+end
+
+function Track:set_mute(bool)
+  self.mute = bool
+end
+
+function Track:toggle_mute()
+  self.mute = (not self.mute)
+end
+
+function Track:is_soloed()
+  return self.solo
+end
+
+function Track:set_solo(bool)
+  self.solo = bool
+end
+
+function Track:toggle_solo()
+  self.solo = (not self.solo)
+end
+
+function Track:is_shadowed()
+  return self:get_shadow() ~= false
+end
+
+function Track:set_shadow(v)
+  self.shadow = v
+end
+
+function Track:get_shadow()
+  return self.shadow
+end
+
+function Track:get_level()
+  return self.level
+end
+
+function Track:set_level(f)
+  self.level = f
+end
+
+function Track:get_clade()
+  return self.clade
+end
+
+function Track:set_clade(s)
+  self.clade = s
+end
+
+function Track:get_view()
+  return self.view
+end
+
+function Track:set_view(s)
+  self.view = s
 end

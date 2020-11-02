@@ -7,13 +7,15 @@ config["settings"] = {
   ["root"] = 0,
   ["scale"] = 47,
   ["octaves"] = 11,
-  ["save_path"] =  _path.data .. "yggdrasil/"
+  ["save_path"] =  _path.data .. "yggdrasil/",
+  ["default_cols"] = 4,
+  ["default_rows"] = 8,
+  ["default_clade"] = "synth",
 }
 
 config["page_titles"] = {
-  "ALPHA",
-  "BETA",
-  "GAMMA"
+  "TRACKER",
+  "MIXER"
 }
 
 return config

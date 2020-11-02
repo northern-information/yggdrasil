@@ -22,6 +22,7 @@ function init()
   page.init()
   parameters.init()
   synth.init()
+  mixer.init()
   tracker.init()
   tracker:refresh()
   y.screen_dirty = true

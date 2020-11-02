@@ -186,6 +186,8 @@ self:register{
   end
 }
 
+
+
 -- CHORD
 -- 1 1 chord 60;63;67
 self:register{
@@ -209,6 +211,26 @@ self:register{
     tracker:chord(payload)
   end
 }
+
+
+-- CLEAR
+self:register{
+  invocations = { "clear" },
+  signature = function(branch, invocations)
+    return #branch == 1
+      and Validator:new(branch[1], invocations):ok()
+  end,
+  payload = function(branch)
+    return {
+      class = "clear"
+    }
+  end,
+  action = function(payload)
+    tracker:clear_tracks()
+  end
+}
+
+
 
 -- DEPTH
 -- 1 depth;16
@@ -256,6 +278,28 @@ self:register{
   end,
   action = function(payload)
      tracker:update_slot(payload)
+  end
+}
+
+
+
+
+-- EXIT
+self:register{
+  invocations = { "exit", "ragequit" },
+  signature = function(branch, invocations)
+    return #branch == 1
+      and Validator:new(branch[1], invocations):ok()
+  end,
+  payload = function(branch)
+    return {
+      class = "exit"
+    }
+  end,
+  action = function(payload)
+    _menu.set_mode(true)
+    fn.print_matron_message("FAREWELL YGGDRASIL PILOT!")
+    norns.script.clear()
   end
 }
 
@@ -317,6 +361,25 @@ self:register{
 
 
 
+-- INFO
+self:register{
+  invocations = { "info" },
+  signature = function(branch, invocations)
+    return #branch == 1
+      and Validator:new(branch[1], invocations):ok()
+  end,
+  payload = function(branch)
+    return {
+      class = "INFO"
+    }
+  end,
+  action = function(payload)
+    tracker:toggle_info()
+  end
+}
+
+
+
 -- LUCKY
 -- 3 4 !
 self:register{
@@ -339,6 +402,25 @@ self:register{
   end,
   action = function(payload)
     tracker:update_slot(payload)
+  end
+}
+
+
+
+-- NEW
+self:register{
+  invocations = { "new" },
+  signature = function(branch, invocations)
+    return #branch == 1
+      and Validator:new(branch[1], invocations):ok()
+  end,
+  payload = function(branch)
+    return {
+      class = "NEW"
+    }
+  end,
+  action = function(payload)
+    fn.new()
   end
 }
 
@@ -449,6 +531,33 @@ self:register{
         class = "RANDOM",
         phenomenon = true,
         prefix = "?",
+        value = nil,
+        x = branch[1].leaves[1], 
+        y = branch[2].leaves[1],
+    }
+  end,
+  action = function(payload)
+    tracker:update_slot(payload)
+  end
+}
+
+
+
+-- REVERSE
+-- 3 4 reverse
+self:register{
+  invocations = { "reverse", "rev"},
+  signature = function(branch, invocations)
+    return #branch == 3
+       and fn.is_int(branch[1].leaves[1])
+       and fn.is_int(branch[2].leaves[1])
+      and Validator:new(branch[3], invocations):ok()
+  end,
+  payload = function(branch)
+    return {
+        class = "REVERSE",
+        phenomenon = true,
+        prefix = "rev",
         value = nil,
         x = branch[1].leaves[1], 
         y = branch[2].leaves[1],
@@ -604,7 +713,7 @@ self:register{
   signature = function(branch, invocations)
     return #branch == 2
       and Validator:new(branch[1], invocations):ok()
-      and fn.table_contains({ "midi", "ipn", "ygg", "freq", "index" }, branch[2].leaves[1])
+      and fn.table_contains({ "midi", "ipn", "ygg", "freq", "index", "mixer", "tracker" }, branch[2].leaves[1])
   end,
   payload = function(branch)
     return {
@@ -613,7 +722,14 @@ self:register{
     }
   end,
   action = function(payload)
-    tracker:set_slot_view(payload.view)
+    if payload.view == "tracker" then
+      view:set_index(1)
+      tracker:set_track_view("midi")
+    elseif payload.view == "mixer" then
+      view:set_index(3)
+    else
+      tracker:set_track_view(payload.view)
+    end
   end
 }
 

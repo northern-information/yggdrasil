@@ -16,8 +16,8 @@ function Slot:new(x, y)
   s.ipn_note = nil
   s.frequency = nil
   s.velocity = 127
-  s.route = "synth"
-  s.view = "midi"
+  s.clade = ""
+  s.view = ""
   s.phenomenon = false
   s.payload = {}
   s.extents = nil
@@ -54,8 +54,10 @@ function Slot:trigger()
       track:set_position(new_y)
     elseif p == "RANDOM" then  
       track:set_position(math.random(1, track:get_depth()))
+    elseif p == "REVERSE" then  
+      track:reverse_direction()
     end
-  elseif self:get_midi_note() ~= nil and self:get_route() == "synth" then
+  elseif self:get_midi_note() ~= nil and self:get_clade() == "synth" then
     synth:play(self:get_midi_note(), self:get_velocity())
   end
   graphics:register_slot_trigger(self:get_id())
@@ -222,12 +224,12 @@ function Slot:set_view(s)
   self.view = s
 end
 
-function Slot:get_route()
-  return self.route
+function Slot:get_clade()
+  return self.clade
 end
 
-function Slot:set_route(s)
-  self.route = s
+function Slot:set_clade(s)
+  self.clade = s
 end
 
 function Slot:set_extents(i)
