@@ -110,6 +110,9 @@ function graphics:draw_hud_foreground()
       15
     )
   end
+end
+
+function graphics:draw_y_mode()
   if keys:is_y_mode() then
     self:mls(6, 0, 3, 3, self.cursor_frame)
     self:mls(9, 0, 0, 9, self.cursor_frame)

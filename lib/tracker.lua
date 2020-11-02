@@ -10,11 +10,10 @@ function tracker.init()
   tracker.slot_view = "midi"
   tracker.tracks = {}
   tracker.rows = 8
-  tracker.cols = 4
+  tracker.cols = 1
   tracker.extents = 0
   for x = 1, tracker.cols do
-    tracker.tracks[x] = Track:new(x)
-    tracker.tracks[x]:fill(tracker.rows)
+    tracker:append_track_after(x - 1)
   end
 end
 
@@ -52,11 +51,14 @@ function tracker:render()
   graphics:draw_hud_foreground()
   graphics:draw_terminal()
   graphics:draw_command_processing()
+  graphics:draw_y_mode()
 end
 
 
 
 -- tracks management
+
+
 
 function tracker:update_every_other(payload)
   self:select_track(payload.x)
@@ -278,6 +280,29 @@ function tracker:deselect()
 end
 
 
+-- music!
+
+
+function tracker:chord(payload)
+  local end_track = payload.x + #payload.midi_notes
+  -- check & create tracks
+  -- "-1" to adjust for the first track!
+  while self:get_cols() < end_track - 1 do
+    self:append_track_after(#self:get_tracks())
+  end
+  -- fill the chord horizontally
+  local note_index = 1
+  for i = payload.x, end_track - 1 do
+    self:get_track(i):update_slot{
+      midi_note = payload.midi_notes[note_index],
+      y = payload.y
+    }
+    note_index = note_index + 1
+  end
+end
+
+
+
 
 -- primitive getters, setters, & checks
 
@@ -311,6 +336,14 @@ end
 
 function tracker:get_selected_index()
   return self.selected_index
+end
+
+function tracker:append_track_after(x)
+  local track = Track:new(x + 1)
+  table.insert(self.tracks, x + 1, track)
+  self:set_cols(#self.tracks)
+  track:fill(self:get_rows())
+  self:refresh()
 end
 
 function tracker:get_tracks()

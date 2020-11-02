@@ -31,9 +31,9 @@ function commands:register(t)
       end
     end
   end
-  if class == "RERUN" then
+  -- if class == "APPEND" then
     self.all[class] = t
-  end
+  -- end
 end
 
 --[[
@@ -85,6 +85,33 @@ self:register{
   end,
   action = function(payload)
      tracker:update_slot(payload)
+  end
+}
+
+
+
+-- APPEND
+-- 1 append 3
+self:register{
+  invocations = { "append", "ap" },
+  signature = function(branch, invocations)
+    return #branch == 3
+      and fn.is_int(branch[1].leaves[1]) 
+      and Validator:new(branch[2], invocations):ok()
+      and fn.is_int(branch[3].leaves[1])
+  end,
+  payload = function(branch)
+    return {
+      class = "APPEND",
+      value = branch[3].leaves[1],
+      x = branch[1].leaves[1]
+    }
+  end,
+  action = function(payload)
+    for i = 1, payload.value do
+      local position = i - 1
+      tracker:append_track_after(payload.x + position)
+    end
   end
 }
 
@@ -159,7 +186,29 @@ self:register{
   end
 }
 
-
+-- CHORD
+-- 1 1 chord 60;63;67
+self:register{
+  invocations = { "chord", "c" },
+  signature = function(branch, invocations)
+    return #branch == 4
+      and fn.is_int(branch[1].leaves[1])
+      and fn.is_int(branch[2].leaves[1])
+      and Validator:new(branch[3], invocations):ok()
+      and #branch[4].leaves >= 2
+  end,
+  payload = function(branch)
+    return {
+      class = "CHORD",
+      midi_notes = fn.table_remove_semicolons(branch[4].leaves),
+      x = branch[1].leaves[1],
+      y = branch[2].leaves[1],
+    }
+  end,
+  action = function(payload)
+    tracker:chord(payload)
+  end
+}
 
 -- DEPTH
 -- 1 depth;16

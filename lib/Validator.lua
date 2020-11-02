@@ -20,9 +20,9 @@ function Validator:is_invocation_match()
     local is_prefix_invocation = self:validate_prefix_invocation()
     local is_string_invocation = self:validate_string_invocation(invocation)
     local is_simple_invocation = self:validate_simple_invocation(invocation)
-    -- print("is_prefix_invocation", is_prefix_invocation)
-    -- print("is_string_invocation", is_string_invocation)
-    -- print("is_simple_invocation", is_simple_invocation)
+    print("is_prefix_invocation", is_prefix_invocation)
+    print("is_string_invocation", is_string_invocation)
+    print("is_simple_invocation", is_simple_invocation)
     if is_prefix_invocation or is_string_invocation or is_simple_invocation then
       result = true
     end
