@@ -115,8 +115,12 @@ end
 
 function graphics:draw_y_mode()
   if keys:is_y_mode() then
+    self:mls(5, 0, 2, 3, 0)
+    self:mls(7, 0, 3, 4, 0)
+    self:mls(8, 0, 0, 8, 0)
+    self:mls(10, 0, 0, 10, 0)
     self:mls(6, 0, 3, 3, self.cursor_frame)
-    self:mls(9, 0, 0, 9, self.cursor_frame)
+    self:mls(9, 0, 0, 9, self.cursor_frame)   
   end
 end
 
@@ -221,7 +225,7 @@ function graphics:draw_clades()
     end
   end
   for k, clade in pairs(clades) do
-    local y = (k * 14) - 9
+    local y = (k * 13) - 8
     clades[k]["y"] = y
     self:rect(87, y - 5, 38, 9, bg)
     self:mlrs(125, y, 3, 0, bg)
