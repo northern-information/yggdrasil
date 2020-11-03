@@ -26,11 +26,27 @@ function page:render()
       if page.error            then self:error_message()
   elseif self.active_page == 0 then graphics:splash()
   elseif self.active_page == 1 then tracker:render()
-  elseif self.active_page == 2 then mixer:render()
-  elseif self.active_page == 3 then clades:render()
+  elseif self.active_page == 2 then self:render_mixer()
+  elseif self.active_page == 3 then self:render_clades()
   end
   fn.dirty_screen(true)
   graphics:teardown()
+end
+
+function page:render_mixer()
+  view:refresh()
+  graphics:draw_mixer()
+  graphics:draw_terminal()
+  graphics:draw_command_processing()
+  graphics:draw_y_mode()
+end
+
+function page:render_clades()
+  view:refresh()
+  graphics:draw_clades()
+  graphics:draw_terminal()
+  graphics:draw_command_processing()
+  graphics:draw_y_mode()
 end
 
 function page:error_message()

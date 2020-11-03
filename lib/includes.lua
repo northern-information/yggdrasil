@@ -13,6 +13,8 @@ if config_ ~= nil then
   include(lib .. "config_")
 end
 
+-- note these cannot be alphabetical due to dependencies
+
 fn          = include("lib/functions")    -- global untilities
 parameters  = include("lib/parameters")   -- exposed norns parameters
 view        = include("lib/view")         -- handle view logic
@@ -24,11 +26,8 @@ buffer      = include("lib/buffer")       -- liminal space for all the character
 commands    = include("lib/commands")     -- registered text-based commands
 runner      = include("lib/runner")       -- executes valid commands
 tracker     = include("lib/tracker")      -- core of yggdrasil
-clades      = include("lib/clades")       -- rich visual data
-mixer       = include("lib/mixer")        -- audio mixing and routing
 music       = include("lib/music")        -- essentially musicutil abstractions
 synth       = include("lib/synth")        -- supercollider
-docs        = include("lib/docs")         -- documentation
 graphics    = include("lib/graphics")     -- everything you see on the screen
 
 -- classes
