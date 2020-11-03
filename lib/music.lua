@@ -160,6 +160,16 @@ function music.init()
   }
 end
 
+function music:is_valid_ygg(s)
+  local match = false
+  for k, v in pairs(self:get_database()) do
+    if v.y == s then
+      match = true
+    end 
+  end
+  return match
+end
+
 function music:transpose_note(note)
   return note + (self.transpose * 12)
 end
