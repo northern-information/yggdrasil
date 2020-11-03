@@ -201,6 +201,14 @@ function music:convert(direction, value)
 end
 
 
+function string:split(sep)
+  local sep,fields=sep or ":",{}
+  local pattern=string.format("([^%s]+)",sep)
+  self:gsub(pattern,function(c) fields[#fields+1]=c end)
+  return fields
+end
+
+
 function music:chord_to_midi(c,return_names)
   -- input: chord names with optional transposition/octaves
   --        in format <note><chordtype>[/<note>][;octave]
