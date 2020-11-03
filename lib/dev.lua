@@ -7,18 +7,20 @@ function dev:scene(i)
     -- mixer testing
     filesystem:set_load_file(config.settings.load_file)
     filesystem:load()
-    view:set_index(3)
+    page:select(3)
     local clades = {}
-    table.insert(clades, "MIDI")
-    table.insert(clades, "CROW")
-    table.insert(clades, "SYNTH")
-    table.insert(clades, "SAMPLER")
+    clades[1] = "SYNTH"
+    clades[2] = "MIDI"
+    clades[3] = "SAMPLER"
+    clades[4] = "CROW"
     local tracks = tracker:get_tracks()
     for k, track in pairs(tracks) do
       track:set_clade(clades[math.random(1, 4)])
       track:set_muted(math.random(1, 2) == 1)
       track:set_soloed(math.random(1, 2) == 1)
       track:set_enabled(math.random(1, 2) == 1)
+      track:set_descend(math.random(1, 2) == 1)
+      track:set_shadow(math.random(1, 2) == 1)
       track:set_level(math.random(0, 100) * .01)
     end
     
@@ -26,7 +28,7 @@ function dev:scene(i)
     -- clade testing
     filesystem:set_load_file(config.settings.load_file)
     filesystem:load()
-    view:set_index(4)
+    page:select(4)
     local clades = {}
     table.insert(clades, "MIDI")
     table.insert(clades, "CROW")

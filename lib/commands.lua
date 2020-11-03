@@ -437,6 +437,9 @@ self:register{
     }
   end,
   action = function(payload)
+    if page:is("MIXER") or page:is("CLADES") then
+      page:select(1)
+    end
     if payload.y ~= nil then
       tracker:select_slot(payload.x, payload.y)
     else
@@ -1022,16 +1025,18 @@ self:register{
   end,
   action = function(payload)
     if payload.view == "tracker" then
-      view:set_index(1)
+      page:select(1)
+      tracker:set_track_view("midi")
+    elseif payload.view == "hud" then
+      page:select(2)
       tracker:set_track_view("midi")
     elseif payload.view == "mixer" then
-      view:set_index(3)
-    else
-      tracker:set_track_view(payload.view)
+      page:select(3)
+    elseif payload.view == "clades" then
+      page:select(4)
     end
   end
 }
-
 
 
 end -- register all

@@ -2,7 +2,6 @@ view = {}
 
 function view.init()
   -- page
-  view.index = 1
   view.tracker = false
   view.hud = false
   view.mixer = false
@@ -23,55 +22,61 @@ function view.init()
   view.slot_extents = view.slot_width_min
   view.slot_left_padding = 4
   view.transposed = false
+  -- mixer
+  view.mixer_multiple = 5
+  view.m = {
+    tracks = config.settings.default_cols,
+    track_width = 25,
+    track_height = 80,
+  }
 end
 
 function view:refresh()
-  local index = self:get_index()
-  if index == 1 then
+  if page:get_page_title() == "TRACKER" then
     self:set_tracker(true)
     self:set_hud(false)
     self:set_mixer(false)
     self:set_clades(false)
     self:set_transposed(false)
-    page:select(1)
-  elseif index == 2 then
+  elseif page:get_page_title() == "TRACKER + HUD" then
     self:set_tracker(true)
     self:set_hud(true)
     self:set_mixer(false)
     self:set_clades(false)
     self:set_transposed(false)
-    page:select(1)
-  elseif index == 3 then
+  elseif page:get_page_title() == "MIXER" then
     self:set_tracker(false)
     self:set_hud(false)
     self:set_mixer(true)
     self:set_clades(false)
     self:set_transposed(false)
-    page:select(2)
-  elseif index == 4 then
+  elseif page:get_page_title() == "CLADES" then
     self:set_tracker(false)
     self:set_hud(false)
     self:set_mixer(false)
     self:set_clades(true)
     self:set_transposed(true)
-    page:select(3)
   end
-  local y = self:get_y()
-  local x = self:get_x()
-  if tracker:is_follow() then
-    local deepest = tracker:get_deepest_not_empty_position()
-    x = deepest.x
-    y = deepest.y
-  end
-  self:set_slot_extents(tracker:get_extents())
-  self:set_rows_above(y > 2)
-  self:set_rows_below(y <= tracker:get_rows() - 5) -- todo what is this magic number
-  self:set_cols_per_view(math.floor(128 / self:get_slot_width()))
-  self:set_x_offset(x - math.ceil(self:get_cols_per_view() / 2))
-  if not self:is_clades() then
-    self:set_y_offset(y - math.ceil(self:get_rows_per_view() / 2))
+  if page:is("MIXER") then
+
   else
-    self:set_y_offset(x - 1) -- clades are transposed
+    local y = self:get_y()
+    local x = self:get_x()
+    if tracker:is_follow() then
+      local deepest = tracker:get_deepest_not_empty_position()
+      x = deepest.x
+      y = deepest.y
+    end
+    self:set_slot_extents(tracker:get_extents())
+    self:set_rows_above(y > 2)
+    self:set_rows_below(y <= tracker:get_rows() - 5) -- todo what is this magic number
+    self:set_cols_per_view(math.floor(128 / self:get_slot_width()))
+    self:set_x_offset(x - math.ceil(self:get_cols_per_view() / 2))
+    if not self:is_clades() then
+      self:set_y_offset(y - math.ceil(self:get_rows_per_view() / 2))
+    else
+      self:set_y_offset(x - 1) -- clades are transposed
+    end
   end
 end
 
@@ -92,15 +97,32 @@ function view:handle_pan(direction)
   end
 end
 
+
+function view:get_mixer_width()
+  return (self.m.track_width * tracker:get_cols()) - (self.m.track_width * 4)
+end
+
+function view:get_mixer_height()
+  return self.m.track_height
+end
+
 function view:pan_x(d)
   tracker:set_follow(false)
-  self:set_x(util.clamp(self:get_x() + d, 1, tracker:get_cols()))
+  if page:is("MIXER") then
+    self:set_x(util.clamp(self:get_x() + (d * self.mixer_multiple), -self.m.track_width, self:get_mixer_width() + 1))
+  else
+    self:set_x(util.clamp(self:get_x() + d, 1, tracker:get_cols()))
+  end
   self:set_tracker_dirty(true)
 end
 
 function view:pan_y(d)
   tracker:set_follow(false)
+  if page:is("MIXER") then
+    self:set_y(util.clamp(self:get_y() + (d * self.mixer_multiple), -self.m.track_width, self:get_mixer_height() - self.m.track_width))
+  else
   self:set_y(util.clamp(self:get_y() + d, 1, tracker:get_rows()))
+  end
   self:set_tracker_dirty(true)
 end
 
@@ -110,20 +132,8 @@ function view:pan_to_y(y)
   self:set_tracker_dirty(true)
 end
 
-function view:cycle()
-  self:set_index(fn.cycle(self:get_index() + 1, 1, self.total_views))
-  self:refresh()
-end
 
 -- getters & setters
-
-function view:set_index(i)
-  self.index = i
-end
-
-function view:get_index()
-  return self.index
-end
 
 function view:set_tracker_dirty(bool)
   self.tracker_dirty = bool
@@ -276,6 +286,14 @@ end
 
 function view:is_transposed()
   return self.transposed
+end
+
+function view:set_tracks(i)
+  self.m.tracks = i
+end
+
+function view:get_m()
+  return self.m
 end
 
 return view

@@ -52,17 +52,6 @@ function tracker:refresh()
   view:set_tracker_dirty(true)
 end
 
-function tracker:render()
-  view:refresh()
-  graphics:draw_hud_background()
-  graphics:draw_focus()
-  graphics:draw_tracks()
-  graphics:draw_hud_foreground()
-  graphics:draw_terminal()
-  graphics:draw_command_processing()
-  graphics:draw_y_mode()
-end
-
 
 
 -- tracks management
@@ -162,8 +151,9 @@ function tracker:remove_slot(track, y)
 end
 
 function tracker:remove_track(track)
-  table.remove(tracker.tracks, track)
-  self:set_cols(#tracker.tracks)
+  table.remove(self.tracks, track)
+  self:set_cols(#self.tracks)
+  view:set_tracks(#self.tracks)
   self:refresh()
 end
 
@@ -470,6 +460,7 @@ function tracker:append_track_after(x)
   local track = Track:new(x + 1)
   table.insert(self.tracks, x + 1, track)
   self:set_cols(#self.tracks)
+  view:set_tracks(#self.tracks)
   track:fill(self:get_rows())
   self:refresh()
 end

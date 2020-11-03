@@ -67,7 +67,7 @@ function keyboard.event(type, code, val)
     end
   end
 
-  if keys:is_tab(code) then view:cycle() end
+  if keys:is_tab(code) then page:cycle() end
 
   if keys:is_caps(code) then keys:toggle_y_mode() end
 

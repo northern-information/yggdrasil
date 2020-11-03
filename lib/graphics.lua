@@ -1,71 +1,5 @@
 graphics = {}
 
-
-
--- mixer
-
-
-
-function graphics:draw_mixer()
-  -- mute
-  -- solo
-  -- enable
-  -- shadow
-  -- clade
-    -- midi
-      -- device
-      -- channel
-    -- synth
-      -- voice
-    -- sampler
-      -- bank
-    -- crow
-      -- pair
-  -- direction  
-
-
-  -- toggles
-  -- self:draw_mixer_glyph(10, 10, "m", false)
-  -- self:draw_mixer_glyph(10, 30, "m", true)
-  -- self:draw_mixer_glyph(30, 10, "s", false)
-  -- self:draw_mixer_glyph(30, 30, "s", true)
-  -- self:draw_mixer_glyph(50, 10, "e", false)
-  -- self:draw_mixer_glyph(50, 30, "e", true)
-  -- self:draw_mixer_glyph(70, 10, "up", false)
-  -- self:draw_mixer_glyph(90, 10, "down", false)
-
-  -- clades
-  -- self:draw_mixer_glyph(1, 1, "midi", true)
-  -- self:draw_mixer_glyph(26, 1, "synth", true)
-  -- self:draw_mixer_glyph(51, 1, "sampler", true)
-  -- self:draw_mixer_glyph(76, 1, "crow", true)
-  -- self:draw_mixer_glyph(101, 1, "shadow", true)
-  -- self:draw_mixer_glyph(1, 32, "midi")
-  -- self:draw_mixer_glyph(26, 32, "synth")
-  -- self:draw_mixer_glyph(51, 32, "sampler")
-  -- self:draw_mixer_glyph(76, 32, "crow")
-  -- self:draw_mixer_glyph(101, 32, "shadow")
-
-  self:draw_level_gauge(10, 10, 1)
-  self:draw_level_gauge(40, 10, .5)
-  self:draw_level_gauge(70, 10, 0)
-
-end
-
-
-function graphics:draw_level_gauge(x, y, level)
-  local level = level > .99 and .99 or level
-  level = level < .1 and .1 or level
-  local height = level * 23
-  self:rect(x, y, 11, 27, 15)
-  self:rect(x + 1, y + 1, 9, 25, 0)
-  self:rect(x + 2, ((y + 2) + (23 - height)), 7, height)
-  if height > 2 and height < 23 then
-    self:mlrs(x + 2, ((y + 3) + (23 - height)), 8, 0, 0)
-  end
-end
-
-
 function graphics.init()
   -- frames and animation state
   graphics.fps = 30
@@ -113,6 +47,7 @@ end
 -- tracker
 
 
+
 function graphics:draw_focus()
   local sw, sh = view:get_slot_width(), view:get_slot_height()
   local w = view:get_x_offset() * sw
@@ -126,12 +61,10 @@ end
 
 
 function graphics:draw_hud_background()
-  if not view:is_hud() then return end
   self:draw_cols()
 end
 
 function graphics:draw_hud_foreground()
-  if not view:is_hud() then return end
   local swm, sw, sh =  view:get_slot_width_min(), view:get_slot_width(), view:get_slot_height()
   self:rect(0, 0, swm, 64, 0)
   self:rect(0, 0, 128, sh, 0)
@@ -181,14 +114,9 @@ end
 
 function graphics:draw_y_mode()
   if keys:is_y_mode() then
-    self:mls(5, 0, 2, 3, 0)
-    self:mls(6, 0, 2, 4, 0)
-    self:mls(7, 0, 3, 4, 0)
-    self:mls(8, 0, 0, 8, 0)
-    self:mls(9, 0, 0, 9, 0)   
-    self:mls(10, 0, 0, 10, 0)
-    self:mls(6, 0, 3, 3, self.cursor_frame)
-    self:mls(9, 0, 0, 9, self.cursor_frame)   
+    local l = page:is("CLADES") and 15 - self.cursor_frame or self.cursor_frame
+    self:mls(6, 0, 3, 3, l)
+    self:mls(9, 0, 0, 9, l)   
   end
 end
 
@@ -265,6 +193,54 @@ end
 
 
 
+-- mixer
+
+
+
+function graphics:draw_mixer()
+  local fg = 15
+  local bg = 0
+  local v = view:get_m()
+  for i = 1, v.tracks do
+    local track = tracker:get_track(i)
+    local x = 2 + ((i - 1) * v.track_width) - view:get_x()
+    local y = -view:get_y()
+    local track_title_width = 11
+    -- left line
+    self:mlrs(x, y + 1, 0, v.track_height, fg)
+    -- track number
+    self:rect(x, y + 1, track_title_width, 7, fg)
+    self:text(x + 1, y + 7, i, bg)
+    -- mute, solo, enabled
+    self:draw_mixer_glyph(x + 1, y + 9, "m", track:is_muted())
+    self:draw_mixer_glyph(x + 1, y + 19, "s", track:is_soloed())
+    self:draw_mixer_glyph(x + 1, y + 29, "e", track:is_enabled())
+    -- level
+    self:draw_level_gauge(x + track_title_width, y + 1, track:get_level())
+    -- direction
+    self:draw_mixer_glyph(x + track_title_width + 3, y + 29, track:is_descending() and "down" or "up")
+    -- clade
+    self:draw_mixer_glyph(x, y + 39, track:get_clade(), true)
+    -- shadow
+    if track:is_shadow() then
+      self:draw_mixer_glyph(x, y + 49, "shadow", true)
+    end
+  end
+end
+
+
+function graphics:draw_level_gauge(x, y, level)
+  self:rect(x, y, 11, 27, 15)
+  self:rect(x + 1, y + 1, 9, 25, 0)  
+  local max_height = 23
+  local height = math.floor(util.linlin(0.0, 1.0, 1, 23, level))
+  self:rect(x + 2, ((y + 2) + (max_height - height)), 7, height)
+  if height > 2 then
+    self:mlrs(x + 2, ((y + 4) + (max_height - height)), 8, 0, 0)
+  end
+end
+
+
 
 -- clades
 
@@ -306,7 +282,7 @@ function graphics:draw_clades()
     if clade.wired then
       self:mlrs(clade_x, y, 23, 0, bg)
     end
-    self:text(89, y + 2, clade.name, fg)
+    self:draw_mixer_glyph(89, y - 4, clade.name, false)
   end
   -- tracks
   local track_extents = fn.get_largest_extents_from_zero_to(tracker:get_cols())
@@ -322,7 +298,7 @@ function graphics:draw_clades()
       if track:is_enabled() 
         and not track:is_muted()
         and (track:is_soloed() or not is_any_soloed) then
-          self:mlrs(track_x - 24, track_y, 24, 0, bg)
+          self:mlrs(track_x - 21, track_y, 21, 0, bg)
       else
           self:mlrs(track_x - 21, track_y, 7, 0, bg)
           self:rect(track_x - 14, track_y - 2, 3, 3, bg)
@@ -540,7 +516,7 @@ function graphics:draw_mixer_glyph(x, y, glyph, inverted)
 
   if glyph == "m" or glyph == "s" or glyph == "e" then
     self:rect(x, y, 9, 9, bg)
-  elseif glyph == "synth" or glyph == "midi" or glyph == "sampler" or glyph == "crow"  or glyph == "shadow"then
+  elseif glyph == "SYNTH" or glyph == "MIDI" or glyph == "SAMPLER" or glyph == "CROW"  or glyph == "shadow"then
     self:rect(x, y, 22, 7, bg)
   end
 
@@ -576,7 +552,7 @@ function graphics:draw_mixer_glyph(x, y, glyph, inverted)
     self:mlrs(x + 4, y + 5, 0, 2, fg)
     self:mlrs(x + 5, y + 4, 0, 2, fg)
     self:mlrs(x + 6, y + 3, 0, 2, fg)
-elseif glyph == "synth" then
+elseif glyph == "SYNTH" then
     local wave = 0
     for i = 1, 3 do
       self:mlrs(x + 1 + wave, y + 4, 2, 0, fg)
@@ -588,7 +564,7 @@ elseif glyph == "synth" then
       self:mlrs(x + 7 + wave, y + 4, 1, 0, fg)
       wave = i * 6
     end
- elseif glyph == "midi" then
+ elseif glyph == "MIDI" then
     self:mlrs(x + 1, y + 2, 4, 0, fg)
     self:mlrs(x + 2, y + 1, 0, 5, fg)
     self:mlrs(x + 4, y + 1, 0, 4, fg)
@@ -599,7 +575,7 @@ elseif glyph == "synth" then
     self:mlrs(x + 13, y + 2, 0, 4, fg)
     self:mlrs(x + 9, y + 6, 4, 0, fg)
     self:mlrs(x + 15, y + 1, 0, 5, fg)
-  elseif glyph == "sampler" then
+  elseif glyph == "SAMPLER" then
     self:mlrs(x + 1, y + 4, 20, 0, fg)
     self:mlrs(x + 3, y + 1, 0, 5, fg)
     self:mlrs(x + 4, y + 2, 0, 3, fg)
@@ -611,7 +587,7 @@ elseif glyph == "synth" then
     self:mlrs(x + 16, y + 1, 0, 4, fg)
     self:mlrs(x + 18, y + 2, 0, 2, fg)
     self:mlrs(x + 19, y + 4, 0, 1, fg)
-  elseif glyph == "crow" then
+  elseif glyph == "CROW" then
     self:mlrs(x + 3, y + 5, 0, 1, fg)
     self:mlrs(x + 4, y + 3, 0, 2, fg)
     self:mlrs(x + 5, y + 2, 0, 2, fg)
