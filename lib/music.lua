@@ -201,14 +201,6 @@ function music:convert(direction, value)
 end
 
 
-function string:split(sep)
-  local sep,fields=sep or ":",{}
-  local pattern=string.format("([^%s]+)",sep)
-  self:gsub(pattern,function(c) fields[#fields+1]=c end)
-  return fields
-end
-
-
 function music:chord_to_midi(c,return_names)
   -- input: chord names with optional transposition/octaves
   --        in format <note><chordtype>[/<note>][;octave]
@@ -223,18 +215,18 @@ function music:chord_to_midi(c,return_names)
   local db = self:get_database()
   db_chords={
     {"1P 3M 5P","major","M","^",""},
-    {"1P 3M 5P 7M","major seventh","maj7","Δ","ma7","M7","Maj7","^7"},
-    {"1P 3M 5P 7M 9M","major ninth","maj9","Δ9","^9"},
+    {"1P 3M 5P 7M","major seventh","maj7","ma7","M7","Maj7","^7"},
+    {"1P 3M 5P 7M 9M","major ninth","maj9","^9"},
     {"1P 3M 5P 7M 9M 13M","major thirteenth","maj13","Maj13 ^13"},
     {"1P 3M 5P 6M","sixth","6","add6","add13","M6"},
     {"1P 3M 5P 6M 9M","sixth/ninth","6/9","69","M69"},
     {"1P 3M 6m 7M","major seventh flat sixth","M7b6","^7b6"},
-    {"1P 3M 5P 7M 11A","major seventh sharp eleventh","maj#4","Δ#4","Δ#11","M7#11","^7#11","maj7#11"},
+    {"1P 3M 5P 7M 11A","major seventh sharp eleventh","maj#4","M7#11","^7#11","maj7#11"},
     -- ==Minor==
     -- '''Normal'''
     {"1P 3m 5P","minor","m","min","-"},
     {"1P 3m 5P 7m","minor seventh","m7","min7","mi7","-7"},
-    {"1P 3m 5P 7M","minor/major seventh","m/ma7","m/maj7","mM7","mMaj7","m/M7","-Δ7","mΔ","-^7"},
+    {"1P 3m 5P 7M","minor/major seventh","m/ma7","m/maj7","mM7","mMaj7","m/M7","-^7"},
     {"1P 3m 5P 6M","minor sixth","m6","-6"},
     {"1P 3m 5P 7m 9M","minor ninth","m9","-9"},
     {"1P 3m 5P 7M 9M","minor/major ninth","mM9","mMaj9","-^9"},
@@ -265,7 +257,7 @@ function music:chord_to_midi(c,return_names)
     {"1P 3M 5A","augmented","aug","+","+5","^#5"},
     {"1P 3m 5A","minor augmented","m#5","-#5","m+"},
     {"1P 3M 5A 7M","augmented seventh","maj7#5","maj7+5","+maj7","^7#5"},
-    {"1P 3M 5P 7M 9M 11A","major sharp eleventh (lydian)","maj9#11","Δ9#11","^9#11"},
+    {"1P 3M 5P 7M 9M 11A","major sharp eleventh (lydian)","maj9#11","^9#11"},
     -- ==Legacy==
     {"1P 2M 4P 5P","","sus24","sus4add9"},
     {"1P 3M 5A 7M 9M","","maj9#5","Maj9#5"},
@@ -356,7 +348,7 @@ function music:chord_to_midi(c,return_names)
   -- get octave
   octave=4
   if string.match(c,";") then
-    for i,s in pairs(c:split(";")) do
+    for i,s in pairs(fn.string_split(c,";")) do
       if i==1 then
         c=s
       else
@@ -368,7 +360,7 @@ function music:chord_to_midi(c,return_names)
   -- get transpositions
   transpose_note=''
   if string.match(c,"/") then
-    for i,s in pairs(c:split("/")) do
+    for i,s in pairs(fn.string_split(c,"/")) do
       if i==1 then
         c=s
       else
