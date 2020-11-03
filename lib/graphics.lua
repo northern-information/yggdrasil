@@ -116,8 +116,10 @@ end
 function graphics:draw_y_mode()
   if keys:is_y_mode() then
     self:mls(5, 0, 2, 3, 0)
+    self:mls(6, 0, 2, 4, 0)
     self:mls(7, 0, 3, 4, 0)
     self:mls(8, 0, 0, 8, 0)
+    self:mls(9, 0, 0, 9, 0)   
     self:mls(10, 0, 0, 10, 0)
     self:mls(6, 0, 3, 3, self.cursor_frame)
     self:mls(9, 0, 0, 9, self.cursor_frame)   
@@ -201,9 +203,10 @@ end
 function graphics:draw_clades()
   local clade_x = 77
   local track_x = 32
-  local bg = 1
+  local bg = 0
   local fg = 15
   local is_any_soloed = tracker:is_any_soloed()
+  self:rect(0, 0, 128, 64, 15)
   -- rightmost column
   local clades = {}
   clades[1] = { name = "SYNTH", wired = false, y = 0 }
@@ -225,7 +228,7 @@ function graphics:draw_clades()
     end
   end
   for k, clade in pairs(clades) do
-    local y = (k * 13) - 8
+    local y = (k * 13) - 5
     clades[k]["y"] = y
     self:rect(87, y - 5, 38, 9, bg)
     self:mlrs(125, y, 3, 0, bg)
@@ -235,28 +238,29 @@ function graphics:draw_clades()
     self:text(89, y + 2, clade.name, fg)
   end
   -- tracks
+  local track_extents = fn.get_largest_extents_from_zero_to(tracker:get_cols())
   for i = 1, view:get_rows_per_view() + 2 do
     -- leftmost column
     local value = i + view:get_y_offset()
     local track = tracker:get_track(value)
-    local track_y = (i * 8) - 4
+    local track_y = (i * 8) - 1
     if track ~= nil then
       -- track background
-      self:mlrs(0, track_y, 3, 0, bg)
-      self:rect(3, track_y - 4, 16, 7, bg)
+      self:mlrs(0, track_y, 8, 0, bg)
+      self:rect(8, track_y - 4, track_extents + 4, 7, bg)
       if track:is_enabled() 
         and not track:is_muted()
         and (track:is_soloed() or not is_any_soloed) then
-          self:mlrs(track_x - 13, track_y, 13, 0, bg)
+          self:mlrs(track_x - 16, track_y, 16, 0, bg)
       else
           self:mlrs(track_x - 15, track_y, 5, 0, bg)
           self:rect(track_x - 10, track_y - 2, 3, 3, bg)
       end
       -- type
       local adjust_a_single_pixel_for_number_1_because_typography = value == 1 and 1 or 0
-      self:text(
-        (5 + adjust_a_single_pixel_for_number_1_because_typography),
-        (i * 8) - 2,
+      self:text_right(
+        (10 + track_extents - adjust_a_single_pixel_for_number_1_because_typography),
+        (i * 8) + 1,
         ((value < 1 or value > tracker:get_cols()) and "" or value),
         fg
       )

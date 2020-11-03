@@ -97,7 +97,14 @@ end
 
 --- value checking and manipulation
 
-
+function fn.get_largest_extents_from_zero_to(i)
+  local extents = 0
+  for e = 1, i do
+    local this_extents = screen.text_extents(e)
+    extents = this_extents > extents and this_extents or extents
+  end
+  return extents
+end
 
 function fn.cycle(value, min, max)
   if value > max then
