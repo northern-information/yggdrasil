@@ -221,8 +221,8 @@ function graphics:draw_clades()
         and not track:is_muted()
         and (track:is_soloed() or not is_any_soloed)
         and track:get_clade() == clade.name
-        and track:get_x() > view:get_y_offset()
-        and track:get_x() < view:get_y_offset() + view:get_rows_per_view() + 3 then
+        and track:get_x() > view:get_y_offset() - 2
+        and track:get_x() < view:get_y_offset() + view:get_rows_per_view() + 1 then
           clades[kk].wired = true
       end
     end
@@ -241,9 +241,9 @@ function graphics:draw_clades()
   local track_extents = fn.get_largest_extents_from_zero_to(tracker:get_cols())
   for i = 1, view:get_rows_per_view() + 2 do
     -- leftmost column
-    local value = i + view:get_y_offset()
+    local value = i + view:get_y_offset() - 2
     local track = tracker:get_track(value)
-    local track_y = (i * 8) - 1
+    local track_y = (i * 8) - 3
     if track ~= nil then
       -- track background
       self:mlrs(0, track_y, 8, 0, bg)
@@ -260,7 +260,7 @@ function graphics:draw_clades()
       local adjust_a_single_pixel_for_number_1_because_typography = value == 1 and 1 or 0
       self:text_right(
         (10 + track_extents - adjust_a_single_pixel_for_number_1_because_typography),
-        (i * 8) + 1,
+        (i * 8) - 1,
         ((value < 1 or value > tracker:get_cols()) and "" or value),
         fg
       )

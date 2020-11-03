@@ -18,7 +18,7 @@ function dev:scene(i)
     end
     -- tracker:disable(1)
     -- tracker:disable(3)
-    -- tracker:solo(1)
+    t(1):midi()
   elseif i == 2 then
 
   end

@@ -405,6 +405,21 @@ end
 function Track:set_clade(s)
   self.clade = s
 end
+function Track:synth()
+  self:set_clade("SYNTH")
+end
+
+function Track:midi()
+  self:set_clade("MIDI")
+end
+
+function Track:sampler()
+  self:set_clade("SAMPLER")
+end
+
+function Track:crow()
+  self:set_clade("CROW")
+end
 
 function Track:get_view()
   return self.view
