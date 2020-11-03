@@ -190,6 +190,7 @@ self:register{
 
 -- CHORD
 -- 1 1 chord 60;63;67
+-- 1 1 chord c4;ds4;g4
 self:register{
   invocations = { "chord", "c" },
   signature = function(branch, invocations)
@@ -197,7 +198,7 @@ self:register{
       and fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
       and Validator:new(branch[3], invocations):ok()
-      and #branch[4].leaves >= 2
+      and #branch[4].leaves >= 2 -- weak
   end,
   payload = function(branch)
     return {
@@ -752,19 +753,34 @@ self:register{
 
 -- SET_MIDI_NOTE_AND_VELOCITY
 -- 1 1 72 vel;100
+-- 1 1 c4 vel;100
 self:register{ -- todo make midi note optional?
   invocations = { "velocity", "vel" },
   signature = function(branch, invocations)
-    return #branch == 4
+    return (
+      #branch == 4
       and fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
       and fn.is_int(branch[3].leaves[1])
       and Validator:new(branch[4], invocations):ok()
+    ) or (
+      #branch == 4
+      and fn.is_int(branch[1].leaves[1])
+      and fn.is_int(branch[2].leaves[1])
+      and music:is_valid_ygg(branch[3].leaves[1])
+      and Validator:new(branch[4], invocations):ok()
+    )
   end,
   payload = function(branch)
+    local midi_note = 0
+    if fn.is_int(branch[3].leaves[1]) then
+      midi_note = branch[3].leaves[1]
+    else
+      midi_note = music:convert("ygg_to_midi", branch[3].leaves[1])
+    end
     return {
       class = "SET_MIDI_NOTE_AND_VELOCITY",
-      midi_note = branch[3].leaves[1],
+      midi_note = midi_note,
       velocity = branch[4].leaves[3],
       x = branch[1].leaves[1],
       y = branch[2].leaves[1],
