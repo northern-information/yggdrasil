@@ -63,10 +63,10 @@ function key(k, z)
     -- exit
   elseif k == 2 then
     tracker:toggle_playback()
+    fn.dismiss_messages()
   elseif k == 3 then
-    print("k3")
+    commands:fire_k3()
   end
-  fn.dismiss_messages()
   fn.dirty_screen(true)
 end
 
