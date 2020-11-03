@@ -200,4 +200,324 @@ function music:convert(direction, value)
   if direction == "ygg_to_midi"  then for k, v in pairs(db) do if v.y == value then return v.m end end end
 end
 
+
+function music:chord_to_midi(c,return_names)
+  -- input: chord names with optional transposition/octaves
+  --        in format <note><chordtype>[/<note>][;octave]
+  --        (octave 4 is default)
+  --        return_names is boolean to return names instead of midi
+  -- returns: table of note names or midi notes in that chord 
+  -- example: 'cmaj7/e;6' will return midi notes {88,91,95,96}
+  --                   or will return names {E6,G6,B6,C7}
+  --          'gbm'       will return midi notes {66,70,73,77}
+  --                   or will return midi names {F#4,A#4,C#5,F5}
+
+  local db = self:get_database()
+  db_chords={
+    {"1P 3M 5P","major","M","^",""},
+    {"1P 3M 5P 7M","major seventh","maj7","Δ","ma7","M7","Maj7","^7"},
+    {"1P 3M 5P 7M 9M","major ninth","maj9","Δ9","^9"},
+    {"1P 3M 5P 7M 9M 13M","major thirteenth","maj13","Maj13 ^13"},
+    {"1P 3M 5P 6M","sixth","6","add6","add13","M6"},
+    {"1P 3M 5P 6M 9M","sixth/ninth","6/9","69","M69"},
+    {"1P 3M 6m 7M","major seventh flat sixth","M7b6","^7b6"},
+    {"1P 3M 5P 7M 11A","major seventh sharp eleventh","maj#4","Δ#4","Δ#11","M7#11","^7#11","maj7#11"},
+    -- ==Minor==
+    -- '''Normal'''
+    {"1P 3m 5P","minor","m","min","-"},
+    {"1P 3m 5P 7m","minor seventh","m7","min7","mi7","-7"},
+    {"1P 3m 5P 7M","minor/major seventh","m/ma7","m/maj7","mM7","mMaj7","m/M7","-Δ7","mΔ","-^7"},
+    {"1P 3m 5P 6M","minor sixth","m6","-6"},
+    {"1P 3m 5P 7m 9M","minor ninth","m9","-9"},
+    {"1P 3m 5P 7M 9M","minor/major ninth","mM9","mMaj9","-^9"},
+    {"1P 3m 5P 7m 9M 11P","minor eleventh","m11","-11"},
+    {"1P 3m 5P 7m 9M 13M","minor thirteenth","m13","-13"},
+    -- '''Diminished'''
+    {"1P 3m 5d","diminished","dim","°","o"},
+    {"1P 3m 5d 7d","diminished seventh","dim7","°7","o7"},
+    {"1P 3m 5d 7m","half-diminished","m7b5","ø","-7b5","h7","h"},
+    -- ==Dominant/Seventh==
+    -- '''Normal'''
+    {"1P 3M 5P 7m","dominant seventh","7","dom"},
+    {"1P 3M 5P 7m 9M","dominant ninth","9"},
+    {"1P 3M 5P 7m 9M 13M","dominant thirteenth","13"},
+    {"1P 3M 5P 7m 11A","lydian dominant seventh","7#11","7#4"},
+    -- '''Altered'''
+    {"1P 3M 5P 7m 9m","dominant flat ninth","7b9"},
+    {"1P 3M 5P 7m 9A","dominant sharp ninth","7#9"},
+    {"1P 3M 7m 9m","altered","alt7"},
+    -- '''Suspended'''
+    {"1P 4P 5P","suspended fourth","sus4","sus"},
+    {"1P 2M 5P","suspended second","sus2"},
+    {"1P 4P 5P 7m","suspended fourth seventh","7sus4","7sus"},
+    {"1P 5P 7m 9M 11P","eleventh","11"},
+    {"1P 4P 5P 7m 9m","suspended fourth flat ninth","b9sus","phryg","7b9sus","7b9sus4"},
+    -- ==Other==
+    {"1P 5P","fifth","5"},
+    {"1P 3M 5A","augmented","aug","+","+5","^#5"},
+    {"1P 3m 5A","minor augmented","m#5","-#5","m+"},
+    {"1P 3M 5A 7M","augmented seventh","maj7#5","maj7+5","+maj7","^7#5"},
+    {"1P 3M 5P 7M 9M 11A","major sharp eleventh (lydian)","maj9#11","Δ9#11","^9#11"},
+    -- ==Legacy==
+    {"1P 2M 4P 5P","","sus24","sus4add9"},
+    {"1P 3M 5A 7M 9M","","maj9#5","Maj9#5"},
+    {"1P 3M 5A 7m","","7#5","+7","7+","7aug","aug7"},
+    {"1P 3M 5A 7m 9A","","7#5#9","7#9#5","7alt"},
+    {"1P 3M 5A 7m 9M","","9#5","9+"},
+    {"1P 3M 5A 7m 9M 11A","","9#5#11"},
+    {"1P 3M 5A 7m 9m","","7#5b9","7b9#5"},
+    {"1P 3M 5A 7m 9m 11A","","7#5b9#11"},
+    {"1P 3M 5A 9A","","+add#9"},
+    {"1P 3M 5A 9M","","M#5add9","+add9"},
+    {"1P 3M 5P 6M 11A","","M6#11","M6b5","6#11","6b5"},
+    {"1P 3M 5P 6M 7M 9M","","M7add13"},
+    {"1P 3M 5P 6M 9M 11A","","69#11"},
+    {"1P 3m 5P 6M 9M","","m69","-69"},
+    {"1P 3M 5P 6m 7m","","7b6"},
+    {"1P 3M 5P 7M 9A 11A","","maj7#9#11"},
+    {"1P 3M 5P 7M 9M 11A 13M","","M13#11","maj13#11","M13+4","M13#4"},
+    {"1P 3M 5P 7M 9m","","M7b9"},
+    {"1P 3M 5P 7m 11A 13m","","7#11b13","7b5b13"},
+    {"1P 3M 5P 7m 13M","","7add6","67","7add13"},
+    {"1P 3M 5P 7m 9A 11A","","7#9#11","7b5#9","7#9b5"},
+    {"1P 3M 5P 7m 9A 11A 13M","","13#9#11"},
+    {"1P 3M 5P 7m 9A 11A 13m","","7#9#11b13"},
+    {"1P 3M 5P 7m 9A 13M","","13#9"},
+    {"1P 3M 5P 7m 9A 13m","","7#9b13"},
+    {"1P 3M 5P 7m 9M 11A","","9#11","9+4","9#4"},
+    {"1P 3M 5P 7m 9M 11A 13M","","13#11","13+4","13#4"},
+    {"1P 3M 5P 7m 9M 11A 13m","","9#11b13","9b5b13"},
+    {"1P 3M 5P 7m 9m 11A","","7b9#11","7b5b9","7b9b5"},
+    {"1P 3M 5P 7m 9m 11A 13M","","13b9#11"},
+    {"1P 3M 5P 7m 9m 11A 13m","","7b9b13#11","7b9#11b13","7b5b9b13"},
+    {"1P 3M 5P 7m 9m 13M","","13b9"},
+    {"1P 3M 5P 7m 9m 13m","","7b9b13"},
+    {"1P 3M 5P 7m 9m 9A","","7b9#9"},
+    {"1P 3M 5P 9M","","Madd9","2","add9","add2"},
+    {"1P 3M 5P 9m","","Maddb9"},
+    {"1P 3M 5d","","Mb5"},
+    {"1P 3M 5d 6M 7m 9M","","13b5"},
+    {"1P 3M 5d 7M","","M7b5"},
+    {"1P 3M 5d 7M 9M","","M9b5"},
+    {"1P 3M 5d 7m","","7b5"},
+    {"1P 3M 5d 7m 9M","","9b5"},
+    {"1P 3M 7m","","7no5"},
+    {"1P 3M 7m 13m","","7b13"},
+    {"1P 3M 7m 9M","","9no5"},
+    {"1P 3M 7m 9M 13M","","13no5"},
+    {"1P 3M 7m 9M 13m","","9b13"},
+    {"1P 3m 4P 5P","","madd4"},
+    {"1P 3m 5P 6m 7M","","mMaj7b6"},
+    {"1P 3m 5P 6m 7M 9M","","mMaj9b6"},
+    {"1P 3m 5P 7m 11P","","m7add11","m7add4"},
+    {"1P 3m 5P 9M","","madd9"},
+    {"1P 3m 5d 6M 7M","","o7M7"},
+    {"1P 3m 5d 7M","","oM7"},
+    {"1P 3m 6m 7M","","mb6M7"},
+    {"1P 3m 6m 7m","","m7#5"},
+    {"1P 3m 6m 7m 9M","","m9#5"},
+    {"1P 3m 5A 7m 9M 11P","","m11A"},
+    {"1P 3m 6m 9m","","mb6b9"},
+    {"1P 2M 3m 5d 7m","","m9b5"},
+    {"1P 4P 5A 7M","","M7#5sus4"},
+    {"1P 4P 5A 7M 9M","","M9#5sus4"},
+    {"1P 4P 5A 7m","","7#5sus4"},
+    {"1P 4P 5P 7M","","M7sus4"},
+    {"1P 4P 5P 7M 9M","","M9sus4"},
+    {"1P 4P 5P 7m 9M","","9sus4","9sus"},
+    {"1P 4P 5P 7m 9M 13M","","13sus4","13sus"},
+    {"1P 4P 5P 7m 9m 13m","","7sus4b9b13","7b9b13sus4"},
+    {"1P 4P 7m 10m","","4","quartal"},
+    {"1P 5P 7m 9m 11P","","11b9"},
+  }
+  notes_white={"C","D","E","F","G","A","B"}
+  notes_scale_sharp={"C","C#","D","D#","E","F","F#","G","G#","A","A#","B","C","C#","D","D#","E","F","F#","G","G#","A","A#","B","C","C#","D","D#","E","F","F#","G","G#","A","A#","B"}
+  notes_scale_acc1={"B#","Db","D","Eb","Fb","E#","Gb","G","Ab","A","Bb","Cb"}
+  notes_scale_acc2={"C","Cs","D","Ds","E","F","Fs","G","Gs","A","As","B"}
+  notes_scale_acc3={"Bs","Db","D","Eb","Fb","Es","Gb","G","Ab","A","Bb","Cb"}
+  notes_adds={"","#","b","s"}
+  notes_all={}
+  for i,n in ipairs(notes_white) do
+    for j,a in ipairs(notes_adds) do
+      table.insert(notes_all,(n..a))
+    end
+  end
+  
+  chord_match=""
+  
+  -- get octave
+  octave=4
+  if string.match(c,";") then
+    for i,s in pairs(c:split(";")) do
+      if i==1 then
+        c=s
+      else
+        octave=tonumber(s)
+      end
+    end
+  end
+  
+  -- get transpositions
+  transpose_note=''
+  if string.match(c,"/") then
+    for i,s in pairs(c:split("/")) do
+      if i==1 then
+        c=s
+      else
+        transpose_note=s
+      end
+    end
+  end
+  
+  -- find the root note name
+  note_match=""
+  transpose_note_match=""
+  chord_rest=""
+  for i,n in ipairs(notes_all) do
+    if transpose_note~="" and #n>#transpose_note_match then
+      if n:lower()==transpose_note or n==transpose_note then
+        transpose_note_match=n
+      end
+    end
+    if #n>#note_match then
+      -- check if has prefix
+      s,e=c:find(n)
+      if s==1 then
+        note_match=n
+        chord_rest=string.sub(c,e+1)
+      end
+      s,e=c:find(n:lower())
+      if s==1 then
+        note_match=n
+        chord_rest=string.sub(c,e+1)
+      end
+    end
+  end
+  if note_match=="" then
+    return {},false
+  end
+  
+  -- convert to canonical sharp scale
+  -- e.g. Fb -> E, Gs -> G#
+  for i,n in ipairs(notes_scale_acc1) do
+    if note_match==n then
+      note_match=notes_scale_sharp[i]
+      break
+    end
+  end
+  for i,n in ipairs(notes_scale_acc2) do
+    if note_match==n then
+      note_match=notes_scale_sharp[i]
+      break
+    end
+  end
+  for i,n in ipairs(notes_scale_acc3) do
+    if note_match==n then
+      note_match=notes_scale_sharp[i]
+      break
+    end
+  end
+  if transpose_note_match~="" then
+    for i,n in ipairs(notes_scale_acc1) do
+      if transpose_note_match==n then
+        transpose_note_match=notes_scale_sharp[i]
+        break
+      end
+    end
+    for i,n in ipairs(notes_scale_acc2) do
+      if transpose_note_match==n then
+        transpose_note_match=notes_scale_sharp[i]
+        break
+      end
+    end
+    for i,n in ipairs(notes_scale_acc3) do
+      if transpose_note_match==n then
+        transpose_note_match=notes_scale_sharp[i]
+        break
+      end
+    end
+  end
+  
+  -- find longest matching chord pattern
+  chord_match="" -- (no chord match is major chord)
+  chord_intervals="1P 3m 5P"
+  for _,chord_type in ipairs(db_chords) do
+    for i,chord_pattern in ipairs(chord_type) do
+      if i>2 then
+        if #chord_pattern>#chord_match and (chord_rest==chord_pattern or chord_rest:lower()==chord_pattern:lower()) then
+          chord_match=chord_pattern
+          chord_intervals=chord_type[1]
+        end
+      end
+    end
+  end
+  --print("chord_match for "..chord_rest..": "..chord_match)
+  
+  -- find location of root
+  root_position=1
+  for i,n in ipairs(notes_scale_sharp) do
+    if n==note_match then
+      root_position=i
+      break
+    end
+  end
+  
+  -- find notes from intervals
+  whole_note_semitones={0,2,4,5,7,9,11,12}
+  notes_in_chord={}
+  for interval in string.gmatch(chord_intervals,"%S+") do
+    -- get major note position
+    major_note_position=(string.match(interval,"%d+")-1)%7+1
+    -- find semitones from root
+    semitones=whole_note_semitones[major_note_position]
+    -- adjust semitones based on interval
+    if string.match(interval,"m") then
+      semitones=semitones-1
+    elseif string.match(interval,"A") then
+      semitones=semitones+1
+    end
+    -- get note in scale from root position
+    note_in_chord=notes_scale_sharp[root_position+semitones]
+    table.insert(notes_in_chord,note_in_chord)
+  end
+  
+  -- if tranposition, rotate until new root
+  if transpose_note_match~="" then
+    found_note=false
+    for i=1,#notes_in_chord do
+      if notes_in_chord[1]==transpose_note_match then
+        found_note=true
+        break
+      end
+      table.insert(notes_in_chord,table.remove(notes_in_chord,1))
+    end
+    if not found_note then
+      table.insert(notes_in_chord,1,transpose_note_match)
+    end
+  end
+  
+  -- convert to midi
+  if octave==nil then
+    octave=4
+  end
+  midi_notes_in_chord={}
+  last_note=0
+  for i,n in ipairs(notes_in_chord) do
+    for _,d in ipairs(db) do
+      if d.m>last_note and (d.i==n..octave or d.i==n..(octave+1) or d.i==n..(octave+2) or d.i==n..(octave+3)) then
+        last_note=d.m
+        table.insert(midi_notes_in_chord,d.m)
+        notes_in_chord[i]=d.i
+        break
+      end
+    end
+  end
+
+  -- return
+  if return_names~=nil and return_names then
+    return notes_in_chord,true
+  end
+  return midi_notes_in_chord,true
+end
+
 return music
