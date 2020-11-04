@@ -201,20 +201,23 @@ function music:convert(direction, value)
 end
 
 
-function music:chord_to_midi(c,return_names)
+function music:chord_to_midi(c)
   -- input: chord names with optional transposition/octaves
   --        in format <note><chordtype>[/<note>][;octave]
   --        (octave 4 is default)
-  --        return_names is boolean to return names instead of midi
   -- returns: table of note names or midi notes in that chord 
   -- example: 'cmaj7/e;6' will return midi notes {88,91,95,96}
   --                   or will return names {E6,G6,B6,C7}
   --          'gbm'       will return midi notes {66,70,73,77}
   --                   or will return midi names {F#4,A#4,C#5,F5}
-
-  local db = self:get_database()
+  local original_c = c
+  if c==nil then
+    print("c is nil") 
+    return false
+  end
+  local db = self.database
   db_chords={
-    {"1P 3M 5P","major","M","^",""},
+    {"1P 3M 5P","major","^",""},
     {"1P 3M 5P 7M","major seventh","maj7","ma7","M7","Maj7","^7"},
     {"1P 3M 5P 7M 9M","major ninth","maj9","^9"},
     {"1P 3M 5P 7M 9M 13M","major thirteenth","maj13","Maj13 ^13"},
@@ -394,7 +397,7 @@ function music:chord_to_midi(c,return_names)
     end
   end
   if note_match=="" then
-    return {},false
+    return false
   end
   
   -- convert to canonical sharp scale
@@ -440,18 +443,18 @@ function music:chord_to_midi(c,return_names)
   
   -- find longest matching chord pattern
   chord_match="" -- (no chord match is major chord)
-  chord_intervals="1P 3m 5P"
+  chord_intervals="1P 3M 5P"
   for _,chord_type in ipairs(db_chords) do
     for i,chord_pattern in ipairs(chord_type) do
       if i>2 then
-        if #chord_pattern>#chord_match and (chord_rest==chord_pattern or chord_rest:lower()==chord_pattern:lower()) then
+        if #chord_pattern>#chord_match and (chord_rest:lower()==chord_pattern:lower()) then
           chord_match=chord_pattern
           chord_intervals=chord_type[1]
         end
       end
     end
   end
-  --print("chord_match for "..chord_rest..": "..chord_match)
+  print("chord_match for "..chord_rest..": "..chord_match)
   
   -- find location of root
   root_position=1
@@ -476,6 +479,10 @@ function music:chord_to_midi(c,return_names)
     elseif string.match(interval,"A") then
       semitones=semitones+1
     end
+    print("interval: "..interval)
+    print("major_note_position: "..major_note_position)
+    print("semitones: "..semitones)
+    print("root_position+semitones: "..root_position+semitones)
     -- get note in scale from root position
     note_in_chord=notes_scale_sharp[root_position+semitones]
     table.insert(notes_in_chord,note_in_chord)
@@ -513,11 +520,14 @@ function music:chord_to_midi(c,return_names)
     end
   end
 
-  -- return
-  if return_names~=nil and return_names then
-    return notes_in_chord,true
+  -- debug 
+  print(original_c)
+  for _,n in ipairs(notes_in_chord) do
+    print(n)
   end
-  return midi_notes_in_chord,true
+
+  -- return
+  return true,midi_notes_in_chord,notes_in_chord
 end
 
 return music

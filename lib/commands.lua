@@ -211,12 +211,20 @@ self:register{
       and fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
       and Validator:new(branch[3], invocations):ok()
-      and #branch[4].leaves >= 2 -- weak
+      and (#branch[4].leaves >= 2 or music:chord_to_midi(branch[4].leaves[1])) -- weak
   end,
   payload = function(branch)
+    c=""
+    for _,v in pairs(branch[4].leaves) do
+      c = c..v
+    end
+    is_chord,midi_notes,note_names=music:chord_to_midi(c)
+    if not is_chord then
+      midi_notes = fn.table_remove_semicolons(branch[4].leaves)
+    end
     return {
       class = "CHORD",
-      midi_notes = fn.table_remove_semicolons(branch[4].leaves),
+      midi_notes = midi_notes,
       x = branch[1].leaves[1],
       y = branch[2].leaves[1],
     }

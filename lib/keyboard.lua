@@ -1,7 +1,6 @@
 keyboard = hid.connect()
 
 function keyboard.event(type, code, val)
-
   screen.ping()
   graphics:ping_cursor_frame()
 
