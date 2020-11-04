@@ -111,6 +111,8 @@ function tracker:update_track(payload)
         track:set_shadow(payload.shadow)
       elseif payload.class == "SHIFT" then
         track:shift(payload.shift)
+      elseif payload.class == "SYNC" then
+        track:set_clock_sync(payload.clock_sync)
       elseif payload.class == "SYNTH" then
         if payload.voice ~= nil then
           track:set_voice(payload.voice)
@@ -344,7 +346,8 @@ function tracker:chord(payload)
   local end_track = payload.x + #payload.midi_notes
   -- check & create tracks
   -- "-1" to adjust for the first track!
-  while self:get_cols() < end_track - 1 do
+  -- 99 tracks is the limit
+  while self:get_cols() < end_track - 1 and self:get_cols() < 100 do
     self:append_track_after(#self:get_tracks())
   end
   -- fill the chord horizontally

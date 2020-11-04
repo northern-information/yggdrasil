@@ -38,7 +38,7 @@ function view.init()
   view.m = {
     tracks = config.settings.default_tracks,
     track_width = 25,
-    track_height = 90,
+    track_height = 100,
   }
 end
 

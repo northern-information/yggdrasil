@@ -44,7 +44,7 @@ function commands:register(t)
       end
     end
   end
-  -- if class == "SYNTH" then
+  -- if class == "CHORD" then
     self.all[class] = t
   -- end
 end
@@ -1057,6 +1057,30 @@ self:register{
   end,
   action = function(payload)
     tracker:set_playback(false)
+  end
+}
+
+
+
+-- SYNC
+-- 1 sync;5
+self:register{
+  invocations = { "sync", "clock" },
+  signature = function(branch, invocations)
+    return #branch == 2
+       and fn.is_int(branch[1].leaves[1])
+       and Validator:new(branch[2], invocations):ok()
+       and fn.is_number(branch[1].leaves[3])
+  end,
+  payload = function(branch)
+    return {
+      class = "SYNC",
+      clock_sync = branch[2].leaves[3],
+      x = branch[1].leaves[1],
+    }
+  end,
+  action = function(payload)
+    tracker:update_track(payload)
   end
 }
 

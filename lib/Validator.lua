@@ -63,9 +63,8 @@ end
 
 -- i.e. "midi;d;4"
 function Validator:validate_complex_invocation(invocation)
- return #self.branch.leaves == 5
+ return #self.branch.leaves >= 5
     and self.branch.leaves[1] == invocation
     and self.branch.leaves[2] == ";"
     and self.branch.leaves[4] == ";"
-    -- and fn.is_number(self.branch.leaves[3]) -- commenting out to let strings work
 end

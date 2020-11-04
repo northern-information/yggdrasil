@@ -240,15 +240,21 @@ function graphics:draw_mixer()
     elseif track:is_sampler() then
 
     elseif track:is_crow() then
-      attributes[1] = { name = "pr.", value = track:get_pair() }
+      attributes[1] = { name = "", value = track:get_pair() == 1 and "1/2" or "3/4" }
     end
+    local i = 0
+    local attribute_start = 53
     if #attributes > 0 then
-      local i = 0
       for k, attribute in pairs(attributes) do
-        self:text(x + 1, y + shadow_adjust + 53 + i, attribute.name .. attribute.value, fg)
+        self:text(x + 1, y + shadow_adjust + attribute_start + i, attribute.name .. attribute.value, fg)
         i = i + 8
       end
     end
+    -- clock
+    local clock_y = y + shadow_adjust + attribute_start + i - 1
+    self:rect(x, clock_y - 5, 22, 7, fg)
+    self:text(x + 1, clock_y + 1, "SYNC", bg)
+    self:text(x + 2, clock_y + 9, track:get_clock_sync(), fg)
   end
 end
 

@@ -14,6 +14,7 @@ function Track:new(x)
   t.slots = {}
   t.extents = 0
   t.selected = false
+  t.clock_sync = 1
   -- mixer
   t.enabled = true
   t.muted = false
@@ -512,4 +513,12 @@ end
 
 function Track:set_pair(i)
   self.pair = util.clamp(i, 1, 2)
+end
+
+function Track:get_clock_sync()
+  return self.clock_sync
+end
+
+function Track:set_clock_sync(f)
+  self.clock_sync = f
 end
