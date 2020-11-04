@@ -44,7 +44,7 @@ function commands:register(t)
       end
     end
   end
-  -- if class == "CHORD" then
+  -- if class == "SYNC" then
     self.all[class] = t
   -- end
 end
@@ -207,12 +207,12 @@ self:register{
 self:register{
   invocations = { "chord", "c" },
   signature = function(branch, invocations)
-    return #branch == 3
-      and fn.is_int(branch[1].leaves[1])
+    if #branch ~= 3 then return false end
+    return fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
       and Validator:new(branch[3], invocations):ok()
-      and (#branch[3].leaves >= 4 and fn.is_int(branch[3].leaves[3]))
-          or music:chord_to_midi(branch[3].leaves[3])
+      and (#branch[3].leaves >= 3 and fn.is_int(branch[3].leaves[3]))
+          or (#branch[3].leaves >= 3 and music:chord_to_midi(branch[3].leaves[3]))
   end,
   payload = function(branch)
     local is_chord, midi_notes, note_names = music:chord_to_midi(branch[3].leaves[3])
@@ -1070,7 +1070,7 @@ self:register{
     return #branch == 2
        and fn.is_int(branch[1].leaves[1])
        and Validator:new(branch[2], invocations):ok()
-       and fn.is_number(branch[1].leaves[3])
+       and fn.is_number(branch[2].leaves[3])
   end,
   payload = function(branch)
     return {
