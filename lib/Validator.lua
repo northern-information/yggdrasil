@@ -53,5 +53,5 @@ function Validator:validate_simple_invocation(invocation)
  return #self.branch.leaves == 3
     and self.branch.leaves[1] == invocation
     and self.branch.leaves[2] == ";"
-    and fn.is_number(self.branch.leaves[3])
+    -- and fn.is_number(self.branch.leaves[3]) -- commenting out to let strings work
 end

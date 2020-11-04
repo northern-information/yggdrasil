@@ -44,7 +44,7 @@ function commands:register(t)
       end
     end
   end
-  -- if class == "APPEND" then
+  -- if class == "CLADE" then
     self.all[class] = t
   -- end
 end
@@ -237,19 +237,19 @@ self:register{
 
 
 -- CLADE
--- 1 clade midi
+-- 1 clade;midi
 self:register{
   invocations = { "clade" },
   signature = function(branch, invocations)
-    return #branch == 3
+    return #branch == 2
       and fn.is_int(branch[1].leaves[1])
       and Validator:new(branch[2], invocations):ok()
-      and fn.table_contains({ "synth", "midi", "sampler", "crow" }, branch[3].leaves[1])
+      and fn.table_contains({ "synth", "midi", "sampler", "crow" }, branch[2].leaves[3])
   end,
   payload = function(branch)
     return {
       class = "CLADE",
-      clade = string.upper(branch[3].leaves[1]),
+      clade = string.upper(branch[2].leaves[3]),
       x = branch[1].leaves[1],
     }
   end,
@@ -524,6 +524,30 @@ self:register{
   end,
   action = function(payload)
     self:set_k3(payload.command_string)
+  end
+}
+
+
+
+-- LEVEL
+-- 1 level;58
+self:register{
+  invocations = { "level", "l" },
+  signature = function(branch, invocations)
+    return #branch == 2
+      and fn.is_int(branch[1].leaves[1])
+      and Validator:new(branch[2], invocations):ok()
+      and fn.is_int(branch[2].leaves[3])
+  end,
+  payload = function(branch)
+    return {
+      class = "LEVEL",
+      level = branch[2].leaves[3] * .01,
+      x = branch[1].leaves[1],
+    }
+  end,
+  action = function(payload)
+    tracker:update_track(payload)
   end
 }
 

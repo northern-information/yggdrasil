@@ -88,17 +88,16 @@ function tracker:update_track(payload)
   if track ~= nil then
     tracker:select_track(payload.x)
     if fn.table_contains_key(payload, "class") then
-      if payload.class == "DEPTH" then
-        self:set_track_depth(payload.x, payload.depth)
-      end
-      if payload.class == "SHIFT" then
-        track:shift(payload.shift)
-      end
       if payload.class == "CLADE" then
         track:set_clade(payload.clade)
-      end
-      if payload.class == "SHADOW" then
+      elseif payload.class == "DEPTH" then
+        self:set_track_depth(payload.x, payload.depth)
+      elseif payload.class == "LEVEL" then
+        track:set_level(payload.level)
+      elseif payload.class == "SHADOW" then
         track:set_shadow(payload.shadow)
+      elseif payload.class == "SHIFT" then
+        track:shift(payload.shift)
       end
     end
     self:refresh()
