@@ -86,8 +86,8 @@ end
 
 function fn.new()
   for x = 1, tracker:get_cols() do tracker:remove(1) end
-  tracker:set_cols(config.settings.default_cols)
-  tracker:set_rows(config.settings.default_rows)
+  tracker:set_cols(config.settings.default_tracks)
+  tracker:set_rows(config.settings.default_depth)
   for x = 1, tracker:get_cols() do tracker:append_track_after(x - 1) end
 end
 

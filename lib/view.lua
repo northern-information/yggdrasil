@@ -1,5 +1,16 @@
 view = {}
 
+function dv()
+print("view.x", view.x)
+print("view.x_offset", view.x_offset)
+print("view.y", view.y)
+print("view.y_offset", view.y_offset)
+print("view.mixer_multiple", view.mixer_multiple)
+print("view.m.tracks", view.m.tracks)
+print("view.m.track_width", view.m.track_width)
+print("view.m.track_height", view.m.track_height)
+end
+
 function view.init()
   -- page
   view.tracker = false
@@ -11,9 +22,9 @@ function view.init()
   view.slot_width = view.slot_width_min
   view.slot_height = 7
   view.tracker_dirty = true
-  view.x = 1
+  view.x = 0
   view.x_offset = 0
-  view.y = 1
+  view.y = 0
   view.y_offset = 0
   view.rows_above = nil
   view.rows_below = nil
@@ -25,9 +36,9 @@ function view.init()
   -- mixer
   view.mixer_multiple = 5
   view.m = {
-    tracks = config.settings.default_cols,
+    tracks = config.settings.default_tracks,
     track_width = 25,
-    track_height = 80,
+    track_height = 90,
   }
 end
 
@@ -109,7 +120,7 @@ end
 function view:pan_x(d)
   tracker:set_follow(false)
   if page:is("MIXER") then
-    self:set_x(util.clamp(self:get_x() + (d * self.mixer_multiple), -self.m.track_width, self:get_mixer_width() + 1))
+    self:set_x(util.clamp(self:get_x() + (d * self.mixer_multiple), -self.m.track_width, self:get_mixer_width()))
   else
     self:set_x(util.clamp(self:get_x() + d, 1, tracker:get_cols()))
   end

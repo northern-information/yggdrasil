@@ -6,6 +6,7 @@ function Track:new(x)
     __tostring = function(t) return t:to_string() end
   })
   t.x = x ~= nil and x or 0
+  t.id = "track-" .. fn.id()
   t.depth = 0
   t.position = 0
   t.descend = true
@@ -18,8 +19,19 @@ function Track:new(x)
   t.muted = false
   t.soloed = false
   t.level = 1.0
-  t.shadow = false
+  t.shadow = 0
   t.clade = config.settings.default_clade
+  -- synth
+  t.voice = 1
+  t.c1 = 99
+  t.c2 = 99
+  -- midi
+  t.channel = 1
+  t.device = 1
+  -- sampler
+  t.tbd = 1
+  -- crow
+  t.pair = 1
   return t
 end
 
@@ -46,11 +58,13 @@ function Track:select()
   for k, slot in pairs(self:get_slots()) do
     slot:set_selected(true)
     tracker:set_selected_index(slot:get_index())
-    if not first_select then
-      view:set_x(self:get_x())
-      view:set_y(slot:get_y())
-      first_select = true
-    end 
+    if not page:is("MIXER") and not page:is("CLADES") then
+      if not first_select then
+        view:set_x(self:get_x())
+        view:set_y(slot:get_y())
+        first_select = true
+      end 
+    end
   end
 end
 
@@ -247,6 +261,10 @@ function Track:get_selected_slots()
   return slots
 end
 
+function Track:get_id()
+  return self.id
+end
+
 function Track:set_slots(t)
   self.slots = t
 end
@@ -315,8 +333,6 @@ function Track:is_selected()
   return self.selected
 end
 
-
-
 function Track:is_muted()
   return self.muted
 end
@@ -336,7 +352,6 @@ end
 function Track:unmute()
   self:set_muted(false)
 end
-
 
 function Track:is_soloed()
   return self.soloed
@@ -379,11 +394,17 @@ function Track:enable()
 end
 
 function Track:is_shadow()
-  return self:get_shadow() ~= false
+  return (self:get_shadow() ~= false)
 end
 
-function Track:set_shadow(v)
-  self.shadow = v
+function Track:set_shadow(i)
+  if fn.is_int(i) and i > 0 then
+    local target_track = tracker:get_track(i)
+    self.shadow = target_track:get_id()
+    self:set_clade(target_track:get_clade())
+  else
+    self.shadow = false
+  end
 end
 
 function Track:get_shadow()
@@ -409,16 +430,32 @@ function Track:synth()
   self:set_clade("SYNTH")
 end
 
+function Track:is_synth()
+  return self:get_clade() == "SYNTH"
+end
+
 function Track:midi()
   self:set_clade("MIDI")
+end
+
+function Track:is_midi()
+  return self:get_clade() == "MIDI"
 end
 
 function Track:sampler()
   self:set_clade("SAMPLER")
 end
 
+function Track:is_sampler()
+  return self:get_clade() == "SAMPLER"
+end
+
 function Track:crow()
   self:set_clade("CROW")
+end
+
+function Track:is_crow()
+  return self:get_clade() == "CROW"
 end
 
 function Track:get_view()
@@ -427,4 +464,52 @@ end
 
 function Track:set_view(s)
   self.view = s
+end
+
+function Track:get_device()
+  return self.device
+end
+
+function Track:set_device(i)
+  self.device = util.clamp(i, 1, 4)
+end
+
+function Track:get_channel()
+  return self.channel
+end
+
+function Track:set_channel(i)
+  self.channel = util.clamp(i, 1, 16)
+end
+
+function Track:get_voice()
+  return self.voice
+end
+
+function Track:set_voice(i)
+  self.voice = util.clamp(i, 1, 3)
+end
+
+function Track:get_c1()
+  return self.c1
+end
+
+function Track:set_c1(i)
+  self.c1 = util.clamp(i, 0, 99)
+end
+
+function Track:get_c2()
+  return self.c2
+end
+
+function Track:set_c2(i)
+  self.c2 = util.clamp(i, 0, 99)
+end
+
+function Track:get_pair()
+  return self.pair
+end
+
+function Track:set_pair(i)
+  self.pair = util.clamp(i, 1, 2)
 end

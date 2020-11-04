@@ -9,8 +9,8 @@ function tracker.init()
   tracker.playback = false
   tracker.track_view = "midi"
   tracker.tracks = {}
-  tracker.rows = config.settings.default_rows
-  tracker.cols = config.settings.default_cols
+  tracker.rows = config.settings.default_depth
+  tracker.cols = config.settings.default_tracks
   tracker.extents = 0
   tracker.info = false
   -- mixer
@@ -39,7 +39,6 @@ function tracker:refresh()
     track:set_x(k)
     track:set_view(self:get_track_view())
     if track:is_soloed() then
-      print(tostring(track) .. " is soloed.")
       self:set_any_soloed(true)
     end
   end
@@ -90,16 +89,39 @@ function tracker:update_track(payload)
     if fn.table_contains_key(payload, "class") then
       if payload.class == "CLADE" then
         track:set_clade(payload.clade)
+      elseif payload.class == "CROW" then
+        if payload.pair ~= nil then
+          track:set_pair(payload.pair)
+        end
       elseif payload.class == "DEPTH" then
         self:set_track_depth(payload.x, payload.depth)
+      elseif payload.class == "MIDI" then
+        if payload.device ~= nil then
+          track:set_device(payload.device)
+        elseif payload.channel ~= nil then
+          track:set_channel(payload.channel)
+        end
       elseif payload.class == "LEVEL" then
         track:set_level(payload.level)
+      elseif payload.class == "SAMPLER" then
+        if payload.tbd ~= nil then
+          track:set_tbd(payload.tbd)
+        end
       elseif payload.class == "SHADOW" then
         track:set_shadow(payload.shadow)
       elseif payload.class == "SHIFT" then
         track:shift(payload.shift)
+      elseif payload.class == "SYNTH" then
+        if payload.voice ~= nil then
+          track:set_voice(payload.voice)
+        elseif payload.c1 ~= nil then
+          track:set_c1(payload.c1)
+        elseif payload.c2 ~= nil then
+          track:set_c2(payload.c2)
+        end
       else
-        track:update(payload)
+        fn.print_matron_message("Error: No matches for payload:")
+        tabutil.print(payload)
       end
     end
     self:refresh()

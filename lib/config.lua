@@ -8,8 +8,8 @@ config["settings"] = {
   ["scale"] = 47,
   ["octaves"] = 11,
   ["save_path"] =  _path.data .. "yggdrasil/",
-  ["default_cols"] = 8,
-  ["default_rows"] = 8,
+  ["default_tracks"] = 8,
+  ["default_depth"] = 8,
   ["default_clade"] = "SYNTH",
 }
 

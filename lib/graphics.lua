@@ -206,8 +206,9 @@ function graphics:draw_mixer()
     local x = 2 + ((i - 1) * v.track_width) - view:get_x()
     local y = -view:get_y()
     local track_title_width = 11
-    -- left line
+    -- left line & terminator
     self:mlrs(x, y + 1, 0, v.track_height, fg)
+    self:rect(x - 2, y + v.track_height, 3, 3, fg)
     -- track number
     self:rect(x, y + 1, track_title_width, 7, fg)
     self:text(x + 1, y + 7, i, bg)
@@ -222,8 +223,31 @@ function graphics:draw_mixer()
     -- clade
     self:draw_mixer_glyph(x, y + 39, track:get_clade(), true)
     -- shadow
+    local shadow_adjust = 0
     if track:is_shadow() then
-      self:draw_mixer_glyph(x, y + 49, "shadow", true)
+      self:draw_mixer_glyph(x, y + 47, "shadow", true)
+      shadow_adjust = 8
+    end
+    -- attributes
+    local attributes = {}
+    if track:is_synth() then
+      attributes[1] = { name = "vo.",  value = track:get_voice() }
+      attributes[2] = { name = "c1.", value = track:get_c1() }
+      attributes[3] = { name = "c2.", value = track:get_c2() }
+    elseif track:is_midi() then
+      attributes[1] = { name = "dv.", value = track:get_device() }
+      attributes[2] = { name = "ch.", value = track:get_channel() }
+    elseif track:is_sampler() then
+
+    elseif track:is_crow() then
+      attributes[1] = { name = "pr.", value = track:get_pair() }
+    end
+    if #attributes > 0 then
+      local i = 0
+      for k, attribute in pairs(attributes) do
+        self:text(x + 1, y + shadow_adjust + 53 + i, attribute.name .. attribute.value, fg)
+        i = i + 8
+      end
     end
   end
 end
@@ -532,10 +556,19 @@ function graphics:draw_mixer_glyph(x, y, glyph, inverted)
     self:mlrs(x + 7, y + 4, 0, 3, fg)
     self:mlrs(x + 2, y + 7, 5, 0, fg)
   elseif glyph == "e" then
-    self:mlrs(x + 3, y + 2, 0, 5, fg)
-    self:mlrs(x + 2, y + 3, 5, 0, fg)
-    self:mlrs(x + 2, y + 5, 5, 0, fg)
-    self:mlrs(x + 2, y + 7, 5, 0, fg)
+    if inverted then
+      -- e for enabled
+      self:mlrs(x + 3, y + 2, 0, 5, fg)
+      self:mlrs(x + 2, y + 3, 5, 0, fg)
+      self:mlrs(x + 2, y + 5, 5, 0, fg)
+      self:mlrs(x + 2, y + 7, 5, 0, fg)
+    else
+      -- d for disabled
+      self:mlrs(x + 3, y + 2, 0, 5, fg)
+      self:mlrs(x + 2, y + 3, 4, 0, fg)
+      self:mlrs(x + 7, y + 3, 0, 3, fg)
+      self:mlrs(x + 2, y + 7, 4, 0, fg)
+    end
   elseif glyph == "up" then
     self:mlrs(x + 0, y + 3, 0, 2, fg)
     self:mlrs(x + 1, y + 2, 0, 2, fg)

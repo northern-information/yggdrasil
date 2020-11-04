@@ -44,7 +44,7 @@ function commands:register(t)
       end
     end
   end
-  -- if class == "CLADE" then
+  -- if class == "SYNTH" then
     self.all[class] = t
   -- end
 end
@@ -277,6 +277,30 @@ self:register{
   end
 }
 
+
+-- CROW
+-- 1 crow;pair;1
+-- 1 crow;p;2
+self:register{
+  invocations = { "crow"},
+  signature = function(branch, invocations)
+    return #branch == 2
+        and Validator:new(branch[2], invocations):ok()
+        and branch[2].leaves[3] == "pair" 
+            or branch[2].leaves[3] == "p" 
+        and fn.is_int(branch[2].leaves[5])
+  end,
+  payload = function(branch)
+    return {
+      class = "CROW",
+      x = branch[1].leaves[1],
+      pair = branch[2].leaves[5]
+    }
+  end,
+  action = function(payload)
+    tracker:update_track(payload)
+  end
+}
 
 
 -- DEPTH
@@ -580,6 +604,39 @@ self:register{
 
 
 
+-- MIDI
+-- 1 midi;d;2
+-- 1 midi;c;10
+self:register{
+  invocations = { "midi" },
+  signature = function(branch, invocations)
+    return #branch == 2
+        and Validator:new(branch[2], invocations):ok()
+        and branch[2].leaves[3] == "d" 
+            or branch[2].leaves[3] == "device" 
+            or branch[2].leaves[3] == "c"
+            or branch[2].leaves[3] == "channel"
+        and fn.is_int(branch[2].leaves[5])
+  end,
+  payload = function(branch)
+    local out = {
+        class = "MIDI",
+        x = branch[1].leaves[1]
+    }
+    if branch[2].leaves[3] == "d" or branch[2].leaves[3] == "device" then
+      out["device"] = branch[2].leaves[5]
+    elseif branch[2].leaves[3] == "c" or branch[2].leaves[3] == "channel" then
+      out["channel"] = branch[2].leaves[5]
+    end
+    return out
+  end,
+  action = function(payload)
+    tracker:update_track(payload)
+  end
+}
+
+
+
 -- MUTE
 -- mute
 -- 1 mute
@@ -774,6 +831,35 @@ self:register{
 
 
 
+-- SAMPLER
+-- 1 sampler;TBD
+-- self:register{
+--   invocations = { "sampler", "sam" },
+--   signature = function(branch, invocations)
+--     return #branch == 2
+--         and Validator:new(branch[2], invocations):ok()
+--         and branch[2].leaves[3] == "tbd" 
+--             or branch[2].leaves[3] == "tbd" 
+--         and fn.is_int(branch[2].leaves[5])
+--   end,
+--   payload = function(branch)
+--     local out = {
+--         class = "SAMPLER",
+--         x = branch[1].leaves[1]
+--     }
+--     if branch[2].leaves[3] == "tbd" or branch[2].leaves[3] == "tbd" then
+--       out["TBD"] = branch[2].leaves[5]
+--     elseif branch[2].leaves[3] == "tbd" or branch[2].leaves[3] == "tbd" then
+--       out["TBD"] = branch[2].leaves[5]
+--     end
+--     return out
+--   end,
+--   action = function(payload)
+--     tracker:update_track(payload)
+--   end
+-- }
+
+
 -- SCREENSHOT
 self:register{
   invocations = { "screenshot" },
@@ -874,6 +960,31 @@ self:register{ -- todo make midi note optional?
 
 
 
+-- SHADOW
+-- 1 shadow x
+-- 1 sha x
+self:register{
+  invocations = { "shadow", "sha" },
+  signature = function(branch, invocations)
+    return #branch == 3
+       and fn.is_int(branch[1].leaves[1]) 
+       and fn.is_int(branch[3].leaves[1])
+      and Validator:new(branch[2], invocations):ok()
+  end,
+  payload = function(branch)
+    return {
+      class = "SHADOW",
+      value = branch[3].leaves[1],
+      x = branch[1].leaves[1],
+    }
+  end,
+  action = function(payload)
+     tracker:update_slot(payload)
+  end
+}
+
+
+
 -- SHIFT
 -- 1 shift;5
 self:register{
@@ -944,6 +1055,43 @@ self:register{
   end,
   action = function(payload)
     tracker:set_playback(false)
+  end
+}
+
+
+
+-- SYNTH
+-- 1 synth;voice;2
+-- 1 synth;v;2
+-- 1 synth;c1;99
+-- 1 synth;c2;8
+self:register{
+  invocations = { "synth" },
+  signature = function(branch, invocations)
+    return #branch == 2
+        and Validator:new(branch[2], invocations):ok()
+        and branch[2].leaves[3] == "voice" 
+            or branch[2].leaves[3] == "v" 
+            or branch[2].leaves[3] == "c1"
+            or branch[2].leaves[3] == "c2"
+        and fn.is_int(branch[2].leaves[5])
+  end,
+  payload = function(branch)
+    local out = {
+        class = "SYNTH",
+        x = branch[1].leaves[1]
+    }
+    if branch[2].leaves[3] == "v" or branch[2].leaves[3] == "voice" then
+      out["voice"] = branch[2].leaves[5]
+    elseif branch[2].leaves[3] == "c1" then
+      out["c1"] = branch[2].leaves[5]
+    elseif branch[2].leaves[3] == "c2" then
+      out["c2"] = branch[2].leaves[5]
+    end
+    return out
+  end,
+  action = function(payload)
+    tracker:update_track(payload)
   end
 }
 
