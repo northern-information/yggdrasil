@@ -383,6 +383,8 @@ function music:chord_to_midi(c)
       end
     end
     if #n>#note_match then
+      -- defense against commands:extract_class()
+      if fn.is_int(c) then return false end
       -- check if has prefix
       s,e=c:find(n)
       if s==1 then

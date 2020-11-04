@@ -202,25 +202,27 @@ self:register{
 
 
 -- CHORD
--- 1 1 chord 60;63;67
--- 1 1 chord c4;ds4;g4
+-- 1 1 chord;60;63;67
+-- 1 1 chord;bmin
 self:register{
   invocations = { "chord", "c" },
   signature = function(branch, invocations)
-    return #branch == 4
+    return #branch == 3
       and fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
       and Validator:new(branch[3], invocations):ok()
-      and (#branch[4].leaves >= 2 or music:chord_to_midi(branch[4].leaves[1])) -- weak
+      and (#branch[3].leaves >= 4 and fn.is_int(branch[3].leaves[3]))
+          or music:chord_to_midi(branch[3].leaves[3])
   end,
   payload = function(branch)
-    local c = ""
-    for _, v in pairs(branch[4].leaves) do
-      c = c .. v
-    end
-    local is_chord, midi_notes, note_names = music:chord_to_midi(c)
+    local is_chord, midi_notes, note_names = music:chord_to_midi(branch[3].leaves[3])
     if not is_chord then
-      midi_notes = fn.table_remove_semicolons(branch[4].leaves)
+      -- clear the invocation and semicolon
+      -- we're doing it this way because we don't know how many
+      -- notes are in this chord. could be 3, could be 10.
+      table.remove(branch[3].leaves, 1)
+      table.remove(branch[3].leaves, 1)
+      midi_notes = fn.table_remove_semicolons(branch[3].leaves)
     end
     return {
       class = "CHORD",
