@@ -17,6 +17,9 @@ end
 
 fn          = include("lib/functions")    -- global untilities
 parameters  = include("lib/parameters")   -- exposed norns parameters
+_midi       = include("lib/_midi")        -- control midi devices
+_crow       = include("lib/_crow")        -- control crow
+sampler     = include("lib/sampler")      -- softcut
 view        = include("lib/view")         -- handle view logic
 filesystem  = include("lib/filesystem")   -- manipulate files
 page        = include("lib/page")         -- mvc "controller" for the page

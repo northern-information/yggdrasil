@@ -206,6 +206,8 @@ function graphics:draw_mixer()
     local x = 2 + ((i - 1) * v.track_width) - view:get_x()
     local y = -view:get_y()
     local track_title_width = 11
+    -- cover any overflow from previous tracks
+    self:rect(x - 1, y, v.track_width, v.track_height, bg)
     -- left line & terminator
     self:mlrs(x, y + 1, 0, v.track_height, fg)
     self:rect(x - 2, y + v.track_height, 3, 3, fg)
@@ -251,7 +253,7 @@ function graphics:draw_mixer()
       end
     end
     -- clock
-    local clock_y = y + shadow_adjust + attribute_start + i - 1
+    local clock_y = y + attribute_start + 32
     self:rect(x, clock_y - 5, 22, 7, fg)
     self:text(x + 1, clock_y + 1, "SYNC", bg)
     self:text(x + 2, clock_y + 9, track:get_clock_sync(), fg)

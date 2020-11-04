@@ -4,10 +4,9 @@ dev = {}
 
 function dev:scene(i)
   if i == 1 then
-    -- mixer testing
     filesystem:set_load_file(config.settings.load_file)
     filesystem:load()
-    page:select(3)
+    page:select(1)
     local clades = {}
     clades[1] = "SYNTH"
     clades[2] = "MIDI"
@@ -20,13 +19,12 @@ function dev:scene(i)
       track:set_soloed(math.random(1, 2) == 1)
       track:set_enabled(math.random(1, 2) == 1)
       track:set_descend(math.random(1, 2) == 1)
-      local i = math.random(1, 2) == 1 and math.random(1, 8) or 0
-      print(i)
-      track:set_shadow(i)
+      track:set_clock_sync(math.random(1, 10) * .1)
+      track:set_shadow(math.random(1, 2) == 1 and math.random(1, 8) or 0)
       track:set_level(math.random(0, 100) * .01)
     end
     
-  elseif i == 2 then
+  elseif i == 3 then
     -- clade testing
     filesystem:set_load_file(config.settings.load_file)
     filesystem:load()

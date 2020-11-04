@@ -94,7 +94,9 @@ function tracker:update_track(payload)
           track:set_pair(payload.pair)
         end
       elseif payload.class == "DEPTH" then
-        self:set_track_depth(payload.x, payload.depth)
+        if payload.depth ~= nil then
+          self:set_track_depth(payload.x, payload.depth)
+        end
       elseif payload.class == "MIDI" then
         if payload.device ~= nil then
           track:set_device(payload.device)
@@ -347,7 +349,7 @@ function tracker:chord(payload)
   -- check & create tracks
   -- "-1" to adjust for the first track!
   -- 99 tracks is the limit
-  while self:get_cols() < end_track - 1 and self:get_cols() < 100 do
+  while self:get_cols() < end_track - 1 do
     self:append_track_after(#self:get_tracks())
   end
   -- fill the chord horizontally
@@ -483,12 +485,16 @@ function tracker:get_selected_index()
 end
 
 function tracker:append_track_after(x)
-  local track = Track:new(x + 1)
-  table.insert(self.tracks, x + 1, track)
-  self:set_cols(#self.tracks)
-  view:set_tracks(#self.tracks)
-  track:fill(self:get_rows())
-  self:refresh()
+  if self:get_cols() + 1 <= config.settings.max_tracks then
+    local track = Track:new(x + 1)
+    table.insert(self.tracks, x + 1, track)
+    self:set_cols(#self.tracks)
+    view:set_tracks(#self.tracks)
+    track:fill(self:get_rows())
+    self:refresh()
+  else
+    self:set_message("Track limit of " .. config.settings.max_tracks .. " met.")
+  end
 end
 
 function tracker:get_tracks()
@@ -590,4 +596,11 @@ function tracker:is_any_soloed()
   return self.any_soloed
 end
 
+function tracker:get_playback()
+  return tracker.playback
+end
+
+function tracker:set_playback(bool)
+  tracker.playback = bool
+end
 return tracker

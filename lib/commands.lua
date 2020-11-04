@@ -80,8 +80,8 @@ function commands:register_all()
 self:register{
   invocations = { "#" },
   signature = function(branch, invocations)
-    return #branch == 3
-      and fn.is_int(branch[1].leaves[1]) 
+    if #branch ~= 3 then return false end
+    return fn.is_int(branch[1].leaves[1]) 
       and fn.is_int(branch[2].leaves[1])
       and Validator:new(branch[3], invocations):ok()
       and fn.is_int(branch[3].leaves[2])
@@ -104,19 +104,19 @@ self:register{
 
 
 -- APPEND
--- 1 append 3
+-- 1 append;3
 self:register{
   invocations = { "append", "ap" },
   signature = function(branch, invocations)
-    return #branch == 3
-      and fn.is_int(branch[1].leaves[1]) 
+    if #branch ~= 2 then return false end
+    return fn.is_int(branch[1].leaves[1]) 
       and Validator:new(branch[2], invocations):ok()
-      and fn.is_int(branch[3].leaves[1])
+      and fn.is_int(branch[2].leaves[3])
   end,
   payload = function(branch)
     return {
       class = "APPEND",
-      value = branch[3].leaves[1],
+      value = branch[2].leaves[3],
       x = branch[1].leaves[1]
     }
   end,
@@ -139,14 +139,13 @@ self:register{
 self:register{
   invocations = { "arpeggio", "arp", "a" },
   signature = function(branch, invocations)
+    if #branch ~= 3 and #branch ~= 4 then return false end
     return (
-        #branch == 3
-        and fn.is_int(branch[1].leaves[1]) 
+        fn.is_int(branch[1].leaves[1]) 
         and Validator:new(branch[2], invocations):ok()
         and fn.is_int(branch[3].leaves[1])
       ) or (
-        #branch == 4
-        and fn.is_int(branch[1].leaves[1]) 
+        fn.is_int(branch[1].leaves[1]) 
         and fn.is_int(branch[2].leaves[1])
         and Validator:new(branch[3], invocations):ok()
         and fn.is_int(branch[4].leaves[1])
@@ -184,8 +183,8 @@ self:register{
 self:register{
   invocations = { "bpm" },
   signature = function(branch, invocations)
-    return #branch == 2
-      and Validator:new(branch[1], invocations):ok()
+    if #branch ~= 2 then return false end
+    return Validator:new(branch[1], invocations):ok()
       and fn.is_number(branch[2].leaves[1])
   end,
   payload = function(branch)
@@ -243,8 +242,8 @@ self:register{
 self:register{
   invocations = { "clade" },
   signature = function(branch, invocations)
-    return #branch == 2
-      and fn.is_int(branch[1].leaves[1])
+    if #branch ~= 2 then return false end
+    return fn.is_int(branch[1].leaves[1])
       and Validator:new(branch[2], invocations):ok()
       and fn.table_contains({ "synth", "midi", "sampler", "crow" }, branch[2].leaves[3])
   end,
@@ -266,8 +265,8 @@ self:register{
 self:register{
   invocations = { "clear" },
   signature = function(branch, invocations)
-    return #branch == 1
-      and Validator:new(branch[1], invocations):ok()
+    if #branch ~= 1 then return false end
+    return Validator:new(branch[1], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -286,8 +285,8 @@ self:register{
 self:register{
   invocations = { "crow"},
   signature = function(branch, invocations)
-    return #branch == 2
-        and Validator:new(branch[2], invocations):ok()
+    if #branch ~= 2 then return false end
+    return Validator:new(branch[2], invocations):ok()
         and branch[2].leaves[3] == "pair" 
             or branch[2].leaves[3] == "p" 
         and fn.is_int(branch[2].leaves[5])
@@ -306,24 +305,44 @@ self:register{
 
 
 -- DEPTH
+-- depth;16
 -- 1 depth;16
 self:register{
   invocations = { "depth", "d" },
   signature = function(branch, invocations)
-    return #branch == 2
-      and fn.is_int(branch[1].leaves[1])
-      and Validator:new(branch[2], invocations):ok()
-      and fn.is_int(branch[2].leaves[3])
+    if #branch ~= 1 and #branch ~= 2 then return false end
+    return
+      (
+        fn.is_int(branch[1].leaves[1])
+        and Validator:new(branch[2], invocations):ok()
+        and fn.is_int(branch[2].leaves[3])
+      ) or (
+        Validator:new(branch[1], invocations):ok()
+        and fn.is_int(branch[1].leaves[3])
+      )
   end,
   payload = function(branch)
-    return {
-      class = "DEPTH",
-      depth = branch[2].leaves[3],
-      x = branch[1].leaves[1],
+    local out = {
+      class = "DEPTH"
     }
+    if #branch == 1 then
+      out.depth = branch[1].leaves[3]
+      out.x = "all"
+    elseif #branch == 2 then
+      out.depth = branch[2].leaves[3]
+      out.x = branch[1].leaves[1]
+    end
+    return out
   end,
   action = function(payload)
-    tracker:update_track(payload)
+    if payload.x == "all" then
+      for k, track in pairs(tracker:get_tracks()) do
+        print(track:get_x())
+        tracker:set_track_depth(track:get_x(), payload.depth)
+      end
+    else
+      tracker:update_track(payload)
+    end
   end
 }
 
@@ -335,13 +354,12 @@ self:register{
 self:register{
   invocations = { "disable" },
   signature = function(branch, invocations)
+    if #branch ~= 1 and #branch ~= 2 then return end
     return 
       (
-        #branch == 1
-        and Validator:new(branch[1], invocations):ok()
+        Validator:new(branch[1], invocations):ok()
       ) or (
-        #branch == 2
-        and fn.is_int(branch[1].leaves[1])
+        fn.is_int(branch[1].leaves[1])
         and Validator:new(branch[2], invocations):ok()
       )
   end,
@@ -368,13 +386,12 @@ self:register{
 self:register{
   invocations = { "enable" },
   signature = function(branch, invocations)
+    if #branch ~= 1 and #branch ~= 2 then return end
     return 
       (
-        #branch == 1
-        and Validator:new(branch[1], invocations):ok()
+        Validator:new(branch[1], invocations):ok()
       ) or (
-        #branch == 2
-        and fn.is_int(branch[1].leaves[1])
+        fn.is_int(branch[1].leaves[1])
         and Validator:new(branch[2], invocations):ok()
       )
   end,
@@ -400,8 +417,8 @@ self:register{
 self:register{
   invocations = { "end", "x" },
   signature = function(branch, invocations)
-    return #branch == 3
-       and fn.is_int(branch[1].leaves[1]) 
+    if #branch ~= 3 then return false end
+    return fn.is_int(branch[1].leaves[1]) 
        and fn.is_int(branch[2].leaves[1])
       and Validator:new(branch[3], invocations):ok()
   end,
@@ -427,8 +444,8 @@ self:register{
 self:register{
   invocations = { "exit", "ragequit" },
   signature = function(branch, invocations)
-    return #branch == 1
-      and Validator:new(branch[1], invocations):ok()
+    if #branch ~= 1 then return false end
+    return Validator:new(branch[1], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -449,15 +466,12 @@ self:register{
 self:register{
   invocations = {},
   signature = function(branch, invocations)
-    return (
-      #branch == 1
-      and fn.is_int(branch[1].leaves[1])
-      
-    ) or (
-     #branch == 2
-      and fn.is_int(branch[1].leaves[1]) 
+    if #branch == 1 then
+      return fn.is_int(branch[1].leaves[1])
+    elseif #branch == 2 then
+      return fn.is_int(branch[1].leaves[1]) 
       and fn.is_int(branch[2].leaves[1])
-    )
+    end
   end,
   payload = function(branch)
     local y = nil
@@ -488,8 +502,8 @@ self:register{
 self:register{
   invocations = { "follow" },
   signature = function(branch, invocations)
-    return #branch == 1
-      and Validator:new(branch[1], invocations):ok()
+    if #branch ~= 1 then return false end
+    return Validator:new(branch[1], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -507,8 +521,8 @@ self:register{
 self:register{
   invocations = { "info" },
   signature = function(branch, invocations)
-    return #branch == 1
-      and Validator:new(branch[1], invocations):ok()
+    if #branch ~= 1 then return false end
+    return Validator:new(branch[1], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -527,8 +541,8 @@ self:register{
 self:register{
   invocations = { "k3" },
   signature = function(branch, invocations)
-    return #branch > 2
-        and Validator:new(branch[1], invocations):ok()
+    if #branch < 3 then return false end
+    return Validator:new(branch[1], invocations):ok()
         and branch[2].leaves[1] == "="
   end,
   payload = function(branch)
@@ -560,8 +574,8 @@ self:register{
 self:register{
   invocations = { "level", "l" },
   signature = function(branch, invocations)
-    return #branch == 2
-      and fn.is_int(branch[1].leaves[1])
+    if #branch ~= 2 then return false end
+    return fn.is_int(branch[1].leaves[1])
       and Validator:new(branch[2], invocations):ok()
       and fn.is_int(branch[2].leaves[3])
   end,
@@ -584,8 +598,8 @@ self:register{
 self:register{
   invocations = { "lucky", "!" },
   signature = function(branch, invocations)
-    return #branch == 3
-      and fn.is_int(branch[1].leaves[1])
+    if #branch ~= 3 then return false end
+    return fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
       and Validator:new(branch[3], invocations):ok()
   end,
@@ -612,8 +626,8 @@ self:register{
 self:register{
   invocations = { "midi" },
   signature = function(branch, invocations)
-    return #branch == 2
-        and Validator:new(branch[2], invocations):ok()
+    if #branch ~= 2 then return false end
+    return Validator:new(branch[2], invocations):ok()
         and branch[2].leaves[3] == "d" 
             or branch[2].leaves[3] == "device" 
             or branch[2].leaves[3] == "c"
@@ -645,6 +659,7 @@ self:register{
 self:register{
   invocations = { "mute" },
   signature = function(branch, invocations)
+    if #branch ~= 1 and #branch ~= 2 then return false end
     return 
       (
         #branch == 1
@@ -676,8 +691,8 @@ self:register{
 self:register{
   invocations = { "new" },
   signature = function(branch, invocations)
-    return #branch == 1
-      and Validator:new(branch[1], invocations):ok()
+    if #branch ~= 1 then return false end
+    return Validator:new(branch[1], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -695,8 +710,8 @@ self:register{
 self:register{
   invocations = { "oblique" },
   signature = function(branch, invocations)
-    return #branch == 1
-      and Validator:new(branch[1], invocations):ok()
+    if #branch ~= 1 then return false end
+    return Validator:new(branch[1], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -714,8 +729,8 @@ self:register{
 self:register{
   invocations = { "play" },
   signature = function(branch, invocations)
-    return #branch == 1
-      and Validator:new(branch[1], invocations):ok()
+    if #branch ~= 1 then return false end
+    return Validator:new(branch[1], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -734,8 +749,8 @@ self:register{
 self:register{
   invocations = { "random", "?" },
   signature = function(branch, invocations)
-    return #branch == 3
-       and fn.is_int(branch[1].leaves[1])
+    if #branch ~= 3 then return false end
+    return fn.is_int(branch[1].leaves[1])
        and fn.is_int(branch[2].leaves[1])
       and Validator:new(branch[3], invocations):ok()
   end,
@@ -761,8 +776,8 @@ self:register{
 self:register{
   invocations = { "reverse", "rev"},
   signature = function(branch, invocations)
-    return #branch == 3
-       and fn.is_int(branch[1].leaves[1])
+    if #branch ~= 3 then return false end
+    return fn.is_int(branch[1].leaves[1])
        and fn.is_int(branch[2].leaves[1])
       and Validator:new(branch[3], invocations):ok()
   end,
@@ -789,6 +804,7 @@ self:register{
 self:register{
   invocations = { "remove", "rm" },
   signature = function(branch, invocations)
+    if #branch ~=2 and #branch ~= 3 then return false end
     return (
       #branch == 2
       and fn.is_int(branch[1].leaves[1])
@@ -818,8 +834,8 @@ self:register{
 self:register{
   invocations = { "rerun" },
   signature = function(branch, invocations)
-    return #branch == 1
-      and Validator:new(branch[1], invocations):ok()
+    if #branch ~= 1 then return false end
+    return Validator:new(branch[1], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -838,8 +854,8 @@ self:register{
 -- self:register{
 --   invocations = { "sampler", "sam" },
 --   signature = function(branch, invocations)
---     return #branch == 2
---         and Validator:new(branch[2], invocations):ok()
+--     if #branch ~= 2 then return false end
+--     return Validator:new(branch[2], invocations):ok()
 --         and branch[2].leaves[3] == "tbd" 
 --             or branch[2].leaves[3] == "tbd" 
 --         and fn.is_int(branch[2].leaves[5])
@@ -866,8 +882,8 @@ self:register{
 self:register{
   invocations = { "screenshot" },
   signature = function(branch, invocations)
-    return #branch == 1
-      and Validator:new(branch[1], invocations):ok()
+    if #branch ~= 1 then return false end
+    return Validator:new(branch[1], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -881,20 +897,19 @@ self:register{
 
 
 
--- SET_MIDI_NOTE
+-- NOTE
 -- 1 1 72
 -- 1 1 c5
 self:register{
   invocations = {},
   signature = function(branch, invocations)
+    if #branch ~= 3 then return faslse end
     return (
-      #branch == 3
-      and fn.is_int(branch[1].leaves[1])
+      fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
       and fn.is_int(branch[3].leaves[1])
     ) or (
-      #branch == 3
-      and fn.is_int(branch[1].leaves[1])
+      fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
       and music:is_valid_ygg(branch[3].leaves[1])
     )
@@ -907,7 +922,7 @@ self:register{
       midi_note = music:convert("ygg_to_midi", branch[3].leaves[1])
     end
     return {
-      class = "SET_MIDI_NOTE",
+      class = "NOTE",
       midi_note = midi_note,
       x = branch[1].leaves[1],
       y = branch[2].leaves[1],
@@ -920,21 +935,20 @@ self:register{
 
 
 
--- SET_MIDI_NOTE_AND_VELOCITY
+-- NOTE_AND_VELOCITY
 -- 1 1 72 vel;100
 -- 1 1 c4 vel;100
 self:register{ -- todo make midi note optional?
   invocations = { "velocity", "vel" },
   signature = function(branch, invocations)
+    if #branch ~= 4 then return false end
     return (
-      #branch == 4
-      and fn.is_int(branch[1].leaves[1])
+      fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
       and fn.is_int(branch[3].leaves[1])
       and Validator:new(branch[4], invocations):ok()
     ) or (
-      #branch == 4
-      and fn.is_int(branch[1].leaves[1])
+      fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
       and music:is_valid_ygg(branch[3].leaves[1])
       and Validator:new(branch[4], invocations):ok()
@@ -948,7 +962,7 @@ self:register{ -- todo make midi note optional?
       midi_note = music:convert("ygg_to_midi", branch[3].leaves[1])
     end
     return {
-      class = "SET_MIDI_NOTE_AND_VELOCITY",
+      class = "NOTE_AND_VELOCITY",
       midi_note = midi_note,
       velocity = branch[4].leaves[3],
       x = branch[1].leaves[1],
@@ -963,25 +977,25 @@ self:register{ -- todo make midi note optional?
 
 
 -- SHADOW
--- 1 shadow x
--- 1 sha x
+-- 1 shadow;2
+-- 1 sha;5
 self:register{
   invocations = { "shadow", "sha" },
   signature = function(branch, invocations)
-    return #branch == 3
-       and fn.is_int(branch[1].leaves[1]) 
-       and fn.is_int(branch[3].leaves[1])
+    if #branch ~= 2 then return false end
+    return fn.is_int(branch[1].leaves[1]) 
       and Validator:new(branch[2], invocations):ok()
+      and fn.is_int(branch[2].leaves[3])
   end,
   payload = function(branch)
     return {
       class = "SHADOW",
-      value = branch[3].leaves[1],
+      value = branch[2].leaves[3],
       x = branch[1].leaves[1],
     }
   end,
   action = function(payload)
-     tracker:update_slot(payload)
+     tracker:update_track(payload)
   end
 }
 
@@ -992,8 +1006,8 @@ self:register{
 self:register{
   invocations = { "shift", "s" },
   signature = function(branch, invocations)
-    return #branch == 2
-       and fn.is_int(branch[1].leaves[1])
+    if #branch ~= 2 then return false end
+    return fn.is_int(branch[1].leaves[1])
       and Validator:new(branch[2], invocations):ok()
   end,
   payload = function(branch)
@@ -1016,13 +1030,12 @@ self:register{
 self:register{
   invocations = { "solo" },
   signature = function(branch, invocations)
+    if #branch ~= 1 and #branch ~= 2 then return false end
     return 
       (
-        #branch == 1
-        and Validator:new(branch[1], invocations):ok()
+        Validator:new(branch[1], invocations):ok()
       ) or (
-        #branch == 2
-        and fn.is_int(branch[1].leaves[1])
+        fn.is_int(branch[1].leaves[1])
         and Validator:new(branch[2], invocations):ok()
       )
   end,
@@ -1047,8 +1060,8 @@ self:register{
 self:register{
   invocations = { "stop" },
   signature = function(branch, invocations)
-    return #branch == 1
-      and Validator:new(branch[1], invocations):ok()
+    if #branch ~= 1 then return false end
+    return Validator:new(branch[1], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -1067,8 +1080,8 @@ self:register{
 self:register{
   invocations = { "sync", "clock" },
   signature = function(branch, invocations)
-    return #branch == 2
-       and fn.is_int(branch[1].leaves[1])
+    if #branch ~= 2 then return false end
+    return fn.is_int(branch[1].leaves[1])
        and Validator:new(branch[2], invocations):ok()
        and fn.is_number(branch[2].leaves[3])
   end,
@@ -1094,8 +1107,8 @@ self:register{
 self:register{
   invocations = { "synth" },
   signature = function(branch, invocations)
-    return #branch == 2
-        and Validator:new(branch[2], invocations):ok()
+    if #branch ~= 2 then return false end
+    return Validator:new(branch[2], invocations):ok()
         and branch[2].leaves[3] == "voice" 
             or branch[2].leaves[3] == "v" 
             or branch[2].leaves[3] == "c1"
@@ -1128,8 +1141,8 @@ self:register{
 self:register{
   invocations = { "transpose", "trans", "t" },
   signature = function(branch, invocations)
-    return #branch == 3
-      and fn.is_int(branch[1].leaves[1])
+    if #branch ~= 3 then return false end
+    return fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
       and Validator:new(branch[3], invocations):ok()
       and fn.is_int(branch[3].leaves[3])
@@ -1155,13 +1168,12 @@ self:register{
 self:register{
   invocations = { "unmute" },
   signature = function(branch, invocations)
+    if #branch ~= 1 and #branch ~= 2 then return false end
     return 
       (
-        #branch == 1
-        and Validator:new(branch[1], invocations):ok()
+        Validator:new(branch[1], invocations):ok()
       ) or (
-        #branch == 2
-        and fn.is_int(branch[1].leaves[1])
+        fn.is_int(branch[1].leaves[1])
         and Validator:new(branch[2], invocations):ok()
       )
   end,
@@ -1188,13 +1200,12 @@ self:register{
 self:register{
   invocations = { "unsolo" },
   signature = function(branch, invocations)
+    if #branch ~= 1 and #branch ~= 2 then return false end
     return 
       (
-        #branch == 1
-        and Validator:new(branch[1], invocations):ok()
+        Validator:new(branch[1], invocations):ok()
       ) or (
-        #branch == 2
-        and fn.is_int(branch[1].leaves[1])
+        fn.is_int(branch[1].leaves[1])
         and Validator:new(branch[2], invocations):ok()
       )
   end,
@@ -1219,14 +1230,14 @@ self:register{
 self:register{
   invocations = { "view", "v" },
   signature = function(branch, invocations)
-    return #branch == 2
-      and Validator:new(branch[1], invocations):ok()
-      and fn.table_contains({ "midi", "ipn", "ygg", "freq", "vel", "index", "tracker", "hud", "mixer", "clades" }, branch[2].leaves[1])
+    if #branch ~= 1 then return false end
+    return Validator:new(branch[1], invocations):ok()
+      and fn.table_contains({ "midi", "ipn", "ygg", "freq", "vel", "index", "tracker", "hud", "mixer", "clades" }, branch[1].leaves[3])
   end,
   payload = function(branch)
     return {
       class = "VIEW",
-      view = branch[2].leaves[1]
+      view = branch[1].leaves[3]
     }
   end,
   action = function(payload)

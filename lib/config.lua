@@ -11,6 +11,7 @@ config["settings"] = {
   ["default_tracks"] = 8,
   ["default_depth"] = 8,
   ["default_clade"] = "SYNTH",
+  ["max_tracks"] = 50
 }
 
 config["page_titles"] = {
