@@ -98,6 +98,8 @@ function tracker:update_track(payload)
         track:set_shadow(payload.shadow)
       elseif payload.class == "SHIFT" then
         track:shift(payload.shift)
+      else
+        track:update(payload)
       end
     end
     self:refresh()
