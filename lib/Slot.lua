@@ -64,9 +64,10 @@ function Slot:trigger()
     if clade == "SYNTH" and self:get_midi_note() ~= nil then
       synth:play(self:get_midi_note(), self:get_velocity())
     elseif clade == "MIDI" then
-      print("trigger crow")
+      print("trigger midi")
     elseif clade == "SAMPLER" then
-      print("trigger crow")
+      print("trigger sampler")
+      -- sampler:play(self:get_sample_name(), self:get_velocity(), self:get_pitch())
     elseif clade == "CROW" then 
       print("trigger crow")
     end

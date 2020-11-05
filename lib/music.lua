@@ -349,6 +349,7 @@ function music:chord_to_midi(c)
   chord_match=""
   
   -- get octave
+  -- this is broken with the refactor
   octave=4
   if string.match(c,";") then
     for i,s in pairs(fn.string_split(c,";")) do
