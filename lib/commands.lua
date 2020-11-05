@@ -706,6 +706,33 @@ self:register{
 
 
 
+-- OFF
+-- 3 4 off
+self:register{
+  invocations = { "off", "o" },
+  signature = function(branch, invocations)
+    if #branch ~= 3 then return false end
+    return fn.is_int(branch[1].leaves[1])
+       and fn.is_int(branch[2].leaves[1])
+      and Validator:new(branch[3], invocations):ok()
+  end,
+  payload = function(branch)
+    return {
+        class = "OFF",
+        phenomenon = true,
+        prefix = "o",
+        value = nil,
+        x = branch[1].leaves[1], 
+        y = branch[2].leaves[1],
+    }
+  end,
+  action = function(payload)
+    tracker:update_slot(payload)
+  end
+}
+
+
+
 -- OBLIQUE
 self:register{
   invocations = { "oblique" },
@@ -720,6 +747,25 @@ self:register{
   end,
   action = function(payload)
     fn.draw_oblique()
+  end
+}
+
+
+
+-- PANIC
+self:register{
+  invocations = { "panic" },
+  signature = function(branch, invocations)
+    if #branch ~= 1 then return false end
+    return Validator:new(branch[1], invocations):ok()
+  end,
+  payload = function(branch)
+    return {
+      class = "PANIC"
+    }
+  end,
+  action = function(payload)
+    _midi:all_off()
   end
 }
 
@@ -1262,11 +1308,13 @@ self:register{
       or v == "h"
       or v == "numbers" then
         view:toggle_hud()
+        tracker:refresh()
         page:select(1)
     elseif v == "phenomenon"
       or v == "phen"
       or v == "p" then
         view:toggle_phenomenon()
+        tracker:refresh()
         page:select(1)
     elseif v == "mixer" 
       or v == "m" then

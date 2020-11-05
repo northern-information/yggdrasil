@@ -13,6 +13,7 @@ function tracker.init()
   tracker.cols = config.settings.default_tracks
   tracker.extents = 0
   tracker.info = false
+  tracker.generation = 0
   -- mixer
   tracker.any_soloed = false
   for x = 1, tracker.cols do
@@ -23,6 +24,7 @@ end
 function tracker.tracker_clock()
   while true do
     clock.sync(1)
+    tracker:increment_generation()
     if tracker.playback == true then
       for k, track in pairs(tracker:get_tracks()) do
         track:advance()
@@ -452,7 +454,13 @@ end
 -- primitive getters, setters, & checks
 
 
+function tracker:increment_generation()
+  self.generation = self.generation + 1
+end
 
+function tracker:get_generation()
+  return self.generation
+end
 
 function tracker:is_in_bounds(x, y)
   local x_ok = (x <= #self:get_tracks()) and (x > 0)

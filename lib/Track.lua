@@ -413,6 +413,10 @@ function Track:get_shadow()
   return self.shadow
 end
 
+function Track:unshadow()
+  self:set_shadow(false)
+end
+
 function Track:get_level()
   return self.level
 end

@@ -16,15 +16,20 @@ function dev:scene(i)
     for k, track in pairs(tracks) do
       track:set_clade(clades[math.random(1, 4)])
       track:set_muted(math.random(1, 2) == 1)
-      track:set_soloed(math.random(1, 2) == 1)
+      -- track:set_soloed(math.random(1, 2) == 1)
       track:set_enabled(math.random(1, 2) == 1)
       track:set_descend(math.random(1, 2) == 1)
       track:set_clock_sync(math.random(1, 10) * .1)
       track:set_shadow(math.random(1, 2) == 1 and math.random(1, 8) or 0)
       track:set_level(math.random(0, 100) * .01)
     end
-    cmd("1 1 #5")
-    -- cmd("view;p")
+    t(1):set_clade("MIDI")
+    t(1):unshadow()
+    t(1):unsolo()
+    t(1):unmute()
+    t(1):enable()
+    t(1):set_level(1)
+    t(1):refresh()
   elseif i == 2 then
 
   end
