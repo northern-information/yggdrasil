@@ -280,7 +280,7 @@ function graphics:draw_mixer()
 
     elseif track:is_crow() then
       attributes[#attributes + 1] = { name = "", value = track:get_pair() == 1 and "1/2" or "3/4" }
-      attributes[#attributes + 1] = { name = "jf.", value = track:get_jf() and "on" or "x"}
+      attributes[#attributes + 1] = { name = "jf.", value = track:is_jf() and "on" or "x"}
     end
     local i = 0
     local attribute_start = 53

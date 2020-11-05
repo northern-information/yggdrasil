@@ -4,6 +4,7 @@ function Validator:new(branch, invocations)
   local v = setmetatable({}, { 
     __index = Validator,
   })
+
   v.branch = branch
   v.invocations = invocations
   v.is_valid = v:is_invocation_match()
@@ -18,16 +19,13 @@ function Validator:is_invocation_match()
   if self.branch == nil then return false end
   local result = false
   for k, invocation in pairs(self.invocations) do
-    local is_prefix_invocation = self:validate_prefix_invocation()
     local is_string_invocation = self:validate_string_invocation(invocation)
     local is_simple_invocation = self:validate_simple_invocation(invocation)
     local is_complex_invocation = self:validate_complex_invocation(invocation)
-    -- print("is_prefix_invocation", is_prefix_invocation)
-    -- print("is_string_invocation", is_string_invocation)
-    -- print("is_simple_invocation", is_simple_invocation)
-    -- print("is_complex_invocation", is_simple_invocation)
-    if is_prefix_invocation 
-       or is_string_invocation 
+    print("is_string_invocation", is_string_invocation)
+    print("is_simple_invocation", is_simple_invocation)
+    print("is_complex_invocation", is_simple_invocation)
+    if is_string_invocation 
        or is_simple_invocation
        or is_complex_invocation then
       result = true

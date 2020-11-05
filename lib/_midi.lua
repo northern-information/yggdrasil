@@ -10,7 +10,7 @@ function _midi.init()
 end
 
 function _midi:play(note, velocity, channel, device, origin_track)
-print("PLAY ", note, velocity, channel, device, origin_track)
+  if not fn.is_int(note) then return end
   self:register_note(note, velocity, channel, device, origin_track)
   self:kill_notes_on_track(origin_track)
   self.devices[device]:note_on(note, velocity, channel)
@@ -38,7 +38,6 @@ end
 function _midi:kill_notes_on_track(track)
   for k, registered_note in pairs(self.notes) do
     if registered_note.origin_track == track then
-print("KILLING", registered_note.note, registered_note.velocity, registered_note.channel, registered_note.device, registered_note.origin_track)
       self.devices[registered_note.device]:note_off(registered_note.note, registered_note.velocity, registered_note.channel)
       table.remove(self.notes, k)
     end

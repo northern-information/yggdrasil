@@ -63,7 +63,7 @@ function Slot:trigger()
         if track:is_jf() then
           _crow:jf(self:get_midi_note())
         else
-          _crow:jf(self:get_midi_note(), self:get_pair())
+          _crow:play(self:get_midi_note(), track:get_pair())
         end
       end
 

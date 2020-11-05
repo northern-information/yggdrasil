@@ -6,7 +6,6 @@ function dev:scene(i)
   if i == 1 then
     filesystem:set_load_file(config.settings.load_file)
     filesystem:load()
-    page:select(1)
     local clades = {}
     clades[1] = "SYNTH"
     clades[2] = "MIDI"
@@ -23,13 +22,14 @@ function dev:scene(i)
       track:set_shadow(math.random(1, 2) == 1 and math.random(1, 8) or 0)
       track:set_level(math.random(0, 100) * .01)
     end
-    t(1):set_clade("MIDI")
+    t(1):set_clade("SYNTH")
     t(1):unshadow()
     t(1):unsolo()
     t(1):unmute()
     t(1):enable()
     t(1):set_level(1)
     t(1):refresh()
+    page:select(1)
   elseif i == 2 then
 
   end
