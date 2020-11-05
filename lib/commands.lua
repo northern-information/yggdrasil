@@ -1025,18 +1025,18 @@ self:register{ -- todo make midi note optional?
 -- SHADOW
 -- 1 shadow;2
 -- 1 sha;5
+-- 1 shadow;off
 self:register{
   invocations = { "shadow", "sha" },
   signature = function(branch, invocations)
     if #branch ~= 2 then return false end
     return fn.is_int(branch[1].leaves[1]) 
       and Validator:new(branch[2], invocations):ok()
-      and fn.is_int(branch[2].leaves[3])
   end,
   payload = function(branch)
     return {
       class = "SHADOW",
-      value = branch[2].leaves[3],
+      shadow = branch[2].leaves[3] ~= "off" and branch[2].leaves[3] or false,
       x = branch[1].leaves[1],
     }
   end,

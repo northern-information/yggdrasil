@@ -196,6 +196,14 @@ function tracker:clear_track(i)
   self:get_track(i):clear()
 end
 
+function tracker:get_track_by_id(id)
+  for k, track in pairs(self:get_tracks()) do
+    if track:get_id() == id then
+      return track
+    end
+  end
+end
+
 
 -- slot management
 

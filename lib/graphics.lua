@@ -256,29 +256,30 @@ function graphics:draw_mixer()
     self:draw_mixer_glyph(x + 1, y + 29, "e", track:is_enabled())
     -- level
     self:draw_level_gauge(x + track_title_width, y + 1, track:get_level())
-    -- direction
+    -- -- direction
     self:draw_mixer_glyph(x + track_title_width + 3, y + 29, track:is_descending() and "down" or "up")
     -- clade
     self:draw_mixer_glyph(x, y + 39, track:get_clade(), true)
+    -- attributes
+    local attributes = {}
     -- shadow
     local shadow_adjust = 0
     if track:is_shadow() then
       self:draw_mixer_glyph(x, y + 47, "shadow", true)
+      attributes[1] = { name = "sd.",  value = tracker:get_track_by_id(track:get_shadow()):get_x() }
       shadow_adjust = 8
     end
-    -- attributes
-    local attributes = {}
     if track:is_synth() then
-      attributes[1] = { name = "vo.",  value = track:get_voice() }
-      attributes[2] = { name = "c1.", value = track:get_c1() }
-      attributes[3] = { name = "c2.", value = track:get_c2() }
+      attributes[#attributes + 1] = { name = "vo.",  value = track:get_voice() }
+      attributes[#attributes + 1] = { name = "c1.", value = track:get_c1() }
+      attributes[#attributes + 1] = { name = "c2.", value = track:get_c2() }
     elseif track:is_midi() then
-      attributes[1] = { name = "dv.", value = track:get_device() }
-      attributes[2] = { name = "ch.", value = track:get_channel() }
+      attributes[#attributes + 1] = { name = "dv.", value = track:get_device() }
+      attributes[#attributes + 1] = { name = "ch.", value = track:get_channel() }
     elseif track:is_sampler() then
 
     elseif track:is_crow() then
-      attributes[1] = { name = "", value = track:get_pair() == 1 and "1/2" or "3/4" }
+      attributes[#attributes + 1] = { name = "", value = track:get_pair() == 1 and "1/2" or "3/4" }
     end
     local i = 0
     local attribute_start = 53
