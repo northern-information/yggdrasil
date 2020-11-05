@@ -15,7 +15,7 @@ function sampler.init()
   -- table of samples addressed by sample name
   sampler.samples = {}
   sampler.buffer_position = 1
-  
+  sampler.steal_voices = false -- if steal voices, then pull the oldest voice, even if its playing  
   -- TODO:
   -- initialize softcut voices
 end
@@ -38,6 +38,7 @@ end
 
 function sampler:acquire_voice()
   -- find an available voice and return it
+  -- TODO: if voice stealing, return the oldest voice
   for voice = 1, 6 do
     if not self.voices[i].is_playing then
       self.voices[i].is_playing = true
