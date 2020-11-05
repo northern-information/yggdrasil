@@ -9,6 +9,7 @@ function graphics.init()
   graphics.run_command_frame = 0
   graphics.glow = 0
   graphics.glow_up = true
+  graphics.transition_frame = 0
   graphics.command_icon = {}
   -- splash screen
   graphics.ni_splash_lines_open = {}
@@ -40,6 +41,42 @@ function graphics.redraw_clock()
     graphics:decrement_slot_triggers()
     clock.sleep(1 / graphics.fps)
   end
+end
+
+function graphics:render_page(page)
+  self:setup()
+  view:refresh()
+  if self.transition_frame > self.frame then
+    self:draw_transition()
+  else
+    if page == "splash" then
+      self:splash()
+    elseif page == "tracker" then
+      if view:is_hud() then
+        self:draw_hud_background()
+      end
+      self:draw_focus()
+      self:draw_tracks()
+      if view:is_hud() then
+        self:draw_hud_foreground()
+      end
+      self:draw_terminal()
+      self:draw_command_processing()
+      self:draw_y_mode()
+    elseif page == "mixer" then
+      self:draw_mixer()
+      self:draw_terminal()
+      self:draw_command_processing()
+      self:draw_y_mode()
+    elseif page == "clades" then
+      self:draw_clades()
+      self:draw_terminal()
+      self:draw_command_processing()
+      self:draw_y_mode()
+    end
+  end
+  fn.dirty_screen(true)
+  self:teardown()
 end
 
 
@@ -683,9 +720,43 @@ end
 
 
 
--- northern information & yggdrasil splash screen
+-- northern information, yggdrasil splash screen, & transition
 
+function graphics:trigger_transition()
+  self.transition_frame = self.frame + 10
+end
 
+function graphics:draw_transition()
+  -- dust
+  for i = 1, 16 do
+    self:mlrs(math.random(1, 128), math.random(28, 36), 1, 1, 15)
+  end
+  for i = 1, 32 do
+    self:mlrs(math.random(1, 128), math.random(16, 48), 1, 1, 1)
+  end
+  -- lines
+  local lines = {}
+  lines[1] = { y_baseline = 30, level = 5}
+  lines[2] = { y_baseline = 32, level = 15}
+  lines[3] = { y_baseline = 34, level = 5}
+  for kl, line in pairs(lines) do
+    local points = {}
+    points[1] = { x = 0, y = 0 }
+    points[2] = { x = 16, y = 0 }
+    points[3] = { x = 32, y = 0 + math.random(-8, 8)}
+    points[4] = { x = 64, y = 0 + math.random(-16, 16)}
+    points[5] = { x = 80, y = 0 + math.random(-16, 16)}
+    points[6] = { x = 96, y = 0 + math.random(-8, 8)}
+    points[7] = { x = 112, y = 0 }
+    points[8] = { x = 128, y = 0 }
+    local last_x, last_y = 0, 0
+    for kp, point in pairs(points) do
+      self:mls(last_x, last_y + line.y_baseline, point.x, point.y + line.y_baseline, line.level)
+      last_x = point.x
+      last_y = point.y
+    end
+  end
+end
 
 function graphics:splash()
   if fn.break_splash() then
