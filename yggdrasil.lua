@@ -77,6 +77,7 @@ function redraw()
 end
 
 function cleanup()
+  _midi:all_off()
   clock.cancel(y.redraw_clock_id)
   clock.cancel(y.frame_clock_id)
   clock.cancel(y.tracker_clock_id)

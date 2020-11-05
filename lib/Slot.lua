@@ -37,6 +37,35 @@ end
 
 function Slot:trigger()
   local track = tracker:get_track(self:get_x())
+  
+  -- notes
+  if track:is_enabled()
+    and not track:is_muted()
+    and (track:is_soloed() or not tracker:is_any_soloed()) then
+    
+      local clade = self:get_clade()
+      local mixed_level = track:get_level() * self:get_velocity()
+    
+      if clade == "SYNTH" and self:get_midi_note() ~= nil then
+        synth:play(self:get_midi_note(), mixed_level)
+      elseif clade == "MIDI" and self:get_midi_note() ~= nil then
+        _midi:play(
+          self:get_midi_note(),
+          mixed_level,
+          track:get_channel(),
+          track:get_device(),
+          track:get_id()
+        )
+      elseif clade == "SAMPLER" then
+        print("trigger sampler")
+        -- sampler:play(self:get_sample_name(), self:get_velocity(), self:get_pitch())
+      elseif clade == "CROW" then 
+        print("trigger crow")
+      end
+
+  end
+
+  -- phenomenon
   if self:is_phenomenon() then
     local p = self.payload.class
     if p == "ANCHOR" then
@@ -52,43 +81,38 @@ function Slot:trigger()
         new_y = slots[math.random(1, #slots)]:get_y()
       until new_y ~= self:get_y()
       track:set_position(new_y)
+    elseif p == "OFF" then
+      _midi:kill_notes_on_track(track:get_id())
     elseif p == "RANDOM" then  
       track:set_position(math.random(1, track:get_depth()))
     elseif p == "REVERSE" then  
       track:reverse_direction()
     end
-  elseif track:is_enabled()
-    and not track:is_muted()
-    and (track:is_soloed() or not tracker:is_any_soloed()) then
-    local clade = self:get_clade()
-    if clade == "SYNTH" and self:get_midi_note() ~= nil then
-      synth:play(self:get_midi_note(), self:get_velocity())
-    elseif clade == "MIDI" then
-      print("trigger midi")
-    elseif clade == "SAMPLER" then
-      print("trigger sampler")
-      -- sampler:play(self:get_sample_name(), self:get_velocity(), self:get_pitch())
-    elseif clade == "CROW" then 
-      print("trigger crow")
-    end
   end
+  
   graphics:register_slot_trigger(self:get_id())
 end
 
 function Slot:to_string()
-  local out = ""
+  local out = nil
+  local phenomenon = nil
+   local v = self:get_view()
+      if v == "midi"   then out = self:get_midi_note() 
+  elseif v == "index"  then out = self:get_index()
+  elseif v == "ygg"    then out = self:get_ygg_note()
+  elseif v == "ipn"    then out = self:get_ipn_note()
+  elseif v == "freq"   then out = self:get_frequency()
+  elseif v == "vel"    then out = self:get_velocity()
+  end
   if self:is_phenomenon() then
-    out = tostring(self.payload)
-  else
-     local v = self:get_view()
-        if v == "midi"   then out = self:get_midi_note() 
-    elseif v == "index"  then out = self:get_index()
-    elseif v == "ygg"    then out = self:get_ygg_note()
-    elseif v == "ipn"    then out = self:get_ipn_note()
-    elseif v == "freq"   then out = self:get_frequency()
-    elseif v == "vel"    then out = self:get_velocity()
+    if view:is_phenomenon() and self.payload.class ~= "OFF" then
+      local p = "+" .. tostring(self.payload)
+      out = out ~= nil and out .. p or p
+    elseif self.payload.class == "OFF" then
+      out = "off"
     end
   end
+
   return out ~= nil and tostring(out) or "."
 end
 
@@ -108,7 +132,9 @@ function Slot:clear_notes()
 end
 
 function Slot:run_phenomenon(payload)
-  self:clear_notes()
+  if payload.class == "OFF" then
+    self:clear_notes()
+  end
   self:set_payload(payload)
   self:set_phenomenon(true)
   self:set_empty(false)

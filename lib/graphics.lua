@@ -9,6 +9,7 @@ function graphics.init()
   graphics.run_command_frame = 0
   graphics.glow = 0
   graphics.glow_up = true
+  graphics.transition_frame = 0
   graphics.command_icon = {}
   -- splash screen
   graphics.ni_splash_lines_open = {}
@@ -42,6 +43,42 @@ function graphics.redraw_clock()
   end
 end
 
+function graphics:render_page(page)
+  self:setup()
+  view:refresh()
+  if self.transition_frame > self.frame then
+    self:draw_transition()
+  else
+    if page == "splash" then
+      self:splash()
+    elseif page == "tracker" then
+      if view:is_hud() then
+        self:draw_hud_background()
+      end
+      self:draw_focus()
+      self:draw_tracks()
+      if view:is_hud() then
+        self:draw_hud_foreground()
+      end
+      self:draw_terminal()
+      self:draw_command_processing()
+      self:draw_y_mode()
+    elseif page == "mixer" then
+      self:draw_mixer()
+      self:draw_terminal()
+      self:draw_command_processing()
+      self:draw_y_mode()
+    elseif page == "clades" then
+      self:draw_clades()
+      self:draw_terminal()
+      self:draw_command_processing()
+      self:draw_y_mode()
+    end
+  end
+  fn.dirty_screen(true)
+  self:teardown()
+end
+
 
 
 -- tracker
@@ -58,7 +95,6 @@ function graphics:draw_focus()
     sw, sh, 1
   )
 end
-
 
 function graphics:draw_hud_background()
   self:draw_cols()
@@ -220,29 +256,30 @@ function graphics:draw_mixer()
     self:draw_mixer_glyph(x + 1, y + 29, "e", track:is_enabled())
     -- level
     self:draw_level_gauge(x + track_title_width, y + 1, track:get_level())
-    -- direction
+    -- -- direction
     self:draw_mixer_glyph(x + track_title_width + 3, y + 29, track:is_descending() and "down" or "up")
     -- clade
     self:draw_mixer_glyph(x, y + 39, track:get_clade(), true)
+    -- attributes
+    local attributes = {}
     -- shadow
     local shadow_adjust = 0
     if track:is_shadow() then
       self:draw_mixer_glyph(x, y + 47, "shadow", true)
+      attributes[1] = { name = "sd.",  value = tracker:get_track_by_id(track:get_shadow()):get_x() }
       shadow_adjust = 8
     end
-    -- attributes
-    local attributes = {}
     if track:is_synth() then
-      attributes[1] = { name = "vo.",  value = track:get_voice() }
-      attributes[2] = { name = "c1.", value = track:get_c1() }
-      attributes[3] = { name = "c2.", value = track:get_c2() }
+      attributes[#attributes + 1] = { name = "vo.",  value = track:get_voice() }
+      attributes[#attributes + 1] = { name = "c1.", value = track:get_c1() }
+      attributes[#attributes + 1] = { name = "c2.", value = track:get_c2() }
     elseif track:is_midi() then
-      attributes[1] = { name = "dv.", value = track:get_device() }
-      attributes[2] = { name = "ch.", value = track:get_channel() }
+      attributes[#attributes + 1] = { name = "dv.", value = track:get_device() }
+      attributes[#attributes + 1] = { name = "ch.", value = track:get_channel() }
     elseif track:is_sampler() then
 
     elseif track:is_crow() then
-      attributes[1] = { name = "", value = track:get_pair() == 1 and "1/2" or "3/4" }
+      attributes[#attributes + 1] = { name = "", value = track:get_pair() == 1 and "1/2" or "3/4" }
     end
     local i = 0
     local attribute_start = 53
@@ -333,7 +370,16 @@ function graphics:draw_clades()
           self:mlrs(track_x - 21, track_y, 21, 0, bg)
       else
           self:mlrs(track_x - 21, track_y, 7, 0, bg)
-          self:rect(track_x - 14, track_y - 2, 3, 3, bg)
+      end
+      if not track:is_enabled() then
+          self:rect(track_x - 13, track_y - 2, 3, 3, bg)
+      end
+      if track:is_muted() then
+          self:mlrs(track_x - 14, track_y - 3, 0, 5, bg)
+      end
+      if track:is_soloed() then
+          self:mlrs(track_x - 17, track_y - 2, 3, 0, bg)
+          self:mlrs(track_x - 17, track_y + 2, 3, 0, bg)
       end
       -- type
       local adjust_a_single_pixel_for_number_1_because_typography = value == 1 and 1 or 0
@@ -362,12 +408,12 @@ end
 -- terminal
 
 
+
 function graphics:draw_terminal()
   local message = tracker:has_message()
   local message_value = tracker:get_message_value()
   local info = tracker:is_info()
   local height = 9
-  
   if message then
     height = 18
   elseif info then
@@ -417,8 +463,8 @@ function graphics:draw_run_command()
 end
 
 
--- housekeeping
 
+-- housekeeping
 
 
 
@@ -462,6 +508,7 @@ end
 
 
 -- slots
+
 
 
 function graphics:get_slot_triggers()
@@ -674,9 +721,43 @@ end
 
 
 
--- northern information & yggdrasil splash screen
+-- northern information, yggdrasil splash screen, & transition
 
+function graphics:trigger_transition()
+  self.transition_frame = self.frame + 10
+end
 
+function graphics:draw_transition()
+  -- dust
+  for i = 1, 16 do
+    self:mlrs(math.random(1, 128), math.random(28, 36), 1, 1, 15)
+  end
+  for i = 1, 32 do
+    self:mlrs(math.random(1, 128), math.random(16, 48), 1, 1, 1)
+  end
+  -- lines
+  local lines = {}
+  lines[1] = { y_baseline = 30, level = 5}
+  lines[2] = { y_baseline = 32, level = 15}
+  lines[3] = { y_baseline = 34, level = 5}
+  for kl, line in pairs(lines) do
+    local points = {}
+    points[1] = { x = 0, y = 0 }
+    points[2] = { x = 16, y = 0 }
+    points[3] = { x = 32, y = 0 + math.random(-8, 8)}
+    points[4] = { x = 64, y = 0 + math.random(-16, 16)}
+    points[5] = { x = 80, y = 0 + math.random(-16, 16)}
+    points[6] = { x = 96, y = 0 + math.random(-8, 8)}
+    points[7] = { x = 112, y = 0 }
+    points[8] = { x = 128, y = 0 }
+    local last_x, last_y = 0, 0
+    for kp, point in pairs(points) do
+      self:mls(last_x, last_y + line.y_baseline, point.x, point.y + line.y_baseline, line.level)
+      last_x = point.x
+      last_y = point.y
+    end
+  end
+end
 
 function graphics:splash()
   if fn.break_splash() then

@@ -16,29 +16,22 @@ function dev:scene(i)
     for k, track in pairs(tracks) do
       track:set_clade(clades[math.random(1, 4)])
       track:set_muted(math.random(1, 2) == 1)
-      track:set_soloed(math.random(1, 2) == 1)
+      -- track:set_soloed(math.random(1, 2) == 1)
       track:set_enabled(math.random(1, 2) == 1)
       track:set_descend(math.random(1, 2) == 1)
       track:set_clock_sync(math.random(1, 10) * .1)
       track:set_shadow(math.random(1, 2) == 1 and math.random(1, 8) or 0)
       track:set_level(math.random(0, 100) * .01)
     end
-    
-  elseif i == 3 then
-    -- clade testing
-    filesystem:set_load_file(config.settings.load_file)
-    filesystem:load()
-    page:select(4)
-    local clades = {}
-    table.insert(clades, "MIDI")
-    table.insert(clades, "CROW")
-    table.insert(clades, "SYNTH")
-    table.insert(clades, "SAMPLER")
-    local tracks = tracker:get_tracks()
-    for k, track in pairs(tracks) do
-      track:set_clade(clades[math.random(1, 4)])
-    end
-    t(1):midi()
+    t(1):set_clade("MIDI")
+    t(1):unshadow()
+    t(1):unsolo()
+    t(1):unmute()
+    t(1):enable()
+    t(1):set_level(1)
+    t(1):refresh()
+  elseif i == 2 then
+
   end
 end
 

@@ -20,7 +20,7 @@ function Track:new(x)
   t.muted = false
   t.soloed = false
   t.level = 1.0
-  t.shadow = 0
+  t.shadow = false
   t.clade = config.settings.default_clade
   -- synth
   t.voice = 1
@@ -169,6 +169,7 @@ function Track:update_slot(payload)
     end
     if payload.phenomenon then
       slot:run_phenomenon(payload)
+      self:set_view("phenomenon")
     end
     if payload.class == "TRANSPOSE_SLOT" then  
       slot:transpose_midi_note(payload.value)
@@ -335,7 +336,7 @@ function Track:is_selected()
 end
 
 function Track:is_muted()
-  return self.muted
+  return self:is_shadow() and self:get_shadow_attribute("muted") or self.muted
 end
 
 function Track:set_muted(bool)
@@ -355,7 +356,7 @@ function Track:unmute()
 end
 
 function Track:is_soloed()
-  return self.soloed
+  return self:is_shadow() and self:get_shadow_attribute("soloed") or self.soloed
 end
 
 function Track:set_soloed(bool)
@@ -375,7 +376,7 @@ function Track:unsolo()
 end
 
 function Track:is_enabled()
-  return self.enabled
+  return self:is_shadow() and self:get_shadow_attribute("enabled") or self.enabled
 end
 
 function Track:set_enabled(bool)
@@ -394,34 +395,56 @@ function Track:enable()
   self:set_enabled(true)
 end
 
+function Track:get_shadow_attribute(attribute)
+  local track = tracker:get_track_by_id(self:get_shadow())
+      if attribute == "enabled" then return track:is_enabled()
+  elseif attribute == "muted"   then return track:is_muted()
+  elseif attribute == "soloed"  then return track:is_soloed()
+  elseif attribute == "level"   then return track:get_level()
+  elseif attribute == "clade"   then return track:get_clade()
+  elseif attribute == "voice"   then return track:get_voice()
+  elseif attribute == "c1"      then return track:get_c1()
+  elseif attribute == "c2"      then return track:get_c2()
+  elseif attribute == "channel" then return track:get_channel()
+  elseif attribute == "device"  then return track:get_device()
+  elseif attribute == "pair"    then return track:get_pair()
+  end
+end
+
 function Track:is_shadow()
   return (self:get_shadow() ~= false)
 end
 
-function Track:set_shadow(i)
-  if fn.is_int(i) and i > 0 then
-    local target_track = tracker:get_track(i)
-    self.shadow = target_track:get_id()
-    self:set_clade(target_track:get_clade())
-  else
+function Track:set_shadow(shadow)
+  if shadow == false then
     self.shadow = false
+  elseif fn.is_int(shadow) 
+    and shadow > 0 
+    and shadow ~= self:get_x() then
+      local target_track = tracker:get_track(shadow)
+      self.shadow = target_track:get_id()
   end
+  self:refresh()
 end
 
 function Track:get_shadow()
   return self.shadow
 end
 
+function Track:unshadow()
+  self:set_shadow(false)
+end
+
 function Track:get_level()
-  return self.level
+  return self:is_shadow() and self:get_shadow_attribute("level") or self.level
 end
 
 function Track:set_level(f)
-  self.level = f
+  self.level = tonumber(f)
 end
 
 function Track:get_clade()
-  return self.clade
+  return self:is_shadow() and self:get_shadow_attribute("clade") or self.clade
 end
 
 function Track:set_clade(s)
@@ -468,7 +491,7 @@ function Track:set_view(s)
 end
 
 function Track:get_device()
-  return self.device
+  return self:is_shadow() and self:get_shadow_attribute("device") or self.device
 end
 
 function Track:set_device(i)
@@ -476,7 +499,7 @@ function Track:set_device(i)
 end
 
 function Track:get_channel()
-  return self.channel
+  return self:is_shadow() and self:get_shadow_attribute("channel") or self.channel
 end
 
 function Track:set_channel(i)
@@ -484,7 +507,7 @@ function Track:set_channel(i)
 end
 
 function Track:get_voice()
-  return self.voice
+  return self:is_shadow() and self:get_shadow_attribute("voice") or self.voice
 end
 
 function Track:set_voice(i)
@@ -492,7 +515,7 @@ function Track:set_voice(i)
 end
 
 function Track:get_c1()
-  return self.c1
+  return self:is_shadow() and self:get_shadow_attribute("c1") or self.c1
 end
 
 function Track:set_c1(i)
@@ -500,7 +523,7 @@ function Track:set_c1(i)
 end
 
 function Track:get_c2()
-  return self.c2
+  return self:is_shadow() and self:get_shadow_attribute("c2") or self.c2
 end
 
 function Track:set_c2(i)
@@ -508,7 +531,7 @@ function Track:set_c2(i)
 end
 
 function Track:get_pair()
-  return self.pair
+  return self:is_shadow() and self:get_shadow_attribute("pair") or self.pair
 end
 
 function Track:set_pair(i)
