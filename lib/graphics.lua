@@ -333,7 +333,16 @@ function graphics:draw_clades()
           self:mlrs(track_x - 21, track_y, 21, 0, bg)
       else
           self:mlrs(track_x - 21, track_y, 7, 0, bg)
-          self:rect(track_x - 14, track_y - 2, 3, 3, bg)
+      end
+      if not track:is_enabled() then
+          self:rect(track_x - 13, track_y - 2, 3, 3, bg)
+      end
+      if track:is_muted() then
+          self:mlrs(track_x - 14, track_y - 3, 0, 5, bg)
+      end
+      if track:is_soloed() then
+          self:mlrs(track_x - 17, track_y - 2, 3, 0, bg)
+          self:mlrs(track_x - 17, track_y + 2, 3, 0, bg)
       end
       -- type
       local adjust_a_single_pixel_for_number_1_because_typography = value == 1 and 1 or 0

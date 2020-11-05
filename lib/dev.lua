@@ -6,7 +6,7 @@ function dev:scene(i)
   if i == 1 then
     filesystem:set_load_file(config.settings.load_file)
     filesystem:load()
-    page:select(1)
+    page:select(4)
     local clades = {}
     clades[1] = "SYNTH"
     clades[2] = "MIDI"
@@ -24,21 +24,8 @@ function dev:scene(i)
       track:set_level(math.random(0, 100) * .01)
     end
     
-  elseif i == 3 then
-    -- clade testing
-    filesystem:set_load_file(config.settings.load_file)
-    filesystem:load()
-    page:select(4)
-    local clades = {}
-    table.insert(clades, "MIDI")
-    table.insert(clades, "CROW")
-    table.insert(clades, "SYNTH")
-    table.insert(clades, "SAMPLER")
-    local tracks = tracker:get_tracks()
-    for k, track in pairs(tracks) do
-      track:set_clade(clades[math.random(1, 4)])
-    end
-    t(1):midi()
+  elseif i == 2 then
+
   end
 end
 
