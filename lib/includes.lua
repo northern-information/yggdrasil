@@ -1,4 +1,5 @@
 -- ships with norns
+crow = require("crow")
 musicutil = require("musicutil")
 tabutil = require("tabutil")
 engine.name = "PolyPerc"

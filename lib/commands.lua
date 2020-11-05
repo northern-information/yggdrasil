@@ -44,7 +44,7 @@ function commands:register(t)
       end
     end
   end
-  -- if class == "ANCHOR" then
+  -- if class == "OFF" then
     self.all[class] = t
   -- end
 end
@@ -80,12 +80,11 @@ function commands:register_all()
 self:register{
   invocations = { "#" },
   signature = function(branch, invocations)
-    if #branch == 3 then
-      return fn.is_int(branch[1].leaves[1]) 
-        and fn.is_int(branch[2].leaves[1])
-        and Validator:new(branch[3], invocations):ok()
-        and fn.is_int(branch[3].leaves[2])
-    end
+    if #branch ~= 3 then return false end
+    return fn.is_int(branch[1].leaves[1]) 
+      and fn.is_int(branch[2].leaves[1])
+      and Validator:new(branch[3], invocations):validate_prefix_invocation()
+      and fn.is_int(branch[3].leaves[2])
   end,
   payload = function(branch)
     return {
@@ -714,7 +713,7 @@ self:register{
     if #branch ~= 3 then return false end
     return fn.is_int(branch[1].leaves[1])
        and fn.is_int(branch[2].leaves[1])
-      and Validator:new(branch[3], invocations):ok()
+       and Validator:new(branch[3], invocations):ok()
   end,
   payload = function(branch)
     return {
@@ -1309,13 +1308,11 @@ self:register{
       or v == "numbers" then
         view:toggle_hud()
         tracker:refresh()
-        page:select(1)
     elseif v == "phenomenon"
       or v == "phen"
       or v == "p" then
         view:toggle_phenomenon()
         tracker:refresh()
-        page:select(1)
     elseif v == "mixer" 
       or v == "m" then
         page:select(2)
