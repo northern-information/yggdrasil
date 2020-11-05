@@ -59,7 +59,6 @@ function graphics:draw_focus()
   )
 end
 
-
 function graphics:draw_hud_background()
   self:draw_cols()
 end
@@ -371,12 +370,12 @@ end
 -- terminal
 
 
+
 function graphics:draw_terminal()
   local message = tracker:has_message()
   local message_value = tracker:get_message_value()
   local info = tracker:is_info()
   local height = 9
-  
   if message then
     height = 18
   elseif info then
@@ -426,8 +425,8 @@ function graphics:draw_run_command()
 end
 
 
--- housekeeping
 
+-- housekeeping
 
 
 
@@ -471,6 +470,7 @@ end
 
 
 -- slots
+
 
 
 function graphics:get_slot_triggers()

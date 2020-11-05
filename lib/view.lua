@@ -120,7 +120,7 @@ end
 function view:pan_x(d)
   tracker:set_follow(false)
   if page:is("MIXER") then
-    self:set_x(util.clamp(self:get_x() + (d * self.mixer_multiple), -self.m.track_width, self:get_mixer_width()))
+    self:set_x(util.clamp(self:get_x() + (d * self.mixer_multiple), -self.m.track_width + 1, self:get_mixer_width() + 1))
   else
     self:set_x(util.clamp(self:get_x() + d, 1, tracker:get_cols()))
   end
