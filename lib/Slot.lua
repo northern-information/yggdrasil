@@ -16,6 +16,8 @@ function Slot:new(x, y)
   s.ipn_note = nil
   s.frequency = nil
   s.velocity = 127
+  s.c1 = 0.5
+  s.c2 = 0.5
   s.clade = ""
   s.view = ""
   s.phenomenon = false
@@ -49,7 +51,8 @@ function Slot:trigger()
     local mixed_level = track:get_level() * self:get_velocity()
   
     if clade == "SYNTH" and self:get_midi_note() ~= nil then
-      synth:play(self:get_midi_note(), mixed_level)
+      print("c1 " .. self.c1 .. " c2 " .. self.c2)
+      synth:play(self:get_midi_note(), mixed_level, self.c1, self.c2)
     elseif clade == "MIDI" and self:get_midi_note() ~= nil then
       _midi:play(
         self:get_midi_note(),
@@ -309,4 +312,16 @@ end
 
 function Slot:get_extents()
   return self.extents
+end
+
+function Slot:set_c1(new_c1)
+  print("SLOT set_c1 " .. new_c1)
+  self.c1 = new_c1
+  print("SLOT set_c1 is now set to " .. self.c1)
+end
+
+function Slot:set_c2(new_c2)
+  print("SLOT set_c2 " .. new_c2)
+  self.c2 = new_c2
+  print("SLOT c2 is now set to " .. self.c2)
 end

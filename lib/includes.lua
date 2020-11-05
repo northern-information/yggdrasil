@@ -2,7 +2,7 @@
 crow = require("crow")
 musicutil = require("musicutil")
 tabutil = require("tabutil")
-engine.name = "PolyPerc"
+engine.name = "PolyPercMacrod"
 
 local lib = "yggdrasil/lib/"
 

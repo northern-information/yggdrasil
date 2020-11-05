@@ -37,8 +37,8 @@ function Track:new(x)
   t.clade = config.settings.default_clade
   -- synth
   t.voice = 1
-  t.c1 = 99
-  t.c2 = 99
+  t.c1 = 0.5 -- might not even need these here...???
+  t.c2 = 0.5 -- might not even need these here...???
   -- midi
   t.channel = 1
   t.device = 1
@@ -533,7 +533,21 @@ function Track:get_c1()
 end
 
 function Track:set_c1(i)
-  self.c1 = util.clamp(i, 0, 99)
+  print("TRACK set_c1 " .. i)
+  i = util.clamp(i, 0, 1)
+  print("self position:" .. self:get_position())
+  -- print("self slot:" .. self:get_slot(self:get_position()))
+  local position = self:get_position()
+  if position ~= nil then
+    local slot = self:get_slot(position)
+    if slot ~= nil then
+      slot:set_c1(i)
+    else
+      print("bogus slot for position " .. position .. ", bud")
+    end
+  else
+      print("bogus position for track " .. (self.id or "UNKNOWN") .. ", bud")
+  end
 end
 
 function Track:get_c2()
@@ -541,7 +555,21 @@ function Track:get_c2()
 end
 
 function Track:set_c2(i)
-  self.c2 = util.clamp(i, 0, 99)
+  print("TRACK set_c2 " .. i)
+  i = util.clamp(i, 0, 1)
+  print("self position:" .. self:get_position())
+  -- print("self slot:" .. self:get_slot(self:get_position()))
+  local position = self:get_position()
+  if position ~= nil then
+    local slot = self:get_slot(position)
+    if slot ~= nil then
+      slot:set_c1(i)
+    else
+      print("bogus slot for position " .. position .. ", bud")
+    end
+  else
+    print("bogus position for track " .. (self.id or "UNKNOWN") .. ", bud")
+  end
 end
 
 function Track:get_pair()
