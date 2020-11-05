@@ -39,6 +39,7 @@ include("lib/Command")      -- "sentences" entered into the buffer
 include("lib/Interpreter")  -- translates text commands into programmatic meaning
 include("lib/Slot")         -- smallest musical unit
 include("lib/Track")        -- organizes slots
+include("lib/Sample")       -- individual audio sample
 include("lib/Validator")    -- works with the interpreter to validate command invocations
 
 -- dev only stuff
