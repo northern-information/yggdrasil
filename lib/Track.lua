@@ -33,6 +33,7 @@ function Track:new(x)
   t.tbd = 1
   -- crow
   t.pair = 1
+  t.jf = false
   return t
 end
 
@@ -408,6 +409,7 @@ function Track:get_shadow_attribute(attribute)
   elseif attribute == "channel" then return track:get_channel()
   elseif attribute == "device"  then return track:get_device()
   elseif attribute == "pair"    then return track:get_pair()
+  elseif attribute == "jf"      then return track:get_jf()
   end
 end
 
@@ -536,6 +538,14 @@ end
 
 function Track:set_pair(i)
   self.pair = util.clamp(i, 1, 2)
+end
+
+function Track:get_jf()
+  return self:is_shadow() and self:get_shadow_attribute("jf") or self.jf
+end
+
+function Track:set_jf(bool)
+  self.jf = bool
 end
 
 function Track:get_clock_sync()
