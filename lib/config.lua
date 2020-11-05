@@ -16,7 +16,6 @@ config["settings"] = {
 
 config["page_titles"] = {
   "TRACKER",
-  "TRACKER + HUD",
   "MIXER",
   "CLADES"
 }

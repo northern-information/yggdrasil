@@ -15,6 +15,7 @@ function view.init()
   -- page
   view.tracker = false
   view.hud = false
+  view.phenomenon = false
   view.mixer = false
   view.total_views = 4
   -- tracker
@@ -45,13 +46,6 @@ end
 function view:refresh()
   if page:get_page_title() == "TRACKER" then
     self:set_tracker(true)
-    self:set_hud(false)
-    self:set_mixer(false)
-    self:set_clades(false)
-    self:set_transposed(false)
-  elseif page:get_page_title() == "TRACKER + HUD" then
-    self:set_tracker(true)
-    self:set_hud(true)
     self:set_mixer(false)
     self:set_clades(false)
     self:set_transposed(false)
@@ -259,12 +253,28 @@ function view:get_slot_left_padding()
   return self.slot_left_padding
 end
 
+function view:toggle_hud()
+  self.hud = not self.hud
+end
+
 function view:set_hud(bool)
   self.hud = bool
 end
 
 function view:is_hud()
   return self.hud
+end
+
+function view:toggle_phenomenon()
+  self.phenomenon = not self.phenomenon
+end
+
+function view:set_phenomenon(bool)
+  self.phenomenon = bool
+end
+
+function view:is_phenomenon()
+  return self.phenomenon
 end
 
 function view:set_tracker(bool)

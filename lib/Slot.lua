@@ -37,6 +37,25 @@ end
 
 function Slot:trigger()
   local track = tracker:get_track(self:get_x())
+  
+  -- notes
+  if track:is_enabled()
+    and not track:is_muted()
+    and (track:is_soloed() or not tracker:is_any_soloed()) then
+    local clade = self:get_clade()
+    if clade == "SYNTH" and self:get_midi_note() ~= nil then
+      synth:play(self:get_midi_note(), self:get_velocity())
+    elseif clade == "MIDI" then
+      print("trigger midi")
+    elseif clade == "SAMPLER" then
+      print("trigger sampler")
+      -- sampler:play(self:get_sample_name(), self:get_velocity(), self:get_pitch())
+    elseif clade == "CROW" then 
+      print("trigger crow")
+    end
+  end
+
+  -- phenomenon
   if self:is_phenomenon() then
     local p = self.payload.class
     if p == "ANCHOR" then
@@ -57,37 +76,24 @@ function Slot:trigger()
     elseif p == "REVERSE" then  
       track:reverse_direction()
     end
-  elseif track:is_enabled()
-    and not track:is_muted()
-    and (track:is_soloed() or not tracker:is_any_soloed()) then
-    local clade = self:get_clade()
-    if clade == "SYNTH" and self:get_midi_note() ~= nil then
-      synth:play(self:get_midi_note(), self:get_velocity())
-    elseif clade == "MIDI" then
-      print("trigger midi")
-    elseif clade == "SAMPLER" then
-      print("trigger sampler")
-      -- sampler:play(self:get_sample_name(), self:get_velocity(), self:get_pitch())
-    elseif clade == "CROW" then 
-      print("trigger crow")
-    end
   end
+  
   graphics:register_slot_trigger(self:get_id())
 end
 
 function Slot:to_string()
-  local out = ""
-  if self:is_phenomenon() then
-    out = tostring(self.payload)
-  else
-     local v = self:get_view()
-        if v == "midi"   then out = self:get_midi_note() 
-    elseif v == "index"  then out = self:get_index()
-    elseif v == "ygg"    then out = self:get_ygg_note()
-    elseif v == "ipn"    then out = self:get_ipn_note()
-    elseif v == "freq"   then out = self:get_frequency()
-    elseif v == "vel"    then out = self:get_velocity()
-    end
+  local out = nil
+   local v = self:get_view()
+      if v == "midi"   then out = self:get_midi_note() 
+  elseif v == "index"  then out = self:get_index()
+  elseif v == "ygg"    then out = self:get_ygg_note()
+  elseif v == "ipn"    then out = self:get_ipn_note()
+  elseif v == "freq"   then out = self:get_frequency()
+  elseif v == "vel"    then out = self:get_velocity()
+  end
+  if view:is_phenomenon() and self:is_phenomenon() then
+    local p = "+" .. tostring(self.payload)
+    out = out ~= nil and out .. p or p
   end
   return out ~= nil and tostring(out) or "."
 end
@@ -108,7 +114,6 @@ function Slot:clear_notes()
 end
 
 function Slot:run_phenomenon(payload)
-  self:clear_notes()
   self:set_payload(payload)
   self:set_phenomenon(true)
   self:set_empty(false)

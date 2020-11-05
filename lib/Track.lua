@@ -169,6 +169,7 @@ function Track:update_slot(payload)
     end
     if payload.phenomenon then
       slot:run_phenomenon(payload)
+      self:set_view("phenomenon")
     end
     if payload.class == "TRANSPOSE_SLOT" then  
       slot:transpose_midi_note(payload.value)

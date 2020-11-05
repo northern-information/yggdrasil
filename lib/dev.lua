@@ -6,7 +6,7 @@ function dev:scene(i)
   if i == 1 then
     filesystem:set_load_file(config.settings.load_file)
     filesystem:load()
-    page:select(4)
+    page:select(1)
     local clades = {}
     clades[1] = "SYNTH"
     clades[2] = "MIDI"
@@ -23,7 +23,8 @@ function dev:scene(i)
       track:set_shadow(math.random(1, 2) == 1 and math.random(1, 8) or 0)
       track:set_level(math.random(0, 100) * .01)
     end
-    
+    cmd("1 1 #5")
+    -- cmd("view;p")
   elseif i == 2 then
 
   end

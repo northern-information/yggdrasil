@@ -33,21 +33,20 @@ function page:render()
       if page.error            then self:error_message()
   elseif self.active_page == 0 then graphics:splash()
   elseif self.active_page == 1 then self:render_tracker()
-  elseif self.active_page == 2 then self:render_tracker("with_hud")
-  elseif self.active_page == 3 then self:render_mixer()
-  elseif self.active_page == 4 then self:render_clades()
+  elseif self.active_page == 2 then self:render_mixer()
+  elseif self.active_page == 3 then self:render_clades()
   end
   fn.dirty_screen(true)
   graphics:teardown()
 end
 
-function page:render_tracker(hud)
-  if hud ~= nil then
+function page:render_tracker()
+  if view:is_hud() then
     graphics:draw_hud_background()
   end
   graphics:draw_focus()
   graphics:draw_tracks()
-  if hud ~= nil then
+  if view:is_hud() then
     graphics:draw_hud_foreground()
   end
   graphics:draw_terminal()

@@ -44,7 +44,7 @@ function commands:register(t)
       end
     end
   end
-  -- if class == "SYNC" then
+  -- if class == "ANCHOR" then
     self.all[class] = t
   -- end
 end
@@ -80,11 +80,12 @@ function commands:register_all()
 self:register{
   invocations = { "#" },
   signature = function(branch, invocations)
-    if #branch ~= 3 then return false end
-    return fn.is_int(branch[1].leaves[1]) 
-      and fn.is_int(branch[2].leaves[1])
-      and Validator:new(branch[3], invocations):ok()
-      and fn.is_int(branch[3].leaves[2])
+    if #branch == 3 then
+      return fn.is_int(branch[1].leaves[1]) 
+        and fn.is_int(branch[2].leaves[1])
+        and Validator:new(branch[3], invocations):ok()
+        and fn.is_int(branch[3].leaves[2])
+    end
   end,
   payload = function(branch)
     return {
@@ -139,17 +140,16 @@ self:register{
 self:register{
   invocations = { "arpeggio", "arp", "a" },
   signature = function(branch, invocations)
-    if #branch ~= 3 and #branch ~= 4 then return false end
-    return (
-        fn.is_int(branch[1].leaves[1]) 
+    if #branch == 3 then
+      return fn.is_int(branch[1].leaves[1]) 
         and Validator:new(branch[2], invocations):ok()
         and fn.is_int(branch[3].leaves[1])
-      ) or (
-        fn.is_int(branch[1].leaves[1]) 
+    elseif #branch == 4 then
+      return fn.is_int(branch[1].leaves[1]) 
         and fn.is_int(branch[2].leaves[1])
         and Validator:new(branch[3], invocations):ok()
         and fn.is_int(branch[4].leaves[1])
-      )
+    end
   end,
   payload = function(branch)
     local value = 0
@@ -1227,12 +1227,24 @@ self:register{
 
 
 -- VIEW
+-- view;midi
+-- v;tracker
+-- v;ygg
 self:register{
   invocations = { "view", "v" },
   signature = function(branch, invocations)
     if #branch ~= 1 then return false end
     return Validator:new(branch[1], invocations):ok()
-      and fn.table_contains({ "midi", "ipn", "ygg", "freq", "vel", "index", "tracker", "hud", "mixer", "clades" }, branch[1].leaves[3])
+      and fn.table_contains({ 
+      "midi", "ipn", "ygg", "freq", 
+      "vel",
+      "index",
+      "phenomenon", "phen", "p",
+      "tracker", "t",
+      "hud", "h", "numbers",
+      "mixer", "m",
+      "clades", "c"
+      }, branch[1].leaves[3])
   end,
   payload = function(branch)
     return {
@@ -1241,18 +1253,29 @@ self:register{
     }
   end,
   action = function(payload)
-    if payload.view == "tracker" then
-      page:select(1)
-      tracker:set_track_view("midi")
-    elseif payload.view == "hud" then
-      page:select(2)
-      tracker:set_track_view("midi")
-    elseif payload.view == "mixer" then
-      page:select(3)
-    elseif payload.view == "clades" then
-      page:select(4)
+    local v = payload.view
+    if v == "tracker" 
+      or v == "t" then
+        page:select(1)
+        tracker:set_track_view("midi")
+    elseif v == "hud" 
+      or v == "h"
+      or v == "numbers" then
+        view:toggle_hud()
+        page:select(1)
+    elseif v == "phenomenon"
+      or v == "phen"
+      or v == "p" then
+        view:toggle_phenomenon()
+        page:select(1)
+    elseif v == "mixer" 
+      or v == "m" then
+        page:select(2)
+    elseif v == "clades" 
+      or v == "c" then
+        page:select(3)
     else
-      tracker:set_track_view(payload.view)
+      tracker:set_track_view(v)
     end
   end
 }
