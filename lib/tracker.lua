@@ -8,14 +8,16 @@ function tracker.init()
   tracker.message_value = ""
   tracker.playback = false
   tracker.track_view = "midi"
-  tracker.tracks = {}
-  tracker.rows = config.settings.default_depth
-  tracker.cols = config.settings.default_tracks
   tracker.extents = 0
   tracker.info = false
   tracker.generation = 0
-  -- mixer
   tracker.any_soloed = false
+  --[[ cols will always == #tracks.
+    rows * cols ~= always equal #slots, however.
+    tracks can have different depths. ]]
+  tracker.tracks = {}
+  tracker.cols = config.settings.default_tracks
+  tracker.rows = config.settings.default_depth
   for x = 1, tracker.cols do
     tracker:append_track_after(x - 1)
   end
@@ -431,6 +433,13 @@ function tracker:unmute_all()
   self:refresh()
 end
 
+function tracker:unshadow_all()
+  local tracks = self:get_tracks()
+  for k, track in pairs(tracks) do
+    track:unshadow()
+  end
+  self:refresh()
+end
 function tracker:enable(x)
   tracker:get_track(x):enable()
   self:refresh()

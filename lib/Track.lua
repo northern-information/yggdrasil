@@ -232,6 +232,49 @@ end
 -- getters & setters
 
 
+
+function Track:get_shadow_attribute(attribute)
+  local track = tracker:get_track_by_id(self:get_shadow())
+      if attribute == "enabled" then return track:is_enabled()
+  elseif attribute == "muted"   then return track:is_muted()
+  elseif attribute == "soloed"  then return track:is_soloed()
+  elseif attribute == "level"   then return track:get_level()
+  elseif attribute == "clade"   then return track:get_clade()
+  elseif attribute == "voice"   then return track:get_voice()
+  elseif attribute == "c1"      then return track:get_c1()
+  elseif attribute == "c2"      then return track:get_c2()
+  elseif attribute == "channel" then return track:get_channel()
+  elseif attribute == "device"  then return track:get_device()
+  elseif attribute == "pair"    then return track:get_pair()
+  elseif attribute == "jf"      then return track:is_jf()
+  end
+end
+
+function Track:set_shadow(shadow)
+  if shadow == false then
+    self.shadow = false
+  elseif fn.is_int(shadow) 
+    and shadow > 0 
+    and shadow ~= self:get_x() then
+      local target_track = tracker:get_track(shadow)
+      self.shadow = target_track:get_id()
+  end
+  self:refresh()
+end
+
+function Track:is_shadow()
+  return (self:get_shadow() ~= false)
+end
+
+function Track:get_shadow()
+  return self.shadow
+end
+
+function Track:unshadow()
+  self:set_shadow(false)
+end
+
+
 function Track:update_slot_y()
   for k, slot in pairs(self:get_slots()) do
     slot:set_y(k)
@@ -394,47 +437,6 @@ end
 
 function Track:enable()
   self:set_enabled(true)
-end
-
-function Track:get_shadow_attribute(attribute)
-  local track = tracker:get_track_by_id(self:get_shadow())
-      if attribute == "enabled" then return track:is_enabled()
-  elseif attribute == "muted"   then return track:is_muted()
-  elseif attribute == "soloed"  then return track:is_soloed()
-  elseif attribute == "level"   then return track:get_level()
-  elseif attribute == "clade"   then return track:get_clade()
-  elseif attribute == "voice"   then return track:get_voice()
-  elseif attribute == "c1"      then return track:get_c1()
-  elseif attribute == "c2"      then return track:get_c2()
-  elseif attribute == "channel" then return track:get_channel()
-  elseif attribute == "device"  then return track:get_device()
-  elseif attribute == "pair"    then return track:get_pair()
-  elseif attribute == "jf"      then return track:is_jf()
-  end
-end
-
-function Track:is_shadow()
-  return (self:get_shadow() ~= false)
-end
-
-function Track:set_shadow(shadow)
-  if shadow == false then
-    self.shadow = false
-  elseif fn.is_int(shadow) 
-    and shadow > 0 
-    and shadow ~= self:get_x() then
-      local target_track = tracker:get_track(shadow)
-      self.shadow = target_track:get_id()
-  end
-  self:refresh()
-end
-
-function Track:get_shadow()
-  return self.shadow
-end
-
-function Track:unshadow()
-  self:set_shadow(false)
 end
 
 function Track:get_level()
