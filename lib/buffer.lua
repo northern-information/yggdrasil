@@ -6,6 +6,7 @@ function buffer.init()
   buffer.history_index = 0
   buffer.history = {}
   buffer.extents = 0
+  buffer.last_space = false
 end
 
 function buffer:execute()
@@ -31,6 +32,8 @@ function buffer:clear()
   self.b = ""
   self.tb = {}
   self.extents = 0
+  self.last_space = false
+  self.last_space_count = 0
 end
 
 function buffer:backspace()
@@ -88,6 +91,14 @@ end
 
 function buffer:get_extents()
   return self.extents
+end
+
+function buffer:set_last_space(bool)
+  self.last_space = bool
+end
+
+function buffer:is_last_space()
+  return self.last_space
 end
 
 return buffer

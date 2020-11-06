@@ -457,7 +457,9 @@ function music:chord_to_midi(c)
       end
     end
   end
-  print("chord_match for "..chord_rest..": "..chord_match)
+  if config.settings.debug_music then
+    print("chord_match for "..chord_rest..": "..chord_match)
+  end
   
   -- find location of root
   root_position=1
@@ -482,10 +484,12 @@ function music:chord_to_midi(c)
     elseif string.match(interval,"A") then
       semitones=semitones+1
     end
-    print("interval: "..interval)
-    print("major_note_position: "..major_note_position)
-    print("semitones: "..semitones)
-    print("root_position+semitones: "..root_position+semitones)
+    if config.settings.debug_music then
+      print("interval: "..interval)
+      print("major_note_position: "..major_note_position)
+      print("semitones: "..semitones)
+      print("root_position+semitones: "..root_position+semitones)
+    end
     -- get note in scale from root position
     note_in_chord=notes_scale_sharp[root_position+semitones]
     table.insert(notes_in_chord,note_in_chord)
@@ -524,9 +528,11 @@ function music:chord_to_midi(c)
   end
 
   -- debug 
-  print(original_c)
-  for _,n in ipairs(notes_in_chord) do
-    print(n)
+  if config.settings.debug_music then
+    print(original_c)
+    for _,n in ipairs(notes_in_chord) do
+      print(n)
+    end
   end
 
   -- return

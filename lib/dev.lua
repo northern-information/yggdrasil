@@ -3,6 +3,10 @@ screen.ping()
 dev = {}
 
 function dev:scene(i)
+  local debug_interpreter_cache = config.settings.debug_interpreter
+  local debug_music_cache = config.settings.debug_music
+  config.settings.debug_interpreter = false
+  config.settings.debug_music = false
   if i == 1 then
     filesystem:set_load_file(config.settings.load_file)
     filesystem:load()
@@ -50,9 +54,12 @@ function dev:scene(i)
     cmd("2 depth;8")
     cmd("3 depth;8")
     page:select(1)
-    sampler:load_sample("/home/we/dust/code/yggdrasil/samples/piano1_uiowa_440hz.wav")
-    sampler:load_sample("/home/we/dust/code/yggdrasil/samples/wineglass_halffull_513hz.wav")
+    sampler:set_bank("factory")
+    sampler:load_sample("piano1_uiowa_440hz.wav")
+    sampler:load_sample("wineglass_halffull_513hz.wav")
   end
+  config.settings.debug_interpreter = debug_interpreter_cache
+  config.settings.debug_music = debug_music_cache
 end
 
 function rerun()

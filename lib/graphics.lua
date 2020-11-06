@@ -433,7 +433,7 @@ function graphics:draw_terminal()
   if buffer:get_extents() > 0 then
     adjust = adjust + 2
   end
-  if keys:is_last_space() then
+  if buffer:is_last_space() then
     adjust = adjust + 2
   end
   if not keys:is_y_mode() then

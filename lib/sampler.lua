@@ -33,6 +33,7 @@ function sampler.init()
     softcut.post_filter_rq(i, 0.3)
     softcut.post_filter_fc(i, 44100)
   end
+  sampler.bank = "factory"
 end
 
 function sampler:play(track, sample_name, frequency, velocity)
@@ -90,8 +91,9 @@ function sampler:acquire_voice(track)
 end
 
 
-function sampler:load_sample(path_to_file)
-  sample_name = path_to_file:match("^.+/(.+).wav$")
+function sampler:load_sample(filename)
+  local path_to_file = filesystem:get_sample_path() .. self:get_bank() .. "/" .. filename
+  local sample_name = path_to_file:match("^.+/(.+).wav$")
   if self.samples[sample_name] ~= nil then
     -- already has sample loaded
     return
@@ -99,12 +101,21 @@ function sampler:load_sample(path_to_file)
   -- create a new sample
   self.samples[sample_name] = Sample:new()
   -- load the file into the sample
-  new_position = self.samples[sample_name]:load(path_to_file, self.buffer_position)
+  local new_position = self.samples[sample_name]:load(path_to_file, self.buffer_position)
   -- update the buffer position for the next sample
   if new_position then
     self.buffer_position = new_position
   end
 end
+
+function sampler:set_bank(s)
+  self.bank = s
+end
+
+function sampler:get_bank()
+  return self.bank
+end
+
 
 function sampler:load_directory(dir)
   -- TODO: for each file in directory, load sample

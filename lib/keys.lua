@@ -7,7 +7,6 @@ function keys.init()
   keys.opt   = false
   keys.shift = false
   keys.caps  = false
-  keys.last_space = false
   keys.codes = {
     { k = 1,   v = "ESC" },
     { k = 10,  v = "9" },
@@ -246,14 +245,6 @@ end
 
 function keys:is_shifted()
   return self.shift
-end
-
-function keys:set_last_space(bool)
-  self.last_space = bool
-end
-
-function keys:is_last_space()
-  return self.last_space
 end
 
 function keys:is_y_mode()
