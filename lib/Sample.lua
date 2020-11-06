@@ -11,7 +11,7 @@ Sample = {
   buffer = 1,
   position = {1, 3}, -- start and end
   filename = '',
-  last_played = 0, -- keep track of when it was last played TODO return this
+  last_played = 0, -- keep track of when it was last played 
 }
 
 function Sample:new(o)
@@ -30,8 +30,13 @@ function Sample:get_length()
   return self.position[2] - self.position[1]
 end
 
+function Sample:get_time_since_played()
+  return os.clock()-self.last_played
+end
+
 function Sample:play(voice, frequency, velocity)
   -- plays sample in a one-shot loop
+  self.last_played = os.clock()
   softcut.position(voice, self.position[1])
   softcut.loop_start(voice, self.position[1])
   softcut.loop_end(voice, self.position[2])
@@ -60,10 +65,20 @@ function Sample:load(filename, position)
   self.filename = filename
   self.rate_compensation = samplerate / 48000.0 -- compensate for files that aren't 48Khz
   self.position = {position, position + duration}
-  -- TODO: get frequency information from the filename itself
-  -- (regex for NUMBERhz)
-  -- if REGEX then self.frequency = X
-  
+
+  -- get frequency information from the filename itself
+  -- the frequency should be the LAST number in filename
+  local hz = 0
+  for num in string.gmatch(filename,"%d[%d.]*") do 
+    hz = tonumber(num)
+  end
+  if hz > 10 and hz < 20000 then
+    self.frequency=hz
+  else
+    -- defualt frequency
+    self.frequency=440
+  end
+
   -- read it into softcut
   softcut.buffer_read_mono(filename, 0, position, -1, 1, 1)
   -- return new position in buffer
