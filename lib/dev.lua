@@ -51,7 +51,7 @@ function dev:scene(i)
     cmd("3 depth;8")
     page:select(1)
     sampler:load_sample("/home/we/dust/code/yggdrasil/samples/piano1_uiowa_440hz.wav")
-    sampler:load_sample("/home/we/dust/code/yggdrasil/samples/wineglass_halffull_526hz.wav")
+    sampler:load_sample("/home/we/dust/code/yggdrasil/samples/wineglass_halffull_513hz.wav")
   end
 end
 

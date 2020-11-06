@@ -62,7 +62,7 @@ function Slot:trigger()
         --	sample_name = self:get_sample_name()
       	sample_name = "piano1_uiowa_440hz" -- TODO remove this
         if track:get_x() ==4 then 
-          sample_name="wineglass_halffull_526hz"
+          sample_name="wineglass_halffull_513hz"
         end
         sampler:play(track:get_x(), sample_name, self:get_frequency(),self:get_velocity()/127.0 )
       elseif clade == "CROW" then 
