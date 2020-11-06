@@ -110,8 +110,9 @@ function tracker:update_track(payload)
       elseif payload.class == "LEVEL" then
         track:set_level(payload.level)
       elseif payload.class == "SAMPLER" then
-        if payload.tbd ~= nil then
-          track:set_tbd(payload.tbd)
+        if payload.action ~= nil and payload.sample ~= nil then
+          print("ACTION", payload.action)
+          print("SAMPLE", payload.sample)
         end
       elseif payload.class == "SHADOW" then
         track:set_shadow(payload.shadow)
