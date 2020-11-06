@@ -287,7 +287,7 @@ self:register{
 -- 1 crow;pair;1
 -- 1 crow;p;2
 self:register{
-  invocations = { "crow"},
+  invocations = { "crow" },
   signature = function(branch, invocations)
     if #branch ~= 2 then return false end
     return Validator:new(branch[2], invocations):ok()
@@ -900,32 +900,32 @@ self:register{
 
 
 -- SAMPLER
--- 1 sampler;TBD
--- self:register{
---   invocations = { "sampler", "sam" },
---   signature = function(branch, invocations)
---     if #branch ~= 2 then return false end
---     return Validator:new(branch[2], invocations):ok()
---         and branch[2].leaves[3] == "tbd" 
---             or branch[2].leaves[3] == "tbd" 
---         and fn.is_int(branch[2].leaves[5])
---   end,
---   payload = function(branch)
---     local out = {
---         class = "SAMPLER",
---         x = branch[1].leaves[1]
---     }
---     if branch[2].leaves[3] == "tbd" or branch[2].leaves[3] == "tbd" then
---       out["TBD"] = branch[2].leaves[5]
---     elseif branch[2].leaves[3] == "tbd" or branch[2].leaves[3] == "tbd" then
---       out["TBD"] = branch[2].leaves[5]
---     end
---     return out
---   end,
---   action = function(payload)
---     tracker:update_track(payload)
---   end
--- }
+-- 1 sampler;load;piano_440.wav
+-- 1 sampler;l;piano_440.wav
+self:register{
+  invocations = { "sampler", "sam" },
+  signature = function(branch, invocations)
+    if #branch ~= 2 then return false end
+    return Validator:new(branch[2], invocations):ok()
+        and (branch[2].leaves[3] == "load" 
+            or branch[2].leaves[3] == "l")
+        and branch[2].leaves[5] ~= nil
+  end,
+  payload = function(branch)
+    local out = {
+        class = "SAMPLER",
+        sample = branch[2].leaves[5],
+        x = branch[1].leaves[1]
+    }
+    if branch[2].leaves[3] == "load" or branch[2].leaves[3] == "l" then
+      out["action"] = "load"
+    end
+    return out
+  end,
+  action = function(payload)
+    tracker:update_track(payload)
+  end
+}
 
 
 -- SCREENSHOT
@@ -1024,12 +1024,9 @@ self:register{ -- todo make midi note optional?
   end
 }
 
-
-
 -- SHADOW
 -- 1 shadow;2
 -- 1 sha;5
--- 1 shadow;off
 self:register{
   invocations = { "shadow", "sha" },
   signature = function(branch, invocations)
@@ -1040,7 +1037,7 @@ self:register{
   payload = function(branch)
     return {
       class = "SHADOW",
-      shadow = branch[2].leaves[3] ~= "off" and branch[2].leaves[3] or false,
+      shadow = branch[2].leaves[3],
       x = branch[1].leaves[1],
     }
   end,
@@ -1244,6 +1241,40 @@ self:register{
 
 
 
+-- UNSHADOW
+-- 1 unshadow
+-- 1 unsha
+-- unshadow
+-- unsha
+self:register{
+  invocations = { "unshadow", "unsha" },
+  signature = function(branch, invocations)
+    if #branch ~= 1 and #branch ~= 2 then return false end
+    return 
+      (
+        Validator:new(branch[1], invocations):ok()
+      ) or (
+        fn.is_int(branch[1].leaves[1])
+        and Validator:new(branch[2], invocations):ok()
+      )
+  end,
+  payload = function(branch)
+    return {
+        class = "UNSHADOW",
+        x = #branch == 2 and branch[1].leaves[1] or nil
+    }
+  end,
+  action = function(payload)
+    if payload.x ~= nil then
+      tracker:unshadow(payload.x)
+    else
+      tracker:unshadow_all()
+    end
+  end
+}
+
+
+
 -- UNSOLO
 -- unsolo
 -- 1 unsolo
@@ -1289,9 +1320,9 @@ self:register{
       "midi", "ipn", "ygg", "freq", 
       "vel",
       "index",
-      "phenomenon", "phen", "p",
+      "phenomenon", "p",
       "tracker", "t",
-      "hud", "h", "numbers",
+      "hud", "h",
       "mixer", "m",
       "clades", "c"
       }, branch[1].leaves[3])
