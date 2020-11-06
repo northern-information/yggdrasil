@@ -10,9 +10,9 @@ Sample = {
   frequency = 440,
   buffer = 1,
   position = {1, 3}, -- start and end
+  name = '',
   filename = '',
   path = '',
-  last_played = 0, -- keep track of when it was last played 
 }
 
 function Sample:new(o)
@@ -31,22 +31,28 @@ function Sample:get_length()
   return self.position[2] - self.position[1]
 end
 
-function Sample:get_time_since_played()
-  return os.clock()-self.last_played
-end
-
 function Sample:play(voice, frequency, velocity)
+  if frequency == nil then 
+    return 
+  end
+  if velocity == nil then 
+    velocity = 1
+  end
+  if voice < 1 or voice > 6 then 
+    error("bad voice")
+  end
+  local rate = self.rate_compensation * frequency / self.frequency
+  local duration = (self.position[2]-self.position[1])/rate
   -- plays sample in a one-shot loop
-  self.last_played = os.clock()
+  print("playing "..self.name.." on voice "..voice.." at "..frequency.." with velocity "..velocity)
   softcut.position(voice, self.position[1])
   softcut.loop_start(voice, self.position[1])
   softcut.loop_end(voice, self.position[2])
-  softcut.rate(self.rate_compensation * frequency / self.frequency)
-  softcut.level(velocity)
-end
-
-function Sample:is_playing()
-  return self.voice > 0
+  softcut.rate(voice,rate)
+  softcut.level(voice,velocity)
+  softcut.play(voice,1)
+  -- return how long this is going to take
+  return duration 
 end
 
 function Sample:stop()
@@ -60,7 +66,7 @@ end
 function Sample:load(filename, position)
   -- loads sample into position
   -- and returns where in the buffer it ends up
-  
+  self.name=filename:match("^.+/(.+).wav$")
   local ch, samples, samplerate = audio.file_info(filename)
   local duration = samples / 48000.0
   self.filename = filename
@@ -79,6 +85,7 @@ function Sample:load(filename, position)
     -- defualt frequency
     self.frequency=440
   end
+  print("loaded "..self.name.." at "..hz.."hz")
 
   -- read it into softcut
   softcut.buffer_read_mono(filename, 0, position, -1, 1, 1)
