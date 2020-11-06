@@ -51,14 +51,10 @@ function dev:scene(i)
     cmd("4 2 76")
     cmd("4 4 72")
     cmd("ypc;bank;factory")
-    for x = 1, 4 do
-      for y = 1, 8 do
-        cmd(x .. " " .. y .. " ypc;load;piano1_uiowa_440hz.wav")
-      end
+    for x = 1, 3 do
+        cmd(x .. " ypc;load;piano1_uiowa_440hz.wav")
     end
-    for y = 1, 8 do
-      cmd("4 " .. y .. " ypc;load;wineglass_halffull_513hz.wav")
-    end
+    cmd("4 ypc;load;wineglass_halffull_513hz.wav")
     page:select(1)
   end
   config.settings.debug_interpreter = debug_interpreter_cache

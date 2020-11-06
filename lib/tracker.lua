@@ -113,8 +113,15 @@ function tracker:update_track(payload)
         if payload.action ~= nil then
           if payload.action == "bank" then
             ypc:set_bank(payload.directory)
-          elseif payload.action == "load" then
+          elseif payload.action == "load" and payload.y ~= nil then
             track:update_slot(payload)
+          elseif payload.action == "load" then
+            local y = 1
+            for k, slot in pairs(track:get_slots()) do
+              payload["y"] = y
+              track:update_slot(payload)
+              y = y + 1
+            end
           end
         end
       elseif payload.class == "SHADOW" then
