@@ -1298,7 +1298,8 @@ self:register{
       "hud", "h",
       "mixer", "m",
       "clades", "c",
-      "bank", "b"
+      "bank", "b",
+      "ypc"
       }, branch[1].leaves[3])
   end,
   payload = function(branch)
@@ -1332,6 +1333,9 @@ self:register{
     elseif v == "bank" 
       or v == "b" then
       ypc:show_bank()
+    elseif v == "ypc" then 
+      view:toggle_ypc()
+      tracker:refresh()
     else
       tracker:set_track_view(v)
     end

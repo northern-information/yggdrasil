@@ -103,7 +103,7 @@ end
 
 function Slot:to_string()
   local out = nil
-  local phenomenon = nil
+  local empty_character = "."
    local v = self:get_view()
       if v == "midi"   then out = self:get_midi_note() 
   elseif v == "index"  then out = self:get_index()
@@ -112,16 +112,21 @@ function Slot:to_string()
   elseif v == "freq"   then out = self:get_frequency()
   elseif v == "vel"    then out = self:get_velocity()
   end
+  if self:get_clade() == "YPC" then
+    if view:is_ypc() and self:get_sample_name() ~= "" then
+      local y = "=" .. self:get_sample_name()
+      out = out ~= nil and out .. y or empty_character .. y
+    end
+  end
   if self:is_phenomenon() then
     if view:is_phenomenon() and self.payload.class ~= "OFF" then
       local p = "+" .. tostring(self.payload)
       out = out ~= nil and out .. p or p
     elseif self.payload.class == "OFF" then
-      out = "off"
+      out = self.payload.prefix
     end
   end
-
-  return out ~= nil and tostring(out) or "."
+  return out ~= nil and tostring(out) or empty_character
 end
 
 function Slot:clear()

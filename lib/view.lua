@@ -16,6 +16,7 @@ function view.init()
   view.tracker = false
   view.hud = false
   view.phenomenon = false
+  view.phenomenon = ypc
   view.mixer = false
   view.total_views = 4
   -- tracker
@@ -275,6 +276,18 @@ end
 
 function view:is_phenomenon()
   return self.phenomenon
+end
+
+function view:toggle_ypc()
+  self.ypc = not self.ypc
+end
+
+function view:set_ypc(bool)
+  self.ypc = bool
+end
+
+function view:is_ypc()
+  return self.ypc
 end
 
 function view:set_tracker(bool)
