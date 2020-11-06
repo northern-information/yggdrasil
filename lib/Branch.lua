@@ -22,6 +22,8 @@ function Branch:make_leaves(input)
   local processed = string.gsub(input, ";", " ; ")
   processed = string.gsub(processed, ":", " : ")
   processed = string.gsub(processed, "#", "# ") -- note no leading space
+  processed = string.gsub(processed, ">", "> ") -- note no leading space
+  processed = string.gsub(processed, "<", "< ") -- note no leading space
   for s in string.gmatch(processed, "([^%s]+)") do
     value = tonumber(s) and tonumber(s) or s
     result[#result + 1] = value

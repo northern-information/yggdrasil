@@ -37,7 +37,7 @@ end
 -- i.e. "#2"
 function Validator:validate_prefix_invocation()
   local result = false
-  for k, v in pairs(commands:get_prefixes()) do
+  for k, v in pairs(self.invocations) do
     if string.find(self.branch.leaves[1], v) then
       result = true
     end
