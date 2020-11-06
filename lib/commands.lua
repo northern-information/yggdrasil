@@ -213,7 +213,12 @@ self:register{
           or (#branch[3].leaves >= 3 and music:chord_to_midi(branch[3].leaves[3]))
   end,
   payload = function(branch)
-    local is_chord, midi_notes, note_names = music:chord_to_midi(branch[3].leaves[3])
+    local c = branch[3].leaves[3]
+    if #branch[3].leaves > 3 then 
+      -- include the octave information like `cm;3`
+      c = branch[3].leaves[3]..branch[3].leaves[4]..branch[3].leaves[5]
+    end
+    local is_chord, midi_notes, note_names = music:chord_to_midi(c)
     if not is_chord then
       -- clear the invocation and semicolon
       -- we're doing it this way because we don't know how many

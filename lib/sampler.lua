@@ -36,15 +36,22 @@ function sampler.init()
 end
 
 function sampler:play(track, sample_name, frequency, velocity)
+  if frequency == nil then 
+    return 
+  end
   -- plays sample in a one-shot loop
   -- then uses a clock to sleep and reset
   -- voice to 0 (not playing)
+  print("request for "..sample_name.." on track "..track)
   local voice = self:acquire_voice(track)
   if voice then
-    self.voices[voice].track = track 
-    self.voices[voice].last_played = os.clock()
-    self.samples[sample_name]:play(voice, frequency, velocity)
-    -- self.voices[voice].duration=
+    local duration = self.samples[sample_name]:play(voice, frequency, velocity)
+    if duration ~= nil then 
+      self.voices[voice].track = track 
+      self.voices[voice].last_played = os.clock()
+      self.voices[voice].duration=duration 
+    end
+    print("acquired voice "..voice.." for track "..track.." for "..self.voices[voice].duration.."s")
   else
     -- could not acquire voice, exit gracefully
     return
@@ -71,8 +78,8 @@ function sampler:acquire_voice(track)
       return i 
     end
     -- try to get oldest if stealing voices
-    if self.steal_voices and (os.clock()-self.voices[voice].last_played)> oldest then
-      oldest = self.voices[i]:get_time_since_played()
+    if self.steal_voices and (os.clock()-self.voices[i].last_played)> oldest then
+      oldest = (os.clock()-self.voices[i].last_played)
       oldest_voice = i
     end
   end

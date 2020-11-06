@@ -45,12 +45,18 @@ function Sample:play(voice, frequency, velocity)
   local duration = (self.position[2]-self.position[1])/rate
   -- plays sample in a one-shot loop
   print("playing "..self.name.." on voice "..voice.." at "..frequency.." with velocity "..velocity)
-  softcut.position(voice, self.position[1])
-  softcut.loop_start(voice, self.position[1])
-  softcut.loop_end(voice, self.position[2])
-  softcut.rate(voice,rate)
-  softcut.level(voice,velocity)
-  softcut.play(voice,1)
+
+  -- unsure whether clock is needed here
+  -- it might be faster to help play in sync
+  -- at really fast speeds
+  clock.run(function() 
+    softcut.position(voice, self.position[1])
+    softcut.loop_start(voice, self.position[1])
+    softcut.loop_end(voice, self.position[2])
+    softcut.rate(voice,rate)
+    softcut.level(voice,velocity)
+    softcut.play(voice,1)
+  end)
   -- return how long this is going to take
   return duration 
 end
