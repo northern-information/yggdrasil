@@ -217,7 +217,7 @@ function music:chord_to_midi(c)
   end
   local db = self.database
   db_chords={
-    {"1P 3M 5P","major","^",""},
+    {"1P 3M 5P","major","maj","^",""},
     {"1P 3M 5P 7M","major seventh","maj7","ma7","M7","Maj7","^7"},
     {"1P 3M 5P 7M 9M","major ninth","maj9","^9"},
     {"1P 3M 5P 7M 9M 13M","major thirteenth","maj13","Maj13 ^13"},
@@ -271,7 +271,7 @@ function music:chord_to_midi(c)
     {"1P 3M 5A 7m 9m","","7s5b9","7b9s5"},
     {"1P 3M 5A 7m 9m 11A","","7s5b9s11"},
     {"1P 3M 5A 9A","","padds9"},
-    {"1P 3M 5A 9M","","Ms5add9","padd9"},
+    {"1P 3M 5A 9M","","ms5add9","padd9"},
     {"1P 3M 5P 6M 11A","","M6s11","M6b5","6s11","6b5"},
     {"1P 3M 5P 6M 7M 9M","","maj7add13"},
     {"1P 3M 5P 6M 9M 11A","","69s11"},

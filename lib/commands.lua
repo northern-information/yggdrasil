@@ -44,7 +44,7 @@ function commands:register(t)
       end
     end
   end
-  -- if class == "ypc" then
+  -- if class == "ARPEGGIO" then
     self.all[class] = t
   -- end
 end
@@ -136,6 +136,7 @@ self:register{
 -- 1 3 arp 60
 -- 1 3 arp 60;63;65
 -- 1 3 arp;2 60;63;65
+-- 1 1 arp;2 bmin
 self:register{
   invocations = { "arpeggio", "arp", "a" },
   signature = function(branch, invocations)
@@ -147,7 +148,11 @@ self:register{
       return fn.is_int(branch[1].leaves[1]) 
         and fn.is_int(branch[2].leaves[1])
         and Validator:new(branch[3], invocations):ok()
-        and fn.is_int(branch[4].leaves[1])
+        and (
+          fn.is_int(branch[4].leaves[1])
+        ) or (
+          music:chord_to_midi(branch[4].leaves[1])
+        )
     end
   end,
   payload = function(branch)
@@ -158,9 +163,14 @@ self:register{
       value = branch[2].leaves[3] ~= nil and branch[2].leaves[3] or 0
       midi_notes = fn.table_remove_semicolons(branch[3].leaves)
     elseif #branch == 4 then
+      if music:chord_to_midi(branch[4].leaves[1]) then
+        valid, midi_notes = music:chord_to_midi(branch[4].leaves[1])
+      else
+        midi_notes = fn.table_remove_semicolons(branch[4].leaves)
+      end
       y = branch[2].leaves[1]
       value = branch[3].leaves[3] ~= nil and branch[3].leaves[3] or 0
-      midi_notes = fn.table_remove_semicolons(branch[4].leaves)
+      midi_notes = midi_notes
     end
     return {
       class = "ARPEGGIO",
