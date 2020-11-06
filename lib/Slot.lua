@@ -96,6 +96,8 @@ function Slot:trigger()
       track:set_position(math.random(1, track:get_depth()))
     elseif p == "REVERSE" then  
       track:reverse_direction()
+    elseif p == "RUIN" then  
+      track:remove_slot(math.random(1, #track:get_slots()))
     elseif p == "SHIFT_PHENOMENON_DOWN" then  
       track:shift(self.payload.value)
     elseif p == "SHIFT_PHENOMENON_UP" then  
