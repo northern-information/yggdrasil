@@ -39,16 +39,18 @@ function sampler:play(sample_name, frequency, velocity)
   -- plays sample in a one-shot loop
   -- then uses a clock to sleep and reset
   -- voice to 0 (not playing)
-  local voice = self.aquire_voice()
-  if voice then
-    self.samples[sample_name]:play(voice, pitch, velocity)
-  else
-    -- could not acquire voice, exit gracefully
-    return
-  end
-  -- TODO sleep for length of sample and release voice
-  -- clock.run(sleep(self.samples[sample_name]:get_length()))
-  self.release_voice(voice)
+  clock.run(function() 
+    local voice = self.aquire_voice()
+    if voice then
+      self.samples[sample_name]:play(voice, frequency, velocity)
+    else
+      -- could not acquire voice, exit gracefully
+      return
+    end
+    -- sleep for length of sample and release voice
+    clock.sleep(self.samples[sample_name]:get_length())
+    self.release_voice(voice)
+  end)
 end
 
 function sampler:acquire_voice()
@@ -76,7 +78,8 @@ function sampler:release_voice(voice)
   self.voices[i].is_playing = false
 end
 
-function sampler:load_sample(filename)
+function sampler:load_sample(path_to_file)
+  sample_name = path_to_file:match("^.+/(.+).wav$")
   if self.samples[sample_name] ~= nil then
     -- already has sample loaded
     return
@@ -84,7 +87,7 @@ function sampler:load_sample(filename)
   -- create a new sample
   self.samples[sample_name] = Sample:new()
   -- load the file into the sample
-  new_position = self.samples[sample_name]:load(filename, self.buffer_position)
+  new_position = self.samples[sample_name]:load(path_to_file, self.buffer_position)
   -- update the buffer position for the next sample
   if new_position then
     self.buffer_position = new_position
@@ -94,5 +97,8 @@ end
 function sampler:load_directory(dir)
   -- TODO: for each file in directory, load sample
 end
+
+-- TODO erase this
+sampler:load_sample("/home/we/dust/code/yggdrasil/samples/piano1_uiowa_440hz.wav")
 
 return sampler

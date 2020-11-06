@@ -58,7 +58,9 @@ function Slot:trigger()
         )
       elseif clade == "SAMPLER" then
         print("trigger sampler")
-        -- sampler:play(self:get_sample_name(), self:get_velocity(), self:get_pitch())
+	sample_name = self:get_sample_name()
+	sample_name = "piano1_uiowa_440hz" -- TODO remove this
+        sampler:play(sample_name, self:get_velocity(), self:get_frequency())
       elseif clade == "CROW" then 
         if track:is_jf() then
           _crow:jf(self:get_midi_note())

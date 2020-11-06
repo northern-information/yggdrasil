@@ -11,6 +11,7 @@ Sample = {
   buffer = 1,
   position = {1, 3}, -- start and end
   filename = '',
+  path = '',
   last_played = 0, -- keep track of when it was last played 
 }
 
