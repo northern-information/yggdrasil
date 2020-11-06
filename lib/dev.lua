@@ -6,14 +6,14 @@ function dev:scene(i)
   local debug_interpreter_cache = config.settings.debug_interpreter
   local debug_music_cache = config.settings.debug_music
   config.settings.debug_interpreter = false
-  config.settings.debug_music = false
+  -- config.settings.debug_music = false
   if i == 1 then
     filesystem:set_load_file(config.settings.load_file)
     filesystem:load()
     local clades = {}
     clades[1] = "SYNTH"
     clades[2] = "MIDI"
-    clades[3] = "SAMPLER"
+    clades[3] = "YPC"
     clades[4] = "CROW"
     local tracks = tracker:get_tracks()
     for k, track in pairs(tracks) do
@@ -36,7 +36,7 @@ function dev:scene(i)
     page:select(1)
   elseif i == 2 then
     for i=1,5 do
-      t(i):set_clade("SAMPLER")
+      t(i):set_clade("YPC")
       t(i):unshadow()
       t(i):unsolo()
       t(i):unmute()
@@ -50,13 +50,16 @@ function dev:scene(i)
     cmd("1 7 c;f;3")
     cmd("4 2 76")
     cmd("4 4 72")
-    cmd("1 depth;8")
-    cmd("2 depth;8")
-    cmd("3 depth;8")
+    cmd("ypc;bank;factory")
+    for x = 1, 4 do
+      for y = 1, 8 do
+        cmd(x .. " " .. y .. " ypc;load;piano1_uiowa_440hz.wav")
+      end
+    end
+    for y = 1, 8 do
+      cmd("4 " .. y .. " ypc;load;wineglass_halffull_513hz.wav")
+    end
     page:select(1)
-    sampler:set_bank("factory")
-    sampler:load_sample("piano1_uiowa_440hz.wav")
-    sampler:load_sample("wineglass_halffull_513hz.wav")
   end
   config.settings.debug_interpreter = debug_interpreter_cache
   config.settings.debug_music = debug_music_cache
@@ -74,8 +77,12 @@ function cmd(s)
   buffer:execute()
 end
 
-function s(x, y)
+function slot(x, y)
   return tracker:get_track(x):get_slot(y)
+end
+
+function track(x)
+  return tracker:get_track(x)
 end
 
 function t(x)

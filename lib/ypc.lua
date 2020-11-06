@@ -1,21 +1,21 @@
--- sampler
+-- ypc
 -- orchestrates many samples
 -- keeping track of which voices are available
 -- and keeps track of which samples are loaded
 --
 
-sampler = {}
+ypc = {}
 
-function sampler.init()
+function ypc.init()
   -- keeping track of active voices
-  sampler.voices = {}
+  ypc.voices = {}
   for i = 1, 6 do
-    sampler.voices[i] = {duration = 0, track=0, last_played=0}
+    ypc.voices[i] = {duration = 0, track=0, last_played=0}
   end
   -- table of samples addressed by sample name
-  sampler.samples = {}
-  sampler.buffer_position = 1
-  sampler.steal_voices = true -- if steal voices, then pull the oldest voice, even if its playing
+  ypc.samples = {}
+  ypc.buffer_position = 1
+  ypc.steal_voices = true -- if steal voices, then pull the oldest voice, even if its playing
   -- initialize softcut voices
   for i = 1, 6 do
     softcut.enable(i, 1)
@@ -33,11 +33,11 @@ function sampler.init()
     softcut.post_filter_rq(i, 0.3)
     softcut.post_filter_fc(i, 44100)
   end
-  sampler.bank = "factory"
+  ypc.bank = "factory"
 end
 
-function sampler:play(track, sample_name, frequency, velocity)
-  if frequency == nil then 
+function ypc:play(track, sample_name, frequency, velocity)
+  if track == nil or sample_name == nil or frequency == nil or velocity == nil then 
     return 
   end
   -- plays sample in a one-shot loop
@@ -45,6 +45,8 @@ function sampler:play(track, sample_name, frequency, velocity)
   -- voice to 0 (not playing)
   print("request for "..sample_name.." on track "..track)
   local voice = self:acquire_voice(track)
+print(voice, frequency, velocity)
+tabutil.print(self.samples)
   if voice then
     local duration = self.samples[sample_name]:play(voice, frequency, velocity)
     if duration ~= nil then 
@@ -60,7 +62,7 @@ function sampler:play(track, sample_name, frequency, velocity)
 end
 
 
-function sampler:acquire_voice(track)
+function ypc:acquire_voice(track)
   -- first, see if there are any voices that 
   -- are on that track and cut those short 
   -- ?? open to thoughts on this
@@ -91,34 +93,42 @@ function sampler:acquire_voice(track)
 end
 
 
-function sampler:load_sample(filename)
-  local path_to_file = filesystem:get_sample_path() .. self:get_bank() .. "/" .. filename
-  local sample_name = path_to_file:match("^.+/(.+).wav$")
-  if self.samples[sample_name] ~= nil then
-    -- already has sample loaded
-    return
-  end
-  -- create a new sample
-  self.samples[sample_name] = Sample:new()
-  -- load the file into the sample
-  local new_position = self.samples[sample_name]:load(path_to_file, self.buffer_position)
-  -- update the buffer position for the next sample
-  if new_position then
-    self.buffer_position = new_position
-  end
+function ypc:load_sample(filename)
+
 end
 
-function sampler:set_bank(s)
+function ypc:load_bank(s)
   self.bank = s
+  local bank_path = filesystem:get_sample_path() .. s
+  local filenames = filesystem:scandir(bank_path)
+  for k, filename in pairs(filenames) do
+    local path_to_file = bank_path .. "/" .. filename
+    local sample_name = path_to_file:match("^.+/(.+).wav$")
+    if self.samples[sample_name] ~= nil then
+      -- already has sample loaded
+      return
+    end
+    -- create a new sample
+    self.samples[sample_name] = Sample:new()
+    -- load the file into the sample
+    local new_position = self.samples[sample_name]:load(path_to_file, self.buffer_position)
+    -- update the buffer position for the next sample
+    if new_position then
+      self.buffer_position = new_position
+    end
+  end
 end
 
-function sampler:get_bank()
+function ypc:get_bank()
   return self.bank
 end
 
+function ypc:show_bank()
+  tracker:set_message(self:get_bank())
+end
 
-function sampler:load_directory(dir)
+function ypc:load_directory(dir)
   -- TODO: for each file in directory, load sample
 end
 
-return sampler
+return ypc

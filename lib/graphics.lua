@@ -276,7 +276,7 @@ function graphics:draw_mixer()
     elseif track:is_midi() then
       attributes[#attributes + 1] = { name = "dv.", value = track:get_device() }
       attributes[#attributes + 1] = { name = "ch.", value = track:get_channel() }
-    elseif track:is_sampler() then
+    elseif track:is_ypc() then
 
     elseif track:is_crow() then
       attributes[#attributes + 1] = { name = "", value = track:get_pair() == 1 and "1/2" or "3/4" }
@@ -328,7 +328,7 @@ function graphics:draw_clades()
   local clades = {}
   clades[1] = { name = "SYNTH", wired = false, y = 0 }
   clades[2] = { name = "MIDI", wired = false, y = 0 }
-  clades[3] = { name = "SAMPLER", wired = false, y = 0 }
+  clades[3] = { name = "YPC", wired = false, y = 0 }
   clades[4] = { name = "CROW", wired = false, y = 0 }
   local tracks = tracker:get_tracks()
   for k, track in pairs(tracks) do
@@ -596,7 +596,7 @@ function graphics:draw_mixer_glyph(x, y, glyph, inverted)
 
   if glyph == "m" or glyph == "s" or glyph == "e" then
     self:rect(x, y, 9, 9, bg)
-  elseif glyph == "SYNTH" or glyph == "MIDI" or glyph == "SAMPLER" or glyph == "CROW"  or glyph == "shadow"then
+  elseif glyph == "SYNTH" or glyph == "MIDI" or glyph == "YPC" or glyph == "CROW"  or glyph == "shadow"then
     self:rect(x, y, 22, 7, bg)
   end
 
@@ -664,7 +664,7 @@ elseif glyph == "SYNTH" then
     self:mlrs(x + 13, y + 2, 0, 4, fg)
     self:mlrs(x + 9, y + 6, 4, 0, fg)
     self:mlrs(x + 15, y + 1, 0, 5, fg)
-  elseif glyph == "SAMPLER" then
+  elseif glyph == "YPC" then
     self:mlrs(x + 1, y + 4, 20, 0, fg)
     self:mlrs(x + 3, y + 1, 0, 5, fg)
     self:mlrs(x + 4, y + 2, 0, 3, fg)

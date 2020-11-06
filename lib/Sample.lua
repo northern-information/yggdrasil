@@ -9,7 +9,7 @@ Sample = {}
 function Sample:new()
   local s = setmetatable({}, { 
     __index = Sample,
-    __tostring = function(s) return s:to_string() end
+    -- __tostring = function(s) return s:to_string() end
   })
   s.voice = 0
   s.rate_compensation = 1
@@ -75,11 +75,11 @@ end
 function Sample:load(filename, position)
   -- loads sample into position
   -- and returns where in the buffer it ends up
-  self.name=filename:match("^.+/(.+).wav$")
-  local ch, samples, samplerate = audio.file_info(filename)
+  self.name = filename:match("^.+/(.+).wav$")
+  local ch, samples, sample_rate = audio.file_info(filename)
   local duration = samples / 48000.0
   self.filename = filename
-  self.rate_compensation = samplerate / 48000.0 -- compensate for files that aren't 48Khz
+  self.rate_compensation = sample_rate / 48000.0 -- compensate for files that aren't 48Khz
   self.position = {position, position + duration}
 
   -- get frequency information from the filename itself

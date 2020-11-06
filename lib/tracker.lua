@@ -109,10 +109,13 @@ function tracker:update_track(payload)
         end
       elseif payload.class == "LEVEL" then
         track:set_level(payload.level)
-      elseif payload.class == "SAMPLER" then
-        if payload.action ~= nil and payload.sample ~= nil then
-          print("ACTION", payload.action)
-          print("SAMPLE", payload.sample)
+      elseif payload.class == "YPC" then
+        if payload.action ~= nil then
+          if payload.action == "bank" then
+            ypc:set_bank(payload.directory)
+          elseif payload.action == "load" then
+            track:update_slot(payload)
+          end
         end
       elseif payload.class == "SHADOW" then
         track:set_shadow(payload.shadow)
@@ -338,7 +341,7 @@ end
 function tracker:deselect()
   self:set_selected(false)
   self:set_selected_index(0)
-  for k, tracks in pairs(self:get_selected_tracks()) do
+  for k, track in pairs(self:get_selected_tracks()) do
     if track ~= nil then
       track:set_selected(false)
     end

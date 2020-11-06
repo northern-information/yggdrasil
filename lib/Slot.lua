@@ -21,6 +21,7 @@ function Slot:new(x, y)
   s.phenomenon = false
   s.payload = {}
   s.extents = nil
+  s.sample_name = ""
   s:refresh()
   return s
 end
@@ -37,42 +38,40 @@ end
 
 function Slot:trigger()
   local track = tracker:get_track(self:get_x())
+  graphics:register_slot_trigger(self:get_id())
+  if not track:is_enabled() then return end
   
   -- notes
-  if track:is_enabled()
-    and not track:is_muted()
+  if not track:is_muted()
     and (track:is_soloed() or not tracker:is_any_soloed()) then
     
-      local clade = self:get_clade()
-      local mixed_level = track:get_level() * self:get_velocity()
-    
-      if clade == "SYNTH" and self:get_midi_note() ~= nil then
-        synth:play(self:get_midi_note(), mixed_level)
-      elseif clade == "MIDI" and self:get_midi_note() ~= nil then
-        _midi:play(
-          self:get_midi_note(),
-          mixed_level,
-          track:get_channel(),
-          track:get_device(),
-          track:get_id()
-        )
-      elseif clade == "SAMPLER" then
-        print("trigger sampler")
-        -- TODO: get sample name
-        --	sample_name = self:get_sample_name()
-      	sample_name = "piano1_uiowa_440hz" -- TODO remove this
-        if track:get_x() ==4 then 
-          sample_name="wineglass_halffull_513hz"
-        end
-        sampler:play(track:get_x(), sample_name, self:get_frequency(),self:get_velocity()/127.0 )
-      elseif clade == "CROW" then 
-        if track:is_jf() then
-          _crow:jf(self:get_midi_note())
-        else
-          _crow:play(self:get_midi_note(), track:get_pair())
-        end
+    local clade = self:get_clade()
+    local mixed_level = track:get_level() * self:get_velocity()
+  
+    if clade == "SYNTH" and self:get_midi_note() ~= nil then
+      synth:play(self:get_midi_note(), mixed_level)
+    elseif clade == "MIDI" and self:get_midi_note() ~= nil then
+      _midi:play(
+        self:get_midi_note(),
+        mixed_level,
+        track:get_channel(),
+        track:get_device(),
+        track:get_id()
+      )
+    elseif clade == "YPC" then
+      ypc:play(
+        track:get_x(),
+        self:get_sample_name(),
+        self:get_frequency(),
+        mixed_level / 127.0
+      )
+    elseif clade == "CROW" then 
+      if track:is_jf() then
+        _crow:jf(self:get_midi_note())
+      else
+        _crow:play(self:get_midi_note(), track:get_pair())
       end
-
+    end
   end
 
   -- phenomenon
@@ -100,7 +99,6 @@ function Slot:trigger()
     end
   end
   
-  graphics:register_slot_trigger(self:get_id())
 end
 
 function Slot:to_string()
@@ -129,6 +127,7 @@ end
 function Slot:clear()
   self:clear_notes()
   self:set_payload({})
+  self:set_sample_name("")
   self:set_phenomenon(false)
   self:set_selected(false)
   self:set_empty(true)
@@ -153,8 +152,6 @@ end
 
 
 -- primitive getters, setters, & checks
-
-
 
 
 
@@ -210,6 +207,17 @@ end
 function Slot:set_frequency(f)
   self.frequency = f
   self:set_empty(false)
+end
+
+function Slot:get_sample_name()
+  return self.sample_name
+end
+
+function Slot:set_sample_name(s)
+  if string.match(s, ".wav") then
+    s = s:gsub(".wav", "")
+  end
+  self.sample_name = s
 end
 
 function Slot:set_selected(bool)

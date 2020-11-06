@@ -29,8 +29,6 @@ function Track:new(x)
   -- midi
   t.channel = 1
   t.device = 1
-  -- sampler
-  t.tbd = 1
   -- crow
   t.pair = 1
   t.jf = false
@@ -164,7 +162,7 @@ end
 
 function Track:update_slot(payload)
   local slot = self:get_slot(payload.y)
-  if slot ~= nil then
+  if slot ~= nil then  
     if payload.y > self:get_depth() then
       self:fill(payload.y)
     end
@@ -174,6 +172,9 @@ function Track:update_slot(payload)
     end
     if payload.class == "TRANSPOSE_SLOT" then  
       slot:transpose_midi_note(payload.value)
+    end
+    if payload.class == "YPC" then
+      slot:set_sample_name(payload.filename)
     end
     if fn.table_contains_key(payload, "midi_note") then
       slot:set_midi_note(payload.midi_note)
@@ -470,12 +471,12 @@ function Track:is_midi()
   return self:get_clade() == "MIDI"
 end
 
-function Track:sampler()
-  self:set_clade("SAMPLER")
+function Track:ypc()
+  self:set_clade("YPC")
 end
 
-function Track:is_sampler()
-  return self:get_clade() == "SAMPLER"
+function Track:is_ypc()
+  return self:get_clade() == "YPC"
 end
 
 function Track:crow()

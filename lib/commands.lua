@@ -44,7 +44,7 @@ function commands:register(t)
       end
     end
   end
-  -- if class == "OFF" then
+  -- if class == "ypc" then
     self.all[class] = t
   -- end
 end
@@ -249,7 +249,7 @@ self:register{
     if #branch ~= 2 then return false end
     return fn.is_int(branch[1].leaves[1])
       and Validator:new(branch[2], invocations):ok()
-      and fn.table_contains({ "synth", "midi", "sampler", "crow" }, branch[2].leaves[3])
+      and fn.table_contains({ "synth", "midi", "ypc", "crow" }, branch[2].leaves[3])
   end,
   payload = function(branch)
     return {
@@ -899,31 +899,52 @@ self:register{
 
 
 
--- SAMPLER
--- 1 sampler;load;piano_440.wav
--- 1 sampler;l;piano_440.wav
+-- YPC
+-- 1 1 ypc;load;piano_440.wav
+-- 1 1 ypc;l;piano_440.wav
+-- ypc;bank;909
+-- ypc;b;909
 self:register{
-  invocations = { "sampler", "sam" },
+  invocations = { "ypc" },
   signature = function(branch, invocations)
-    if #branch ~= 2 then return false end
-    return Validator:new(branch[2], invocations):ok()
-        and (branch[2].leaves[3] == "load" 
-            or branch[2].leaves[3] == "l")
-        and branch[2].leaves[5] ~= nil
+    if #branch ~= 1 and #branch ~= 3 then return false end
+    return (
+      #branch == 3
+      and fn.is_int(branch[1].leaves[1])
+      and fn.is_int(branch[2].leaves[1])
+      and Validator:new(branch[3], invocations):ok()
+      and branch[3].leaves[1] == "ypc"
+      and branch[3].leaves[5] ~= nil
+    ) or (
+      #branch == 1
+      and Validator:new(branch[1], invocations):ok()
+    )
   end,
   payload = function(branch)
     local out = {
-        class = "SAMPLER",
-        sample = branch[2].leaves[5],
-        x = branch[1].leaves[1]
+        class = "YPC"
     }
-    if branch[2].leaves[3] == "load" or branch[2].leaves[3] == "l" then
-      out["action"] = "load"
+    if #branch == 1 then
+      if branch[1].leaves[3] == "bank" or branch[1].leaves[3] == "b" then
+        out["action"] = "bank"
+        out["directory"] = branch[1].leaves[5]
+      end
+    elseif #branch == 3 then
+      if branch[3].leaves[3] == "load" or branch[3].leaves[3] == "l" then
+        out["action"] = "load"
+        out["filename"] = branch[3].leaves[5]
+        out["x"] = branch[1].leaves[1]
+        out["y"] = branch[2].leaves[1]
+      end
     end
     return out
   end,
   action = function(payload)
-    tracker:update_track(payload)
+    if payload.action == "bank" then
+      ypc:load_bank(payload.directory)
+    elseif payload.action == "load" then
+      tracker:update_track(payload)
+    end
   end
 }
 
@@ -1023,6 +1044,8 @@ self:register{ -- todo make midi note optional?
     tracker:update_slot(payload)
   end
 }
+
+
 
 -- SHADOW
 -- 1 shadow;2
@@ -1324,7 +1347,8 @@ self:register{
       "tracker", "t",
       "hud", "h",
       "mixer", "m",
-      "clades", "c"
+      "clades", "c",
+      "bank", "b"
       }, branch[1].leaves[3])
   end,
   payload = function(branch)
@@ -1355,6 +1379,9 @@ self:register{
     elseif v == "clades" 
       or v == "c" then
         page:select(3)
+    elseif v == "bank" 
+      or v == "b" then
+      ypc:show_bank()
     else
       tracker:set_track_view(v)
     end
