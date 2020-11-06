@@ -4,23 +4,26 @@
 -- and directly plays/stops/loads sample
 --
 
-Sample = {
-  voice = 0,
-  rate_compensation = 1,
-  frequency = 440,
-  buffer = 1,
-  position = {1, 3}, -- start and end
-  name = '',
-  filename = '',
-  path = '',
-}
+Sample = {}
 
-function Sample:new(o)
-  -- class for sample https://www.lua.org/pil/16.1.html
-  o = o or {} -- create object if user does not provide one
-  setmetatable(o, self)
-  self.__index = self
-  return o
+function Sample:new()
+  local s = setmetatable({}, { 
+    __index = Sample,
+    __tostring = function(s) return s:to_string() end
+  })
+  s.voice = 0
+  s.rate_compensation = 1
+  s.frequency = 440
+  s.buffer = 1
+  s.position = {1, 3} -- start and end
+  s.name = ''
+  s.filename = ''
+  s.path = ''
+  return s
+end
+
+function Sample:to_string()
+  return self:get_filename()
 end
 
 function Sample:get_filename()
