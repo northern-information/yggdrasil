@@ -80,6 +80,7 @@ end
 
 
 function tracker:update_every_other(payload)
+  self:deselect()
   self:select_tracks(payload.x)
   if self:is_selected() then
     self:get_track(payload.x):update_every_other(payload)
@@ -128,8 +129,8 @@ function tracker:update_track(payload)
         track:set_shadow(payload.shadow)
       elseif payload.class == "SHIFT" then
         track:shift(payload.shift)
-      elseif payload.class == "SYNC" then
-        track:set_clock_sync(payload.clock_sync)
+      elseif payload.class == "CLOCK" then
+        track:set_clock(payload.clock)
       elseif payload.class == "SYNTH" then
         if payload.voice ~= nil then
           track:set_voice(payload.voice)
@@ -259,7 +260,6 @@ end
 
 
 function tracker:select_tracks(x1, x2)
-  self:deselect()
   local valid_range = true
   if not self:is_in_bounds(x1) then
     valid_range = false
@@ -270,8 +270,16 @@ function tracker:select_tracks(x1, x2)
     self:set_message("Track " .. x2 .. " is out of bounds.")
   end
   if valid_range then
-    x2 = x2 ~= nil and x2 or x1
-    for x = x1, x2 do
+    if self:is_selected() and x2 == nil then
+      x2 = 0
+      for k, track in pairs(self:get_selected_tracks()) do
+        x2 = track:get_x() > x2 and track:get_x() or x2
+      end
+    end
+    x2 = x2 ~= 0 and x2 or x1
+    local t = {x1, x2}
+    table.sort(t)
+    for x = t[1], t[2] do
       self:get_track(x):select()
       self:set_selected(true)
     end

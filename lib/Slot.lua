@@ -116,7 +116,10 @@ function Slot:to_string()
   elseif v == "ygg"    then out = self:get_ygg_note()
   elseif v == "ipn"    then out = self:get_ipn_note()
   elseif v == "freq"   then out = self:get_frequency()
-  elseif v == "vel"    then out = self:get_velocity()
+  end
+  if view:is_velocity() then
+    local v = "." .. self:get_velocity()
+    out = out ~= nil and out .. v or v
   end
   if self:get_clade() == "YPC" then
     if view:is_ypc() and self:get_sample_name() ~= "" then

@@ -294,7 +294,7 @@ function graphics:draw_mixer()
     local clock_y = y + attribute_start + 32
     self:rect(x, clock_y - 5, 22, 7, fg)
     self:text(x + 1, clock_y + 1, "SYNC", bg)
-    self:text(x + 2, clock_y + 9, track:get_clock_sync(), fg)
+    self:text(x + 2, clock_y + 9, track:get_clock(), fg)
   end
 end
 

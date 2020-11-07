@@ -1,6 +1,13 @@
 view = {}
 
 function dv()
+print("view.tracker", view.tracker)
+print("view.velocity", view.velocity)
+print("view.phenomenon", view.phenomenon)
+print("view.ypc", view.ypc)
+print("view.hud", view.hud)
+print("view.clades", view.clades)
+print("view.mixer", view.mixer)
 print("view.x", view.x)
 print("view.x_offset", view.x_offset)
 print("view.y", view.y)
@@ -14,11 +21,12 @@ end
 function view.init()
   -- page
   view.tracker = false
-  view.hud = false
+  view.velocity = false
   view.phenomenon = false
-  view.phenomenon = ypc
+  view.ypc = false
+  view.hud = false
+  view.clades = false
   view.mixer = false
-  view.total_views = 4
   -- tracker
   view.slot_width_min = 16
   view.slot_width = view.slot_width_min
@@ -52,19 +60,17 @@ function view:refresh()
     self:set_transposed(false)
   elseif page:get_page_title() == "MIXER" then
     self:set_tracker(false)
-    self:set_hud(false)
     self:set_mixer(true)
     self:set_clades(false)
     self:set_transposed(false)
   elseif page:get_page_title() == "CLADES" then
     self:set_tracker(false)
-    self:set_hud(false)
     self:set_mixer(false)
     self:set_clades(true)
     self:set_transposed(true)
   end
   if page:is("MIXER") then
-
+    -- empty
   else
     local y = self:get_y()
     local x = self:get_x()
@@ -276,6 +282,18 @@ end
 
 function view:is_phenomenon()
   return self.phenomenon
+end
+
+function view:toggle_velocity()
+  self.velocity = not self.velocity
+end
+
+function view:set_velocity(bool)
+  self.velocity = bool
+end
+
+function view:is_velocity()
+  return self.velocity
 end
 
 function view:toggle_ypc()

@@ -14,7 +14,7 @@ function Track:new(x)
   t.slots = {}
   t.extents = 0
   t.selected = false
-  t.clock_sync = 1
+  t.clock = 1
   -- mixer
   t.enabled = true
   t.muted = false
@@ -236,14 +236,8 @@ end
 
 function Track:get_shadow_attribute(attribute)
   local track = tracker:get_track_by_id(self:get_shadow())
-      if attribute == "enabled" then return track:is_enabled()
-  elseif attribute == "muted"   then return track:is_muted()
-  elseif attribute == "soloed"  then return track:is_soloed()
-  elseif attribute == "level"   then return track:get_level()
-  elseif attribute == "clade"   then return track:get_clade()
+      if attribute == "clade"   then return track:get_clade()
   elseif attribute == "voice"   then return track:get_voice()
-  elseif attribute == "c1"      then return track:get_c1()
-  elseif attribute == "c2"      then return track:get_c2()
   elseif attribute == "channel" then return track:get_channel()
   elseif attribute == "device"  then return track:get_device()
   elseif attribute == "pair"    then return track:get_pair()
@@ -381,7 +375,7 @@ function Track:is_selected()
 end
 
 function Track:is_muted()
-  return self:is_shadow() and self:get_shadow_attribute("muted") or self.muted
+  return self.muted
 end
 
 function Track:set_muted(bool)
@@ -401,7 +395,7 @@ function Track:unmute()
 end
 
 function Track:is_soloed()
-  return self:is_shadow() and self:get_shadow_attribute("soloed") or self.soloed
+  return self.soloed
 end
 
 function Track:set_soloed(bool)
@@ -421,7 +415,7 @@ function Track:unsolo()
 end
 
 function Track:is_enabled()
-  return self:is_shadow() and self:get_shadow_attribute("enabled") or self.enabled
+  return self.enabled
 end
 
 function Track:set_enabled(bool)
@@ -441,7 +435,7 @@ function Track:enable()
 end
 
 function Track:get_level()
-  return self:is_shadow() and self:get_shadow_attribute("level") or self.level
+  return self.level
 end
 
 function Track:set_level(f)
@@ -520,7 +514,7 @@ function Track:set_voice(i)
 end
 
 function Track:get_c1()
-  return self:is_shadow() and self:get_shadow_attribute("c1") or self.c1
+  return self.c1
 end
 
 function Track:set_c1(i)
@@ -528,7 +522,7 @@ function Track:set_c1(i)
 end
 
 function Track:get_c2()
-  return self:is_shadow() and self:get_shadow_attribute("c2") or self.c2
+  return self.c2
 end
 
 function Track:set_c2(i)
@@ -551,10 +545,10 @@ function Track:set_jf(bool)
   self.jf = bool
 end
 
-function Track:get_clock_sync()
-  return self.clock_sync
+function Track:get_clock()
+  return self.clock
 end
 
-function Track:set_clock_sync(f)
-  self.clock_sync = f
+function Track:set_clock(f)
+  self.clock = f
 end

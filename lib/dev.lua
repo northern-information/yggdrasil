@@ -22,7 +22,7 @@ function dev:scene(i)
       -- track:set_soloed(math.random(1, 2) == 1)
       track:set_enabled(math.random(1, 2) == 1)
       track:set_descend(math.random(1, 2) == 1)
-      track:set_clock_sync(math.random(1, 10) * .1)
+      track:set_clock(math.random(1, 10) * .1)
       track:set_shadow(math.random(1, 2) == 1 and math.random(1, 8) or 0)
       track:set_level(math.random(0, 100) * .01)
     end

@@ -118,7 +118,7 @@ self:register{
       fn.is_int(branch[1].leaves[1])
       and Validator:new(branch[2], invocations):ok()
       and fn.is_int(branch[2].leaves[3])
-      and fn.table_contains({"velocity", "vel"}, branch[3].leaves[1])
+      and fn.table_contains({"shadow", "sha"}, branch[3].leaves[1])
     )
   end,
   payload = function(branch)
@@ -529,6 +529,7 @@ self:register{
       if payload.x2 ~= nil then
         tracker:select_tracks(payload.x1, payload.x2)
       else
+        tracker:deselect()
         tracker:select_tracks(payload.x1)
       end
     end
@@ -1179,10 +1180,10 @@ self:register{
 
 
 
--- SYNC
--- 1 sync;5
+-- CLOCK
+-- 1 clock;5
 self:register{
-  invocations = { "sync", "clock" },
+  invocations = { "clock" },
   signature = function(branch, invocations)
     if #branch ~= 2 then return false end
     return fn.is_int(branch[1].leaves[1])
@@ -1191,8 +1192,8 @@ self:register{
   end,
   payload = function(branch)
     return {
-      class = "SYNC",
-      clock_sync = branch[2].leaves[3],
+      class = "CLOCK",
+      clock = branch[2].leaves[3],
       x = branch[1].leaves[1],
     }
   end,
@@ -1375,7 +1376,7 @@ self:register{
     return Validator:new(branch[1], invocations):ok()
       and fn.table_contains({ 
       "midi", "ipn", "ygg", "freq", 
-      "vel",
+      "velocity", "vel", "v",
       "index",
       "phenomenon", "p",
       "tracker", "t",
@@ -1398,9 +1399,13 @@ self:register{
       or v == "t" then
         page:select(1)
         tracker:set_track_view("midi")
+    elseif v == "velocity" 
+      or v == "vel"
+      or v == "v" then
+        view:toggle_velocity()
+        tracker:refresh()
     elseif v == "hud" 
-      or v == "h"
-      or v == "numbers" then
+      or v == "h" then
         view:toggle_hud()
         tracker:refresh()
     elseif v == "phenomenon"
