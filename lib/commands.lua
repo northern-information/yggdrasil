@@ -74,6 +74,39 @@ note, new "prefixes" are a special matching case and still need to be added in .
 ]]
 function commands:register_all()
 
+
+
+-- ASCEND
+-- 1 ascend
+-- ascend
+self:register{
+  invocations = { "ascend", "asc" },
+  signature = function(branch, invocations)
+    if #branch ~= 1 and #branch ~= 2 then return false end
+    return (
+      Validator:new(branch[1], invocations):ok()
+    ) or (
+      fn.is_int(branch[1].leaves[1])
+      and Validator:new(branch[2], invocations):ok()
+    )
+  end,
+  payload = function(branch)
+    return {
+      class = "ASCEND",
+      x = #branch[1].leaves == 3 and branch[1].leaves[1] or nil
+    }
+  end,
+  action = function(payload) tabutil.print(payload)
+    if payload.x ~= nil then
+      tracker:get_track(payload.x):set_descend(false)
+    else
+      tracker:ascend()
+    end
+  end
+}
+
+
+
 -- ANCHOR
 -- 1 5 #1
 self:register{
@@ -325,6 +358,38 @@ self:register{
     tracker:update_track(payload)
   end
 }
+
+
+
+-- DESCEND
+-- 1 descend
+-- descend
+self:register{
+  invocations = { "descend", "des" },
+  signature = function(branch, invocations)
+    if #branch ~= 1 and #branch ~= 2 then return false end
+    return (
+      Validator:new(branch[1], invocations):ok()
+    ) or (
+      fn.is_int(branch[1].leaves[1])
+      and Validator:new(branch[2], invocations):ok()
+    )
+  end,
+  payload = function(branch)
+    return {
+      class = "DESCEND",
+      x = #branch[1].leaves == 3 and branch[1].leaves[1] or nil
+    }
+  end,
+  action = function(payload) tabutil.print(payload)
+    if payload.x ~= nil then
+      tracker:get_track(payload.x):set_descend(true)
+    else
+      tracker:descend()
+    end
+  end
+}
+
 
 
 -- DEPTH
@@ -813,19 +878,31 @@ self:register{
 
 
 -- PLAY
+-- 1 play
+-- play
 self:register{
-  invocations = { "play" },
+  invocations = { "play", "start" },
   signature = function(branch, invocations)
-    if #branch ~= 1 then return false end
-    return Validator:new(branch[1], invocations):ok()
+    if #branch ~= 1 and #branch ~= 2 then return false end
+    return (
+      Validator:new(branch[1], invocations):ok()
+    ) or (
+      fn.is_int(branch[1].leaves[1])
+      and Validator:new(branch[2], invocations):ok()
+    )
   end,
   payload = function(branch)
     return {
-      class = "PLAY"
+      class = "PLAY",
+      x = #branch == 2 and branch[1].leaves[1] or nil
     }
   end,
   action = function(payload)
-    tracker:set_playback(true)
+    if payload.x ~= nil then
+      tracker:get_track(payload.x):start()
+    else
+      tracker:start()
+    end
   end
 }
 
@@ -838,7 +915,7 @@ self:register{
   signature = function(branch, invocations)
     if #branch ~= 3 then return false end
     return fn.is_int(branch[1].leaves[1])
-       and fn.is_int(branch[2].leaves[1])
+      and fn.is_int(branch[2].leaves[1])
       and Validator:new(branch[3], invocations):ok()
   end,
   payload = function(branch)
@@ -950,6 +1027,33 @@ self:register{
   end,
   action = function(payload)
     fn.screenshot()
+  end
+}
+
+
+
+-- SYNC
+-- sync
+-- sync;3
+self:register{
+  invocations = { "sync" },
+  signature = function(branch, invocations)
+    if #branch ~= 1 then return false end
+    return (
+      Validator:new(branch[1], invocations):ok()
+    ) or ( 
+      Validator:new(branch[1], invocations):ok()
+      and fn.is_int(branch[1].leaves[3])
+    )
+  end,
+  payload = function(branch)
+    return {
+      class = "SYNC",
+      y = branch[1].leaves[3] or nil
+    }
+  end,
+  action = function(payload)
+    tracker:sync(payload.y)
   end
 }
 
@@ -1162,19 +1266,31 @@ self:register{
 
 
 -- STOP
+-- 1 stop
+-- stop
 self:register{
   invocations = { "stop" },
   signature = function(branch, invocations)
-    if #branch ~= 1 then return false end
-    return Validator:new(branch[1], invocations):ok()
+    if #branch ~= 1 and #branch ~= 2 then return false end
+    return (
+      Validator:new(branch[1], invocations):ok()
+    ) or (
+      fn.is_int(branch[1].leaves[1])
+      and Validator:new(branch[2], invocations):ok()
+    )
   end,
   payload = function(branch)
     return {
-      class = "STOP"
+      class = "STOP",
+      x = #branch == 2 and branch[1].leaves[1] or nil
     }
   end,
   action = function(payload)
-    tracker:set_playback(false)
+    if payload.x ~= nil then
+      tracker:get_track(payload.x):stop()
+    else
+      tracker:stop()
+    end
   end
 }
 

@@ -27,10 +27,7 @@ function tracker.tracker_clock()
   while true do
     clock.sync(1)
     tracker:increment_generation()
-    if tracker.playback == true then
-      for k, track in pairs(tracker:get_tracks()) do
-        track:advance()
-      end
+    if tracker:is_playback() then
       fn.dirty_screen(true)
     end
   end
@@ -218,6 +215,24 @@ function tracker:get_track_by_id(id)
   end
 end
 
+function tracker:sync(y)
+  y = y == nil and 0 or y - 1 -- subtract one to get intuitive behavior
+  for k, track in pairs(self:get_tracks()) do
+    track:set_position(y)
+  end
+end
+
+function tracker:ascend()
+  for k, track in pairs(self:get_tracks()) do
+    track:set_descend(false)
+  end
+end
+
+function tracker:descend()
+  for k, track in pairs(self:get_tracks()) do
+    track:set_descend(true)
+  end
+end
 
 -- slot management
 
@@ -702,11 +717,20 @@ function tracker:is_any_soloed()
   return self.any_soloed
 end
 
-function tracker:get_playback()
+function tracker:is_playback()
   return tracker.playback
 end
 
 function tracker:set_playback(bool)
   tracker.playback = bool
 end
+
+function tracker:stop()
+  self:set_playback(false)
+end
+
+function tracker:start()
+  self:set_playback(true)
+end
+
 return tracker

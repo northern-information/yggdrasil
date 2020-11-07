@@ -1,5 +1,16 @@
 Track = {}
 
+local function track_clock(track)
+  while true do
+    clock.sync(track:get_clock() / 1)
+    if tracker:is_playback() 
+    and track:is_playback() 
+    and track:is_enabled() then
+      track:advance()
+    end
+  end
+end
+
 function Track:new(x)
   local t = setmetatable({}, { 
     __index = Track,
@@ -8,6 +19,7 @@ function Track:new(x)
   t.x = x ~= nil and x or 0
   t.id = "track-" .. fn.id()
   t.depth = 0
+  t.playback = true
   t.position = 0
   t.descend = true
   t.view = ""
@@ -15,6 +27,7 @@ function Track:new(x)
   t.extents = 0
   t.selected = false
   t.clock = 1
+  t.track_clock = clock.run(track_clock, t)
   -- mixer
   t.enabled = true
   t.muted = false
@@ -34,6 +47,8 @@ function Track:new(x)
   t.jf = false
   return t
 end
+
+
 
 function Track:refresh()
   local e = 0
@@ -551,4 +566,20 @@ end
 
 function Track:set_clock(f)
   self.clock = f
+end
+
+function Track:is_playback()
+  return self.playback
+end
+
+function Track:set_playback(bool)
+  self.playback = bool
+end
+
+function Track:stop()
+  self:set_playback(false)
+end
+
+function Track:start()
+  self:set_playback(true)
 end
