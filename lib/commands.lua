@@ -104,17 +104,27 @@ self:register{
 
 -- APPEND
 -- 1 append;3
+-- 1 append;3 shadow
+-- 1 append;3 sha
 self:register{
   invocations = { "append", "ap" },
   signature = function(branch, invocations)
-    if #branch ~= 2 then return false end
-    return fn.is_int(branch[1].leaves[1]) 
+    if #branch ~= 2 and #branch ~= 3 then return false end
+    return (
+      fn.is_int(branch[1].leaves[1]) 
       and Validator:new(branch[2], invocations):ok()
       and fn.is_int(branch[2].leaves[3])
+    ) or (
+      fn.is_int(branch[1].leaves[1])
+      and Validator:new(branch[2], invocations):ok()
+      and fn.is_int(branch[2].leaves[3])
+      and fn.table_contains({"velocity", "vel"}, branch[3].leaves[1])
+    )
   end,
   payload = function(branch)
     return {
       class = "APPEND",
+      shadow = #branch == 3,
       value = branch[2].leaves[3],
       x = branch[1].leaves[1]
     }
@@ -122,7 +132,7 @@ self:register{
   action = function(payload)
     for i = 1, payload.value do
       local position = i - 1
-      tracker:append_track_after(payload.x + position)
+      tracker:append_track_after(payload.x + position, payload.shadow)
     end
   end
 }
@@ -474,37 +484,53 @@ self:register{
 
 
 
--- FOCUS
+-- SELECT
 -- 1 2
+-- 1;5
 self:register{
   invocations = {},
   signature = function(branch, invocations)
     if #branch == 1 then
-      return fn.is_int(branch[1].leaves[1])
+      return (
+        fn.is_int(branch[1].leaves[1])
+      ) or (
+        fn.is_int(branch[1].leaves[1])
+        and branch[1].leaves[2] == ";"
+        and fn.is_int(branch[1].leaves[3])
+        and fn.is_int(branch[1].leaves[1]) < fn.is_int(branch[1].leaves[3])
+      )
     elseif #branch == 2 then
       return fn.is_int(branch[1].leaves[1]) 
       and fn.is_int(branch[2].leaves[1])
     end
   end,
   payload = function(branch)
-    local y = nil
-    if branch[2] ~= nil then
-      y = fn.is_int(branch[2].leaves[1]) and branch[2].leaves[1] or nil
-    end
-    return {
+    local out = {
       class = "FOCUS",
-      x = branch[1].leaves[1], 
-      y = y
+      range = false,
+      x1 = branch[1].leaves[1]
     }
+    if branch[2] ~= nil then
+      out["y"] = branch[2].leaves[1]
+    end
+    if branch[1].leaves[2] == ";" then
+      out.range = true
+      out["x2"] = branch[1].leaves[3]
+    end
+    return out
   end,
   action = function(payload)
     if page:is("MIXER") or page:is("CLADES") then
       page:select(1)
     end
     if payload.y ~= nil then
-      tracker:select_slot(payload.x, payload.y)
+      tracker:select_slot(payload.x1, payload.y)
     else
-      tracker:select_track(payload.x)
+      if payload.x2 ~= nil then
+        tracker:select_tracks(payload.x1, payload.x2)
+      else
+        tracker:select_tracks(payload.x1)
+      end
     end
   end
 }
@@ -966,36 +992,21 @@ self:register{
 
 
 
--- NOTE_AND_VELOCITY
--- 1 1 72 vel;100
--- 1 1 c4 vel;100
-self:register{ -- todo make midi note optional?
+-- VELOCITY
+-- 1 1 velocity;100
+-- 1 1 vel;100
+self:register{
   invocations = { "velocity", "vel" },
   signature = function(branch, invocations)
-    if #branch ~= 4 then return false end
-    return (
-      fn.is_int(branch[1].leaves[1])
+    if #branch ~= 3 then return false end
+    return fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
-      and fn.is_int(branch[3].leaves[1])
-      and Validator:new(branch[4], invocations):ok()
-    ) or (
-      fn.is_int(branch[1].leaves[1])
-      and fn.is_int(branch[2].leaves[1])
-      and music:is_valid_ygg(branch[3].leaves[1])
-      and Validator:new(branch[4], invocations):ok()
-    )
+      and Validator:new(branch[3], invocations):ok()
   end,
   payload = function(branch)
-    local midi_note = 0
-    if fn.is_int(branch[3].leaves[1]) then
-      midi_note = branch[3].leaves[1]
-    else
-      midi_note = music:convert("ygg_to_midi", branch[3].leaves[1])
-    end
     return {
-      class = "NOTE_AND_VELOCITY",
-      midi_note = midi_note,
-      velocity = branch[4].leaves[3],
+      class = "VELOCITY",
+      velocity = branch[3].leaves[3],
       x = branch[1].leaves[1],
       y = branch[2].leaves[1],
     }

@@ -57,7 +57,7 @@ end
 
 
 
--- tracks management
+-- track management
 
 
 
@@ -80,7 +80,7 @@ end
 
 
 function tracker:update_every_other(payload)
-  self:select_track(payload.x)
+  self:select_tracks(payload.x)
   if self:is_selected() then
     self:get_track(payload.x):update_every_other(payload)
   end
@@ -89,7 +89,7 @@ end
 function tracker:update_track(payload)
   local track = self:get_track(payload.x)
   if track ~= nil then
-    tracker:select_track(payload.x)
+    tracker:select_tracks(payload.x)
     if fn.table_contains_key(payload, "class") then
       if payload.class == "CLADE" then
         track:set_clade(payload.clade)
@@ -258,13 +258,23 @@ end
 
 
 
-function tracker:select_track(x)
+function tracker:select_tracks(x1, x2)
   self:deselect()
-  if not self:is_in_bounds(x) then
-    self:set_message("Track " .. x .. " is out of bounds.")
-  else
-    self:get_track(x):select()
-    self:set_selected(true)
+  local valid_range = true
+  if not self:is_in_bounds(x1) then
+    valid_range = false
+    self:set_message("Track " .. x1 .. " is out of bounds.")
+  end
+  if x2 ~= nil and not self:is_in_bounds(x2) then
+    valid_range = false
+    self:set_message("Track " .. x2 .. " is out of bounds.")
+  end
+  if valid_range then
+    x2 = x2 ~= nil and x2 or x1
+    for x = x1, x2 do
+      self:get_track(x):select()
+      self:set_selected(true)
+    end
   end
   view:set_tracker_dirty(true)
 end
@@ -520,10 +530,13 @@ function tracker:get_selected_index()
   return self.selected_index
 end
 
-function tracker:append_track_after(x)
+function tracker:append_track_after(x, shadow)
   if self:get_cols() + 1 <= config.settings.max_tracks then
     local track = Track:new(x + 1)
     table.insert(self.tracks, x + 1, track)
+    if shadow then
+      track:set_shadow(x)
+    end
     self:set_cols(#self.tracks)
     view:set_tracks(#self.tracks)
     track:fill(self:get_rows())
