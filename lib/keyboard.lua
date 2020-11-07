@@ -16,19 +16,26 @@ function keyboard.event(type, code, val)
   print("")
 
   if keys:is_y_mode() then
-    if keys:is_hjkl(code) then
-      view:handle_pan(keys:get_keycode(code))
-    elseif keys:is_f(code) then
-      fn.decrement_increment(keys:is_shifted() and -12 or -1)
-    elseif keys:is_g(code) then
-      fn.decrement_increment(keys:is_shifted() and 12 or 1)
+        if keys:is_number_code(code) then tracker:select_tracks(tonumber(keys:get_keycode_value(code)))
+    elseif keys:equals(code, "q")    then tracker:unmute()
+    elseif keys:equals(code, "w")    then tracker:unsolo()
+    elseif keys:equals(code, "e")    then tracker:enable()
+    elseif keys:equals(code, "a")    then tracker:mute()
+    elseif keys:equals(code, "s")    then tracker:solo()
+    elseif keys:equals(code, "d")    then tracker:disable()
+    elseif keys:equals(code, "f")    then fn.decrement_increment(keys:is_shifted() and -12 or -1)
+    elseif keys:equals(code, "g")    then fn.decrement_increment(keys:is_shifted() and 12 or 1)
+    elseif keys:equals(code, "h")    then view:handle_pan(keys:get_keycode_value(code))
+    elseif keys:equals(code, "j")    then view:handle_pan(keys:get_keycode_value(code))
+    elseif keys:equals(code, "k")    then view:handle_pan(keys:get_keycode_value(code))
+    elseif keys:equals(code, "l")    then view:handle_pan(keys:get_keycode_value(code))
     end
   else
     if keys:is_letter_code(code) or keys:is_number_code(code) or keys:is_symbol(code) then
       if keys:is_shifted() and (keys:is_number_code(code) or keys:is_symbol(code)) then
         buffer:add(keys:get_shifted_keycode(code))
       else
-        buffer:add(keys:get_keycode(code))
+        buffer:add(keys:get_keycode_value(code))
       end
     end
   end
@@ -57,10 +64,10 @@ function keyboard.event(type, code, val)
 
   if keys:is_arrow(code) then
     local i = keys:is_shifted() and 12 or 1
-        if keys:get_keycode(code) == "RIGHT" then fn.decrement_increment(i)
-    elseif keys:get_keycode(code) == "LEFT"  then fn.decrement_increment(-i)
-    elseif keys:get_keycode(code) == "UP"    then buffer:up_history()
-    elseif keys:get_keycode(code) == "DOWN"  then buffer:down_history()
+        if keys:get_keycode_value(code) == "RIGHT" then fn.decrement_increment(i)
+    elseif keys:get_keycode_value(code) == "LEFT"  then fn.decrement_increment(-i)
+    elseif keys:get_keycode_value(code) == "UP"    then buffer:up_history()
+    elseif keys:get_keycode_value(code) == "DOWN"  then buffer:down_history()
     end
   end
 

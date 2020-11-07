@@ -89,7 +89,11 @@ function keys.init()
   }
 end
 
-function keys:get_keycode(code)
+function keys:equals(code, check)
+  return self:get_keycode_value(code) == check
+end
+
+function keys:get_keycode_value(code)
   for foo, bar in pairs(self.codes) do
     if bar.k == code then
       return bar.v
@@ -149,18 +153,6 @@ end
 
 function keys:is_arrow(code)
   return (103 == code) or (106 == code) or (108 == code) or (105 == code)
-end
-
-function keys:is_f(code)
-  return 33 == code
-end
-
-function keys:is_g(code)
-  return 34 == code
-end
-
-function keys:is_hjkl(code)
-  return (35 == code) or (36 == code) or (37 == code) or (38 == code)
 end
 
 function keys:is_esc(code)

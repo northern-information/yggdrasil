@@ -403,7 +403,15 @@ end
 
 
 function tracker:solo(x)
-  tracker:get_track(x):solo()
+  if x == nil and not self:is_selected() then
+    self:solo_all()
+  elseif x == nil and self:is_selected() then
+    for k, track in pairs(self:get_selected_tracks()) do
+      track:solo()
+    end
+  elseif x ~= nil then
+    tracker:get_track(x):solo()
+  end
   self:refresh()
 end
 
@@ -416,7 +424,15 @@ function tracker:solo_all()
 end
 
 function tracker:unsolo(x)
-  tracker:get_track(x):unsolo()
+  if x == nil and not self:is_selected() then
+    self:unsolo_all()
+  elseif x == nil and self:is_selected() then
+    for k, track in pairs(self:get_selected_tracks()) do
+      track:unsolo()
+    end
+  elseif x ~= nil then
+    tracker:get_track(x):unsolo()
+  end
   self:refresh()
 end
 
@@ -429,7 +445,15 @@ function tracker:unsolo_all()
 end
 
 function tracker:mute(x)
-  tracker:get_track(x):mute()
+  if x == nil and not self:is_selected() then
+    self:mute_all()
+  elseif x == nil and self:is_selected() then
+    for k, track in pairs(self:get_selected_tracks()) do
+      track:mute()
+    end
+  elseif x ~= nil then
+    tracker:get_track(x):mute()
+  end
   self:refresh()
 end
 
@@ -442,7 +466,15 @@ function tracker:mute_all()
 end
 
 function tracker:unmute(x)
-  tracker:get_track(x):unmute()
+  if x == nil and not self:is_selected() then
+    self:unmute_all()
+  elseif x == nil and self:is_selected() then
+    for k, track in pairs(self:get_selected_tracks()) do
+      track:unmute()
+    end
+  elseif x ~= nil then
+    tracker:get_track(x):unmute()
+  end
   self:refresh()
 end
 
@@ -461,8 +493,17 @@ function tracker:unshadow_all()
   end
   self:refresh()
 end
+
 function tracker:enable(x)
-  tracker:get_track(x):enable()
+  if x == nil and not self:is_selected() then
+    self:enable_all()
+  elseif x == nil and self:is_selected() then
+    for k, track in pairs(self:get_selected_tracks()) do
+      track:enable()
+    end
+  elseif x ~= nil then
+    tracker:get_track(x):enable()
+  end
   self:refresh()
 end
 
@@ -475,7 +516,15 @@ function tracker:enable_all()
 end
 
 function tracker:disable(x)
-  tracker:get_track(x):disable()
+  if x == nil and not self:is_selected() then
+    self:disable_all()
+  elseif x == nil and self:is_selected() then
+    for k, track in pairs(self:get_selected_tracks()) do
+      track:disable()
+    end
+  elseif x ~= nil then
+    tracker:get_track(x):disable()
+  end
   self:refresh()
 end
 
