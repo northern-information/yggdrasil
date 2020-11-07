@@ -246,7 +246,7 @@ function graphics:draw_mixer()
     self:rect(x - 1, y, v.track_width, v.track_height, bg)
     -- upper boundary, left line, & terminator
     self:rect(x - 1, y - 3, v.track_width - 2, 3, fg)
-    self:mlrs(x, y - 3, 0, v.track_height, fg)
+    self:mlrs(x, y - 3, 0, v.track_height + 3, fg)
     self:rect(x - 2, y + v.track_height, 3, 3, fg)
     -- track number
     local selected_fg = track:is_selected() and fg or bg
