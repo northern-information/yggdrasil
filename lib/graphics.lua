@@ -244,12 +244,15 @@ function graphics:draw_mixer()
     local track_title_width = 11
     -- cover any overflow from previous tracks
     self:rect(x - 1, y, v.track_width, v.track_height, bg)
-    -- left line & terminator
-    self:mlrs(x, y + 1, 0, v.track_height, fg)
+    -- upper boundary, left line, & terminator
+    self:rect(x - 1, y - 3, v.track_width - 2, 3, fg)
+    self:mlrs(x, y - 3, 0, v.track_height, fg)
     self:rect(x - 2, y + v.track_height, 3, 3, fg)
     -- track number
-    self:rect(x, y + 1, track_title_width, 7, fg)
-    self:text(x + 1, y + 7, i, bg)
+    local selected_fg = track:is_selected() and fg or bg
+    local selected_bg = track:is_selected() and bg or fg
+    self:rect(x, y + 1, track_title_width, 7, selected_fg)
+    self:text_center(x + 5, y + 7, i, selected_bg)
     -- mute, solo, enabled
     self:draw_mixer_glyph(x + 1, y + 9, "m", track:is_muted())
     self:draw_mixer_glyph(x + 1, y + 19, "s", track:is_soloed())

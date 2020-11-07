@@ -585,9 +585,6 @@ self:register{
     return out
   end,
   action = function(payload)
-    if page:is("MIXER") or page:is("CLADES") then
-      page:select(1)
-    end
     if payload.y ~= nil then
       tracker:select_slot(payload.x1, payload.y)
     else
