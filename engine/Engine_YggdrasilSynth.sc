@@ -15,7 +15,7 @@ Engine_YggdrasilSynth : CroneEngine {
 
 		// dirty dirty dirty!!!
 		synths = [
-			\PolyPercMacrod, { |out, freq, macro1, macro2|
+			\PolyPercMacrod, { |out, freq, amp, macro1, macro2|
 				var cutoff = (macro1 * 127).midicps;
 				var release = macro2 * 5;
 				var snd = Pulse.ar(freq, 0.5);
@@ -24,7 +24,7 @@ Engine_YggdrasilSynth : CroneEngine {
 
 				Out.ar(out, (filt*env).dup);
 			},
-			\MikaPerc, { |out, freq, macro1, macro2|
+			\MikaPerc, { |out, freq, amp, macro1, macro2|
 				var modDepth, modMul, modAdd, decay, modSpeed;
 				var env, carFreq, modMod, modFreq, mod, car;
 
