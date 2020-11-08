@@ -213,6 +213,18 @@ function tracker:clear_track(i)
   self:get_track(i):clear()
 end
 
+function tracker:clear_all_samples()
+  for k, track in pairs(self:filter_tracks("CLADE", "YPC")) do
+    for y = 1, track:get_depth() do
+      track:update_slot({
+        class = "YPC",
+        filename = "",
+        y = y
+      })
+    end
+  end
+end
+
 function tracker:get_track_by_id(id)
   for k, track in pairs(self:get_tracks()) do
     if track:get_id() == id then

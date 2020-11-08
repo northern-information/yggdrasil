@@ -1618,8 +1618,11 @@ self:register{
   end,
   action = function(payload)
     if payload.action == "bank" then
+      tracker:clear_all_samples()
       ypc:load_bank(payload.directory)
     elseif payload.action == "load" then
+      tracker:deselect()
+      tracker:select_tracks(payload.x)
       tracker:update_track(payload)
     end
   end

@@ -37,24 +37,26 @@ function ypc.init()
 end
 
 function ypc:play(track, sample_name, frequency, velocity)
-  if track == nil or sample_name == nil or frequency == nil or velocity == nil then 
+  if track == nil 
+  or sample_name == nil 
+  or sample_name == "" 
+  or self.samples[sample_name] == nil 
+  or frequency == nil
+  or velocity == nil then 
     return 
   end
   -- plays sample in a one-shot loop
   -- then uses a clock to sleep and reset
   -- voice to 0 (not playing)
-  print("request for "..sample_name.." on track "..track)
   local voice = self:acquire_voice(track)
-print(voice, frequency, velocity)
-tabutil.print(self.samples)
   if voice then
+    print(sample_name, self.samples[sample_name], voice, frequency, velocity)
     local duration = self.samples[sample_name]:play(voice, frequency, velocity)
     if duration ~= nil then 
       self.voices[voice].track = track 
       self.voices[voice].last_played = os.clock()
-      self.voices[voice].duration=duration 
+      self.voices[voice].duration = duration 
     end
-    print("acquired voice "..voice.." for track "..track.." for "..self.voices[voice].duration.."s")
   else
     -- could not acquire voice, exit gracefully
     return
@@ -92,29 +94,28 @@ function ypc:acquire_voice(track)
   return false
 end
 
-
-function ypc:load_sample(filename)
-
-end
-
 function ypc:load_bank(s)
-  self.bank = s
   local bank_path = filesystem:get_sample_path() .. s
-  local filenames = filesystem:scandir(bank_path)
-  for k, filename in pairs(filenames) do
-    local path_to_file = bank_path .. "/" .. filename
-    local sample_name = path_to_file:match("^.+/(.+).wav$")
-    if self.samples[sample_name] ~= nil then
-      -- already has sample loaded
-      return
-    end
-    -- create a new sample
-    self.samples[sample_name] = Sample:new()
-    -- load the file into the sample
-    local new_position = self.samples[sample_name]:load(path_to_file, self.buffer_position)
-    -- update the buffer position for the next sample
-    if new_position then
-      self.buffer_position = new_position
+  if not filesystem:file_or_directory_exists(bank_path) then
+    tracker:set_message("Bank does not exist: " .. bank_path)
+  else
+    self.bank = s
+    local filenames = filesystem:scandir(bank_path)
+    for k, filename in pairs(filenames) do
+      local path_to_file = bank_path .. "/" .. filename
+      local sample_name = path_to_file:match("^.+/(.+).wav$")
+      if self.samples[sample_name] ~= nil then
+        -- already has sample loaded
+        return
+      end
+      -- create a new sample
+      self.samples[sample_name] = Sample:new()
+      -- load the file into the sample
+      local new_position = self.samples[sample_name]:load(path_to_file, self.buffer_position)
+      -- update the buffer position for the next sample
+      if new_position then
+        self.buffer_position = new_position
+      end
     end
   end
 end
@@ -125,10 +126,6 @@ end
 
 function ypc:show_bank()
   tracker:set_message(self:get_bank())
-end
-
-function ypc:load_directory(dir)
-  -- TODO: for each file in directory, load sample
 end
 
 return ypc

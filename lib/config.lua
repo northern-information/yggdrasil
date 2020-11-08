@@ -10,6 +10,7 @@ config["settings"] = {
   ["save_path"] =  _path.data .. "yggdrasil/",
   ["sample_path"] = _path.audio .. "yggdrasil/samples/",
   ["factory_path"] = _path.code .. "yggdrasil/samples/",
+  ["runs_path"] = _path.data .. "yggdrasil/runs/",
   ["default_tracks"] = 8,
   ["default_depth"] = 8,
   ["default_clade"] = "SYNTH",

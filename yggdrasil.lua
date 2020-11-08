@@ -26,6 +26,7 @@ function init()
   synth.init()
   tracker.init()
   tracker:refresh()
+  runner:start()
   y.screen_dirty = true
   y.splash_break = false
   y.init_done = true
