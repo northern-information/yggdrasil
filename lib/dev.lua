@@ -35,7 +35,7 @@ function dev:scene(i)
     t(1):refresh()
     cmd("v;macros")
     cmd("v;ipn")
-    page:select(1)
+    page:select(2)
   elseif i == 2 then
     for i=1,5 do
       t(i):set_clade("YPC")

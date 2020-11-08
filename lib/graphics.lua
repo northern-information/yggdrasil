@@ -242,6 +242,15 @@ function graphics:draw_mixer()
     local x = 2 + ((i - 1) * v.track_width) - view:get_x()
     local y = -view:get_y()
     local track_title_width = 11
+    if i == 1 then
+      -- bpm
+      self:text(x - 1, y - 18, "BPM", 1)
+      self:text(x - 1, v.track_height + y + 10, "BPM", 1)
+      screen.font_size(16)
+      self:text(x - 1, y - 6, params:get("clock_tempo"), 1)
+      self:text(x - 1, v.track_height + y + 22, params:get("clock_tempo"), 1)
+      self:reset_font()
+    end
     -- cover any overflow from previous tracks
     self:rect(x - 1, y, v.track_width, v.track_height, bg)
     -- upper boundary, left line, & terminator

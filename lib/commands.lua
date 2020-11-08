@@ -1508,7 +1508,8 @@ self:register{
       "mixer", "m",
       "clades", "c",
       "bank", "b",
-      "ypc"
+      "ypc",
+      "bpm"
       }, branch[1].leaves[3])
   end,
   payload = function(branch)
@@ -1552,6 +1553,8 @@ self:register{
     elseif v == "ypc" then 
       view:toggle_ypc()
       tracker:refresh()
+    elseif v == "bpm" then 
+      tracker:set_message(fn.get_display_bpm())
     else
       tracker:set_track_view(v)
     end

@@ -16,6 +16,10 @@ function fn.id()
   return fn.id_prefix .. os.time(os.date("!*t")) .. "-" .. fn.id_counter
 end
 
+function fn.get_display_bpm()
+  return "BPM: " .. params:get("clock_tempo")
+end
+
 function fn.get_semver_string()
   return "v" .. config.settings.version_major .. "." .. config.settings.version_minor .. "." .. config.settings.version_patch
 end
