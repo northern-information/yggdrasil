@@ -218,13 +218,13 @@ function music:chord_to_midi(c)
   local db = self.database
   db_chords={
     {"1P 3M 5P","major","maj","^",""},
-    {"1P 3M 5P 7M","major seventh","maj7","ma7","M7","Maj7","^7"},
+    {"1P 3M 5P 7M","major seventh","maj7","ma7","Maj7","^7"},
     {"1P 3M 5P 7M 9M","major ninth","maj9","^9"},
     {"1P 3M 5P 7M 9M 13M","major thirteenth","maj13","Maj13 ^13"},
-    {"1P 3M 5P 6M","sixth","6","add6","add13","M6"},
-    {"1P 3M 5P 6M 9M","sixth/ninth","6/9","69","M69"},
+    {"1P 3M 5P 6M","sixth","6","add6","add13"},
+    {"1P 3M 5P 6M 9M","sixth/ninth","6/9","69"},
     {"1P 3M 6m 7M","major seventh flat sixth","maj7b6","^7b6"},
-    {"1P 3M 5P 7M 11A","major seventh sharp eleventh","majs4","M7#11","^7#11","maj7#11"},
+    {"1P 3M 5P 7M 11A","major seventh sharp eleventh","majs4","^7#11","maj7#11"},
     -- ==Minor==
     -- '''Normal'''
     {"1P 3m 5P","minor","m","min","-"},
