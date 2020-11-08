@@ -1088,6 +1088,7 @@ self:register{
   end,
   action = function(payload)
     tracker:update_slot(payload)
+    tracker:select_slot(payload.x, payload.y)
   end
 }
 
