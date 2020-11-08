@@ -190,10 +190,9 @@ self:register{
       return fn.is_int(branch[1].leaves[1]) 
         and fn.is_int(branch[2].leaves[1])
         and Validator:new(branch[3], invocations):ok()
-        and (
+        and ( 
           fn.is_int(branch[4].leaves[1])
-        ) or (
-          music:chord_to_midi(branch[4].leaves[1])
+          or music:chord_to_midi(branch[4].leaves[1])
         )
     end
   end,
