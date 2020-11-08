@@ -14,14 +14,16 @@ function synth:play(voice, note, velocity, macro1, macro2)
     macro2 = self:get_c2_override() * .01
   end
   print("engine.voice(" .. voice .. ") VOICE!!11!!1!")
+  local freq = musicutil.note_num_to_freq(
+    music:snap_note(music:transpose_note(note)))
   engine.amp(v / 127)
-  engine.hz(
-    musicutil.note_num_to_freq(music:snap_note(music:transpose_note(note))), 
-    macro1, macro2)
+  -- TODO: UI to switch these
+  engine.hz("MikaPerc", freq, macro1, macro2)
+  -- engine.hz("PolyPercMacrod", freq, macro1, macro2)
 end
 
 function synth:panic()
-  
+  engine.panic()
 end
 
 function synth:get_c_shift_message()

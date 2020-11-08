@@ -2,7 +2,8 @@
 crow = require("crow")
 musicutil = require("musicutil")
 tabutil = require("tabutil")
-engine.name = "MikaPerc"
+-- engine.name = "MikaPerc"
+engine.name = "YggdrasilSynth"
 
 local lib = "yggdrasil/lib/"
 
