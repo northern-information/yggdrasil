@@ -450,7 +450,7 @@ function graphics:draw_terminal()
         self:text(total, 62, character, 15)
       end
       total = eb[k] + total + 1
-      if not keys:is_y_mode() and k == buffer:get_cursor_index() then
+      if k == buffer:get_cursor_index() then
         if buffer:get_cursor_index() < #eb then
           self:draw_cursor(total)
         else
@@ -467,7 +467,9 @@ function graphics:draw_terminal()
 end
 
 function graphics:draw_cursor(x)
-  self:mlrs(x, 56, 0, 7, self.cursor_frame)
+  if not keys:is_y_mode() then
+    self:mlrs(x, 56, 0, 7, self.cursor_frame)
+  end
 end
 
 

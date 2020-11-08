@@ -88,7 +88,7 @@ end
 function tracker:update_track(payload)
   local track = self:get_track(payload.x)
   if track ~= nil then
-    tracker:select_tracks(payload.x)
+    self:get_track(payload.x):select()
     if fn.table_contains_key(payload, "class") then
       if payload.class == "CLADE" then
         track:set_clade(payload.clade)
@@ -315,9 +315,17 @@ end
 
 -- select
 
-
-
-function tracker:select_tracks(x1, x2)
+function tracker:select_range_of_tracks(x1, x2)
+  if x2 == nil then
+    local tracks = self:get_selected_tracks()
+    local positions = {}
+    for k, track in pairs(tracks) do
+      table.insert(positions, track:get_x())
+    end
+    table.sort(positions)
+    x2 = positions[#positions]
+  end
+  print("X2", x2)
   local valid_range = true
   if not self:is_in_bounds(x1) then
     valid_range = false
@@ -327,23 +335,15 @@ function tracker:select_tracks(x1, x2)
     valid_range = false
     self:set_message("Track " .. x2 .. " is out of bounds.")
   end
-  if valid_range then
-    if self:is_selected() and x2 == nil then
-      x2 = 0
-      for k, track in pairs(self:get_selected_tracks()) do
-        x2 = track:get_x() > x2 and track:get_x() or x2
-      end
-    end
-    x2 = x2 ~= 0 and x2 or x1
-    local t = {x1, x2}
-    table.sort(t)
-    for x = t[1], t[2] do
-      self:get_track(x):select()
-      self:set_selected(true)
-    end
+  local t = {x1, x2}
+  table.sort(t)
+  for x = t[1], t[2] do
+    self:get_track(x):select()
+    self:set_selected(true)
   end
   view:set_tracker_dirty(true)
 end
+   
 
 function tracker:select_slot(x, y)
   self:deselect()

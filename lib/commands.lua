@@ -598,10 +598,10 @@ self:register{
       tracker:select_slot(payload.x1, payload.y)
     else
       if payload.x2 ~= nil then
-        tracker:select_tracks(payload.x1, payload.x2)
+        tracker:select_range_of_tracks(payload.x1, payload.x2)
       else
         tracker:deselect()
-        tracker:select_tracks(payload.x1)
+        tracker:get_track(payload.x1):select()
       end
     end
   end
@@ -1705,7 +1705,7 @@ self:register{
       ypc:load_bank(payload.directory)
     elseif payload.action == "load" then
       tracker:deselect()
-      tracker:select_tracks(payload.x)
+      tracker:get_track(payload.x):select()
       tracker:update_track(payload)
     end
   end

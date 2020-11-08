@@ -15,10 +15,16 @@ function keyboard.event(type, code, val)
   print("")
 
   if keys:is_y_mode() then
-    if keys:is_shifted() and keys:is_number_code(code) and tracker:is_selected() then 
-      tracker:select_tracks(tonumber(keys:get_keycode_value(code)))
+print(keys:is_shifted() )
+print( keys:is_number_code(code))
+print( tracker:is_selected() )
+
+    if keys:is_shifted() and keys:is_number_code(code) then 
+      tracker:select_range_of_tracks(tonumber(keys:get_keycode_value(code)))
     else
-       if keys:is_number_code(code) then tracker:select_tracks(tonumber(keys:get_keycode_value(code)))
+      if keys:is_number_code(code) then 
+          tracker:deselect()
+          tracker:get_track(tonumber(keys:get_keycode_value(code))):select()
       elseif keys:equals(code, "q") then tracker:unmute()
       elseif keys:equals(code, "w") then tracker:unsolo()
       elseif keys:equals(code, "e") then tracker:enable()
@@ -95,11 +101,6 @@ function keyboard.event(type, code, val)
   if keys ~= nil then
     fn.dirty_screen(true)
   end
-
-print("index", buffer.cursor_index)
-print("#tb", #buffer.tb)
-print("#eb", #buffer.eb)
-print(buffer:get_b())
 
 end
 
