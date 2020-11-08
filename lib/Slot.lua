@@ -52,6 +52,7 @@ function Slot:trigger()
   
     if clade == "SYNTH" and self:get_midi_note() ~= nil then
       synth:play(
+        track:get_voice(),
         self:get_midi_note(),
         mixed_level,
         self:get_c1() * .01, 
