@@ -15,8 +15,23 @@ function parameters.init()
   params:add_option("jf_i2c_tuning", "JF I2C TUNING", {"440 Hz", "432 Hz"})
   params:set_action("jf_i2c_tuning", function(index) crow.ii.jf.god_mode(index == 2 and 1 or 0) end)
 
-  params:default()
+  params:add_control("default_depth", "DEFAULT DEPTH", controlspec.new(1,64,"lin",8,1,"rows"))
+  params:set_action("default_depth", function(depth) 
+    config.settings.default_depth == depth
+  	parameters.update()
+  end)
+
+  if util.file_exists(config.settings.save_path.."yggdrasil.pset") then 
+	params:read(config.settings.save_path.."yggdrasil.pset")
+  else  	
+    params:default()
+  end
   params:bang()
+end
+
+
+function parameters.update()
+  params:write(config.settings.save_path.."yggdrasil.pset")
 end
 
 return parameters
