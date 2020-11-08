@@ -5,6 +5,7 @@ function keyboard.event(type, code, val)
   graphics:ping_cursor_frame()
 
   if keys:is_shift(code) then keys:handle_shift(val) end
+  if keys:is_ctrl(code) then keys:handle_ctrl(val) end
 
   if not fn.break_splash() then fn.dismiss_messages() end
 
@@ -56,22 +57,28 @@ function keyboard.event(type, code, val)
   end
 
   if keys:is_backspace_or_delete(code) then
-    if buffer:is_empty() and tracker:is_selected() then
-      tracker:clear_selected_slots()
-    else
-      if buffer:is_last_space() then
-        buffer:set_last_space(false)
-      end
-      buffer:backspace()
+    if buffer:is_last_space() then
+      buffer:set_last_space(false)
     end
+    buffer:backspace()
   end
 
   if keys:is_arrow(code) then
     local i = keys:is_shifted() and 12 or 1
-        if keys:get_keycode_value(code) == "RIGHT" then fn.decrement_increment(i)
-    elseif keys:get_keycode_value(code) == "LEFT"  then fn.decrement_increment(-i)
+        if keys:get_keycode_value(code) == "RIGHT" then print("move cursor right")
+    elseif keys:get_keycode_value(code) == "LEFT"  then print("move cursor left")
     elseif keys:get_keycode_value(code) == "UP"    then buffer:up_history()
     elseif keys:get_keycode_value(code) == "DOWN"  then buffer:down_history()
+    end
+  end
+
+  if keys:is_ctrled() then
+    if keys:is_backspace_or_delete(code) and buffer:is_empty() and tracker:is_selected() then
+        tracker:clear_selected_slots()
+    elseif keys:get_keycode_value(code) == "RIGHT" then 
+      fn.decrement_increment(keys:is_shifted() and 12 or 1)
+    elseif keys:get_keycode_value(code) == "LEFT" then 
+      fn.decrement_increment(keys:is_shifted() and -12 or -1)
     end
   end
 

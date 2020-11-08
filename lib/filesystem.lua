@@ -6,7 +6,8 @@ function filesystem.init()
     sample_path = config.settings.sample_path,
     factory_path = config.settings.factory_path,
     factory_bank = config.settings.sample_path .. "factory/",
-    runs_path = config.settings.runs_path
+    runs_path = config.settings.runs_path,
+    tracks_path = config.settings.tracks_path
   }
   for k, path in pairs(filesystem.paths) do
     if util.file_exists(path) == false then
@@ -17,43 +18,12 @@ function filesystem.init()
 end
 
 
-function filesystem:load()
-  local filename = self:get_save_path() .. self:get_load_file()
-  local file = assert(io.open(filename, "r"))
-  local col = {}
-  for line in file:lines() do
-    col[#col + 1] = line:gsub("%s+", "")
+function filesystem:save(file_path, data)
+  if file_path == nil or track == nil then return end
+  self:file_new(file_path)  
+  for k, line in pairs(data) do
+    self:file_append(file_path, line)
   end
-  file:close()
-  tracker:load_track(1, col)
-end
-
-function filesystem:set_load_file(s)
-  self.load_file = s
-end
-
-function filesystem:get_load_file()
-  return self.load_file
-end
-
-function filesystem:set_save_path(s)
-  self.paths.save_path = s
-end
-
-function filesystem:get_save_path()
-  return self.paths.save_path
-end
-
-function filesystem:set_sample_path(s)
-  self.paths.sample_path = s
-end
-
-function filesystem:get_sample_path()
-  return self.paths.sample_path
-end
-
-function filesystem:get_runs_path()
-  return self.paths.runs_path
 end
 
 function filesystem:scandir(directory)
@@ -98,6 +68,42 @@ function filesystem:file_or_directory_exists(path)
       end
    end
    return ok, err
+end
+
+function filesystem:set_load_file(s)
+  self.load_file = s
+end
+
+function filesystem:get_load_file()
+  return self.load_file
+end
+
+function filesystem:set_save_path(s)
+  self.paths.save_path = s
+end
+
+function filesystem:get_save_path()
+  return self.paths.save_path
+end
+
+function filesystem:set_tracks_path(s)
+  self.paths.tracks_path = s
+end
+
+function filesystem:get_tracks_path()
+  return self.paths.tracks_path
+end
+
+function filesystem:set_sample_path(s)
+  self.paths.sample_path = s
+end
+
+function filesystem:get_sample_path()
+  return self.paths.sample_path
+end
+
+function filesystem:get_runs_path()
+  return self.paths.runs_path
 end
 
 return filesystem

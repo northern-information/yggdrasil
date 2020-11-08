@@ -7,7 +7,7 @@ function tracker.init()
   tracker.message = false
   tracker.message_value = ""
   tracker.playback = false
-  tracker.track_view = "midi"
+  tracker.track_view = "ipn"
   tracker.extents = 0
   tracker.info = false
   tracker.generation = 0
@@ -151,17 +151,41 @@ function tracker:update_track(payload)
   end
 end
 
-function tracker:load_track(track_number, data)
-  -- compare incoming rows with existing rows
-  -- if incoming is larger, we need to add more rows
+function tracker:save_track(track_number, filename)
   local track = self:get_track(track_number)
-  if #data > track:get_depth() then
-    self:set_rows(#data)
-    track:fill(#data)
-    self:refresh()
+  local slots = track:get_slots()
+  local data = {}
+  for k, slot in pairs(slots) do
+    data[slot:get_y()] = slot:get_ygg_note()
   end
-  track:load(data)
+  filesystem:save(filesystem:get_tracks_path() .. filename, data)
+  tracker:set_message("Saved " .. filename)
   view:set_tracker_dirty(true)
+end
+
+function tracker:load_track(track_number, filename)
+  local full_path = filesystem:get_tracks_path() .. filename
+  if not filesystem:file_or_directory_exists(full_path) then
+    tracker:set_message(filename .. "not found.")
+  else
+    local file = assert(io.open(full_path, "r"))
+    local data = {}
+    for line in file:lines() do
+      data[#data + 1] = line:gsub("%s+", "")
+    end
+   file:close()
+    -- compare incoming rows with existing rows
+    -- if incoming is larger, we need to add more rows
+    local track = self:get_track(track_number)
+    if #data > track:get_depth() then
+      self:set_rows(#data)
+      track:fill(#data)
+      self:refresh()
+    end
+    track:load(data)
+    self:set_message("Load successful.")
+    view:set_tracker_dirty(true)
+  end
 end
 
 function tracker:set_track_depth(track, depth)
