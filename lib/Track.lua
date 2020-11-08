@@ -239,12 +239,26 @@ function Track:load(data)
   end
   local x = self:get_x()
   for i = 1, #data do
-    self:update_slot({
-      x = x,
-      y = i,
-      midi_note = music:convert("ygg_to_midi", data[i])
+    if data[i] == "." then
+      self:clear_slot(i)
+    elseif data[i] == "off" then
+      self:update_slot({
+        class = "OFF",
+        phenomenon = true,
+        prefix = "o",
+        value = nil,
+        x = x, 
+        y = i
     })
+    else
+      self:update_slot({
+        x = x,
+        y = i,
+        midi_note = music:convert("ygg_to_midi", data[i])
+      })
+    end
   end
+  self:refresh()
 end
 
 

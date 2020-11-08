@@ -230,7 +230,8 @@ self:register{
     }
   end,
   action = function(payload)
-     tracker:update_every_other(payload)
+    tracker:update_every_other(payload)
+    tracker:select_track(y)
   end
 }
 
@@ -295,6 +296,7 @@ self:register{
   end,
   action = function(payload)
     tracker:chord(payload)
+    tracker:select_slot(payload.x, payload.y)
   end
 }
 
@@ -1382,11 +1384,11 @@ self:register{
 self:register{
   invocations = { "synth" },
   signature = function(branch, invocations)
-    if #branch ~= 1 and #branch ~= 2 and #branch ~= 3 then return false end
+    if #branch == 1 then
+      return Validator:new(branch[1], invocations):ok()
+        and branch[1].leaves[3] == "enc"
+    elseif #branch == 2 then
     return (
-      Validator:new(branch[1], invocations):ok()
-      and branch[1].leaves[3] == "enc"
-    ) or (
       Validator:new(branch[2], invocations):ok()
       and fn.table_contains( {"voice", "v" }, branch[2].leaves[3])
       and fn.is_int(branch[2].leaves[5])
@@ -1395,13 +1397,14 @@ self:register{
       and Validator:new(branch[2], invocations):ok()
       and fn.table_contains( {"c1", "c2" }, branch[2].leaves[3])
       and fn.is_number(branch[2].leaves[5])
-    ) or (
-      fn.is_int(branch[1].leaves[1])
+    )
+    elseif #branch == 3 then
+      return fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
       and Validator:new(branch[3], invocations):ok()
       and fn.table_contains( {"c1", "c2" }, branch[3].leaves[3])
       and fn.is_number(branch[3].leaves[5])
-    )
+    end
   end,
   payload = function(branch)
     local out = {

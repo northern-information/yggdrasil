@@ -8,7 +8,8 @@ function dev:scene(i)
   config.settings.debug_interpreter = false
   -- config.settings.debug_music = false
   if i == 1 then
-    -- tracker:load_track(1, "what-is-love.txt")
+    tracker:load_track(1, "love-lead.txt")
+    tracker:load_track(2, "love-saw.txt")
     -- local clades = {}
     -- clades[1] = "SYNTH"
     -- clades[2] = "MIDI"
