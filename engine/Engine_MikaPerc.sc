@@ -1,11 +1,4 @@
 // TODO
-// - set up outs properly!!!!
-// - make this be a real engine!!!!
-// - match parameters to spec!!!!
-// - collapse all the various parameters into macros intelligently
-//     - something besides an obvious linear mapping would be neat
-//     - e.g. fades between various states, physics-y things, etc.
-// - do something kind of smart with the t_trig trigger
 Engine_MikaPerc : CroneEngine {
 	var pg;
 	var amp = 0.3;
