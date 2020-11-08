@@ -542,7 +542,7 @@ function Track:get_voice()
 end
 
 function Track:set_voice(i)
-  self.voice = util.clamp(i, 1, 3)
+  self.voice = util.clamp(i, 1, 2)
 end
 
 function Track:get_pair()
