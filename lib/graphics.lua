@@ -438,18 +438,38 @@ function graphics:draw_terminal()
     self:draw_yggdrasil_gui_logo()
     self:text(64, 40, fn.get_semver_string(), 1)
   end
-  self:text(0, 62, buffer:get(), 15)
-  local adjust = 1
-  if buffer:get_extents() > 0 then
-    adjust = adjust + 2
+  local total = 0
+  local y = 64 - height - 4
+  local tb = buffer:get_tb()
+  local eb = buffer:get_eb()
+  if #tb > 0 then
+    for k, character in pairs(tb) do
+      if k == 1 then
+        self:text(0, 62, character, 15)
+      else
+        self:text(total, 62, character, 15)
+      end
+      total = eb[k] + total + 1
+      if not keys:is_y_mode() and k == buffer:get_cursor_index() then
+        if buffer:get_cursor_index() < #eb then
+          self:draw_cursor(total)
+        else
+          self:draw_cursor(total + 1)
+        end
+      end
+    end
+  else
+    self:draw_cursor(1)
   end
-  if buffer:is_last_space() then
-    adjust = adjust + 2
-  end
-  if not keys:is_y_mode() then
-    self:mlrs(buffer:get_extents() + adjust, 56, 0, 7, self.cursor_frame)
+  if buffer:get_cursor_index() == 0 and #tb > 0 then
+    self:draw_cursor(1)
   end
 end
+
+function graphics:draw_cursor(x)
+  self:mlrs(x, 56, 0, 7, self.cursor_frame)
+end
+
 
 function graphics:draw_command_processing()
   if self.run_command_frame < self.frame then return end  

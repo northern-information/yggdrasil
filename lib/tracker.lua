@@ -82,6 +82,7 @@ function tracker:update_every_other(payload)
   if self:is_selected() then
     self:get_track(payload.x):update_every_other(payload)
   end
+  self:refresh()
 end
 
 function tracker:update_track(payload)

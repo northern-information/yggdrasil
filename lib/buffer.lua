@@ -1,45 +1,60 @@
 buffer = {}
 
 function buffer.init()
-  buffer.b = ""
   buffer.tb = {}
+  buffer.eb = {}
   buffer.history_index = 0
   buffer.history = {}
-  buffer.extents = 0
-  buffer.last_space = false
+  buffer.cursor_index = 0
 end
 
 function buffer:execute()
   self:save_history()
   self:set_history_index(0)
-  runner:run(self.b)
+  runner:run(self:get_b())
   self:clear()
 end
 
-function buffer:add(s)
-  self.b = self.b .. s
-  self.tb[#self.tb + 1] = s
-  self.extents = screen.text_extents(self.b)
+function buffer:get_b()
+  local out = ""
+  for k, v in pairs(self.tb) do
+    out = out .. v
+  end
+  return out
 end
 
-function buffer:set(buffer_string, buffer_table)
-  self.b = buffer_string
+function buffer:move_cursor_index(i)
+  self.cursor_index = util.clamp(self.cursor_index + i, 0, #self.eb)
+end
+
+function buffer:add(s)
+  table.insert(self.tb, self.cursor_index + 1, s)
+  if s == " " then
+    table.insert(self.eb, self.cursor_index + 1, 1)
+  else
+    local extents = screen.text_extents(s)
+    table.insert(self.eb, self.cursor_index + 1, extents)
+  end
+  self:move_cursor_index(1)
+end
+
+function buffer:set(buffer_table, extents_table)
   self.tb = buffer_table
-  self.extents = screen.text_extents(self.b)
+  self.eb = extents_table
 end
 
 function buffer:clear()
-  self.b = ""
   self.tb = {}
-  self.extents = 0
-  self.last_space = false
-  self.last_space_count = 0
+  self.eb = {}
+  self.cursor_index = 0
 end
 
 function buffer:backspace()
-  self.b = self.b:sub(1, -2)
-  self.tb[#self.tb] = nil
-  self.extents = screen.text_extents(self.b)
+  if self.cursor_index > 0 then
+    table.remove(self.tb, self.cursor_index)  
+    table.remove(self.eb, self.cursor_index)
+    self:move_cursor_index(-1)
+  end
 end
 
 function buffer:get_history()
@@ -50,8 +65,8 @@ end
 
 function buffer:save_history()
   table.insert(self.history, 1, {
-    history_string = self.b,
-    history_table = self.tb
+    history_table = self.tb,
+    history_extents = self.eb
   })
 end
 
@@ -70,10 +85,11 @@ end
 function buffer:history_cleanup()
   local history = self:get_history()
   if history ~= nil then
-    buffer:clear()
-    buffer:set(history.history_string, history.history_table)
+    self:clear()
+    self:set(history.history_table, history.history_extents)
+    self.cursor_index = #history.history_extents
   else
-    buffer:clear()
+    self:clear()
   end
 end
 
@@ -85,20 +101,16 @@ function buffer:is_empty()
   return #buffer.tb == 0
 end
 
-function buffer:get()
-  return self.b
+function buffer:get_cursor_index()
+  return self.cursor_index
 end
 
-function buffer:get_extents()
-  return self.extents
+function buffer:get_eb()
+  return self.eb
 end
 
-function buffer:set_last_space(bool)
-  self.last_space = bool
-end
-
-function buffer:is_last_space()
-  return self.last_space
+function buffer:get_tb()
+  return self.tb
 end
 
 return buffer

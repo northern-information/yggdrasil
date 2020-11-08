@@ -11,8 +11,6 @@ function keyboard.event(type, code, val)
 
   if val == 0 then return end -- ignore other keyups
 
-  buffer:set_last_space(false)
-
   print(code)
   print("")
 
@@ -49,24 +47,17 @@ function keyboard.event(type, code, val)
     if buffer:is_empty() then
       tracker:toggle_playback()
     else
-      if not buffer:is_last_space() then
-        buffer:set_last_space(true)
-        buffer:add(" ")
-      end
+      buffer:add(" ")
     end
   end
 
   if keys:is_backspace_or_delete(code) then
-    if buffer:is_last_space() then
-      buffer:set_last_space(false)
-    end
     buffer:backspace()
   end
 
   if keys:is_arrow(code) then
-    local i = keys:is_shifted() and 12 or 1
-        if keys:get_keycode_value(code) == "RIGHT" then print("move cursor right")
-    elseif keys:get_keycode_value(code) == "LEFT"  then print("move cursor left")
+        if keys:get_keycode_value(code) == "RIGHT" then buffer:move_cursor_index(1)
+    elseif keys:get_keycode_value(code) == "LEFT"  then buffer:move_cursor_index(-1)
     elseif keys:get_keycode_value(code) == "UP"    then buffer:up_history()
     elseif keys:get_keycode_value(code) == "DOWN"  then buffer:down_history()
     end
@@ -104,6 +95,11 @@ function keyboard.event(type, code, val)
   if keys ~= nil then
     fn.dirty_screen(true)
   end
+
+print("index", buffer.cursor_index)
+print("#tb", #buffer.tb)
+print("#eb", #buffer.eb)
+print(buffer:get_b())
 
 end
 
