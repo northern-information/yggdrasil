@@ -17,7 +17,9 @@ function runner:run(raw_input)
     graphics:draw_run_command()
     tracker:clear_message()
     interpreter:execute()
-    filesystem:file_append(self:get_current_run_file(), tostring(interpreter))
+    if filesystem ~= nil then
+      filesystem:file_append(self:get_current_run_file(), tostring(interpreter))
+    end
   end
 end
 

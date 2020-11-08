@@ -37,8 +37,10 @@ function fn.break_splash(bool)
 end
 
 function fn.dismiss_messages()
-  tracker:clear_message()
-  tracker:set_info(false)
+  if not synth:is_encoder_override() then
+    tracker:clear_message()
+    tracker:set_info(false)
+  end
   fn.break_splash(true)
 end
 

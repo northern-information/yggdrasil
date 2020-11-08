@@ -42,16 +42,24 @@ function enc(e, d)
   if e == 1 then
     tracker:cycle_select(d)
   elseif e == 2 then
-    if not view:is_transposed() then
-      view:pan_x(d)
+    if synth:is_encoder_override() then
+      synth:scroll_c1(d)
     else
-      view:pan_y(d)
+      if not view:is_transposed() then
+        view:pan_x(d)
+      else
+        view:pan_y(d)
+      end
     end
   elseif e == 3 then
-    if not view:is_transposed() then
-      view:pan_y(d)
+    if synth:is_encoder_override() then
+      synth:scroll_c2(d)
     else
-      view:pan_x(d)
+      if not view:is_transposed() then
+        view:pan_y(d)
+      else
+        view:pan_x(d)
+      end
     end
   end
   fn.dismiss_messages()

@@ -868,6 +868,7 @@ self:register{
   end,
   action = function(payload)
     _midi:all_off()
+    synth:panic()
   end
 }
 
@@ -1369,11 +1370,15 @@ self:register{
 -- 1 synth;v;2
 -- 1 synth;c1;99
 -- 1 2 synth;c2;8
+-- synth;enc
 self:register{
   invocations = { "synth" },
   signature = function(branch, invocations)
-    if #branch ~= 2 and #branch ~= 3 then return false end
+    if #branch ~= 1 and #branch ~= 2 and #branch ~= 3 then return false end
     return (
+      Validator:new(branch[1], invocations):ok()
+      and branch[1].leaves[3] == "enc"
+    ) or (
       Validator:new(branch[2], invocations):ok()
       and fn.table_contains( {"voice", "v" }, branch[2].leaves[3])
       and fn.is_int(branch[2].leaves[5])
@@ -1395,7 +1400,9 @@ self:register{
         class = "SYNTH",
         x = branch[1].leaves[1],
     }
-    if #branch == 2 and fn.table_contains( {"voice", "v" }, branch[2].leaves[3]) then
+    if #branch == 1 then
+      synth:toggle_encoder_override()
+    elseif #branch == 2 and fn.table_contains( {"voice", "v" }, branch[2].leaves[3]) then
       out["voice"] = branch[2].leaves[5]
     elseif #branch == 2 and fn.table_contains( {"c1", "c2" }, branch[2].leaves[3]) then
       out[branch[2].leaves[3]] = branch[2].leaves[5]
