@@ -1321,29 +1321,40 @@ self:register{
 -- 1 synth;voice;2
 -- 1 synth;v;2
 -- 1 synth;c1;99
--- 1 synth;c2;8
+-- 1 2 synth;c2;8
 self:register{
   invocations = { "synth" },
   signature = function(branch, invocations)
-    if #branch ~= 2 then return false end
-    return Validator:new(branch[2], invocations):ok()
-        and branch[2].leaves[3] == "voice" 
-            or branch[2].leaves[3] == "v" 
-            or branch[2].leaves[3] == "c1"
-            or branch[2].leaves[3] == "c2"
-        and fn.is_int(branch[2].leaves[5])
+    if #branch ~= 2 and #branch ~= 3 then return false end
+    return (
+      Validator:new(branch[2], invocations):ok()
+      and fn.table_contains( {"voice", "v" }, branch[2].leaves[3])
+      and fn.is_int(branch[2].leaves[5])
+    ) or (
+      fn.is_int(branch[1].leaves[1])
+      and Validator:new(branch[2], invocations):ok()
+      and fn.table_contains( {"c1", "c2" }, branch[2].leaves[3])
+      and fn.is_number(branch[2].leaves[5])
+    ) or (
+      fn.is_int(branch[1].leaves[1])
+      and fn.is_int(branch[2].leaves[1])
+      and Validator:new(branch[3], invocations):ok()
+      and fn.table_contains( {"c1", "c2" }, branch[3].leaves[3])
+      and fn.is_number(branch[3].leaves[5])
+    )
   end,
   payload = function(branch)
     local out = {
         class = "SYNTH",
-        x = branch[1].leaves[1]
+        x = branch[1].leaves[1],
     }
-    if branch[2].leaves[3] == "v" or branch[2].leaves[3] == "voice" then
+    if #branch == 2 and fn.table_contains( {"voice", "v" }, branch[2].leaves[3]) then
       out["voice"] = branch[2].leaves[5]
-    elseif branch[2].leaves[3] == "c1" then
-      out["c1"] = branch[2].leaves[5]
-    elseif branch[2].leaves[3] == "c2" then
-      out["c2"] = branch[2].leaves[5]
+    elseif #branch == 2 and fn.table_contains( {"c1", "c2" }, branch[2].leaves[3]) then
+      out[branch[2].leaves[3]] = branch[2].leaves[5]
+    elseif #branch == 3 then
+      out["y"] = branch[2].leaves[1]
+      out[branch[3].leaves[3]] = branch[3].leaves[5]
     end
     return out
   end,
@@ -1490,6 +1501,7 @@ self:register{
       and fn.table_contains({ 
       "midi", "ipn", "ygg", "freq", 
       "velocity", "vel", "v",
+      "macros",
       "index",
       "phenomenon", "p",
       "tracker", "t",
@@ -1516,6 +1528,9 @@ self:register{
       or v == "vel"
       or v == "v" then
         view:toggle_velocity()
+        tracker:refresh()
+    elseif v == "macros" then
+        view:toggle_macros()
         tracker:refresh()
     elseif v == "hud" 
       or v == "h" then

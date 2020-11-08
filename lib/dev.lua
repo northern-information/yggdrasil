@@ -23,7 +23,7 @@ function dev:scene(i)
       track:set_enabled(math.random(1, 2) == 1)
       track:set_descend(math.random(1, 2) == 1)
       track:set_clock(math.random(1, 10) * .1)
-      track:set_shadow(math.random(1, 2) == 1 and math.random(1, 8) or 0)
+      track:set_shadow(math.random(1, 2) == 1 and math.random(1, 8) or false)
       track:set_level(math.random(0, 100) * .01)
     end
     t(1):set_clade("SYNTH")
@@ -33,6 +33,8 @@ function dev:scene(i)
     t(1):enable()
     t(1):set_level(1)
     t(1):refresh()
+    cmd("v;macros")
+    cmd("v;ipn")
     page:select(1)
   elseif i == 2 then
     for i=1,5 do

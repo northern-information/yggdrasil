@@ -16,8 +16,8 @@ function Slot:new(x, y)
   s.ipn_note = nil
   s.frequency = nil
   s.velocity = 127
-  s.c1 = 0.5
-  s.c2 = 0.5
+  s.c1 = 50
+  s.c2 = 50
   s.clade = ""
   s.view = ""
   s.phenomenon = false
@@ -51,8 +51,12 @@ function Slot:trigger()
     local mixed_level = track:get_level() * self:get_velocity()
   
     if clade == "SYNTH" and self:get_midi_note() ~= nil then
-      print("c1 " .. self.c1 .. " c2 " .. self.c2)
-      synth:play(self:get_midi_note(), mixed_level, self.c1, self.c2)
+      synth:play(
+        self:get_midi_note(),
+        mixed_level,
+        self:get_c1() * .01, 
+        self:get_c2() * .01
+      )
     elseif clade == "MIDI" and self:get_midi_note() ~= nil then
       _midi:play(
         self:get_midi_note(),
@@ -121,8 +125,12 @@ function Slot:to_string()
   elseif v == "freq"   then out = self:get_frequency()
   end
   if view:is_velocity() then
-    local v = "." .. self:get_velocity()
+    local v = " v" .. self:get_velocity()
     out = out ~= nil and out .. v or v
+  end
+  if view:is_macros() then
+    local c = " " .. self:get_c1() .. " " .. self:get_c2()
+    out = out ~= nil and out .. c or c
   end
   if self:get_clade() == "YPC" then
     if view:is_ypc() and self:get_sample_name() ~= "" then
@@ -314,14 +322,18 @@ function Slot:get_extents()
   return self.extents
 end
 
-function Slot:set_c1(new_c1)
-  print("SLOT set_c1 " .. new_c1)
-  self.c1 = new_c1
-  print("SLOT set_c1 is now set to " .. self.c1)
+function Slot:set_c1(i)
+  self.c1 = util.clamp(i, 0, 99)
 end
 
-function Slot:set_c2(new_c2)
-  print("SLOT set_c2 " .. new_c2)
-  self.c2 = new_c2
-  print("SLOT c2 is now set to " .. self.c2)
+function Slot:get_c1()
+  return self.c1
+end
+
+function Slot:set_c2(i)
+  self.c2 = util.clamp(i, 0, 99)
+end
+
+function Slot:get_c2()
+  return self.c2
 end

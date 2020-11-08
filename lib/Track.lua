@@ -37,8 +37,6 @@ function Track:new(x)
   t.clade = config.settings.default_clade
   -- synth
   t.voice = 1
-  t.c1 = 0.5 -- might not even need these here...???
-  t.c2 = 0.5 -- might not even need these here...???
   -- midi
   t.channel = 1
   t.device = 1
@@ -197,6 +195,12 @@ function Track:update_slot(payload)
     if fn.table_contains_key(payload, "velocity") then
       slot:set_velocity(payload.velocity)
     end
+    if fn.table_contains_key(payload, "c1") then
+      slot:set_c1(payload.c1)
+    end
+    if fn.table_contains_key(payload, "c2") then
+      slot:set_c2(payload.c2)
+    end
     slot:refresh()
     self:refresh()
   end
@@ -283,7 +287,6 @@ end
 function Track:unshadow()
   self:set_shadow(false)
 end
-
 
 function Track:update_slot_y()
   for k, slot in pairs(self:get_slots()) do
@@ -526,50 +529,6 @@ end
 
 function Track:set_voice(i)
   self.voice = util.clamp(i, 1, 3)
-end
-
-function Track:get_c1()
-  return self.c1
-end
-
-function Track:set_c1(i)
-  print("TRACK set_c1 " .. i)
-  i = util.clamp(i, 0, 1)
-  print("self position:" .. self:get_position())
-  -- print("self slot:" .. self:get_slot(self:get_position()))
-  local position = self:get_position()
-  if position ~= nil then
-    local slot = self:get_slot(position)
-    if slot ~= nil then
-      slot:set_c1(i)
-    else
-      print("bogus slot for position " .. position .. ", bud")
-    end
-  else
-      print("bogus position for track " .. (self.id or "UNKNOWN") .. ", bud")
-  end
-end
-
-function Track:get_c2()
-  return self.c2
-end
-
-function Track:set_c2(i)
-  print("TRACK set_c2 " .. i)
-  i = util.clamp(i, 0, 1)
-  print("self position:" .. self:get_position())
-  -- print("self slot:" .. self:get_slot(self:get_position()))
-  local position = self:get_position()
-  if position ~= nil then
-    local slot = self:get_slot(position)
-    if slot ~= nil then
-      slot:set_c1(i)
-    else
-      print("bogus slot for position " .. position .. ", bud")
-    end
-  else
-    print("bogus position for track " .. (self.id or "UNKNOWN") .. ", bud")
-  end
 end
 
 function Track:get_pair()

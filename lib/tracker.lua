@@ -131,10 +131,16 @@ function tracker:update_track(payload)
       elseif payload.class == "SYNTH" then
         if payload.voice ~= nil then
           track:set_voice(payload.voice)
-        elseif payload.c1 ~= nil then
-          track:set_c1(payload.c1)
-        elseif payload.c2 ~= nil then
-          track:set_c2(payload.c2)
+        end
+        if payload.y ~= nil then
+          track:update_slot(payload)
+        else
+          local y = 1
+          for k, slot in pairs(track:get_slots()) do
+            payload["y"] = y
+            track:update_slot(payload)
+            y = y + 1
+          end
         end
       else
         fn.print_matron_message("Error: No matches for payload:")

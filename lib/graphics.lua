@@ -274,8 +274,6 @@ function graphics:draw_mixer()
     end
     if track:is_synth() then
       attributes[#attributes + 1] = { name = "vo.",  value = track:get_voice() }
-      attributes[#attributes + 1] = { name = "c1.", value = track:get_c1() }
-      attributes[#attributes + 1] = { name = "c2.", value = track:get_c2() }
     elseif track:is_midi() then
       attributes[#attributes + 1] = { name = "dv.", value = track:get_device() }
       attributes[#attributes + 1] = { name = "ch.", value = track:get_channel() }

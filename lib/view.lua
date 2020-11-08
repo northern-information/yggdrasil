@@ -22,6 +22,7 @@ function view.init()
   -- page
   view.tracker = false
   view.velocity = false
+  view.macros = false
   view.phenomenon = false
   view.ypc = false
   view.hud = false
@@ -294,6 +295,18 @@ end
 
 function view:is_velocity()
   return self.velocity
+end
+
+function view:toggle_macros()
+  self.macros = not self.macros
+end
+
+function view:set_macros(bool)
+  self.macros = bool
+end
+
+function view:is_macros()
+  return self.macros
 end
 
 function view:toggle_ypc()
