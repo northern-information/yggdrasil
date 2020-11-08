@@ -1,4 +1,3 @@
-// TODO
 Engine_MikaPerc : CroneEngine {
 	var pg;
 	var amp = 0.3;
