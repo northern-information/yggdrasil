@@ -166,7 +166,7 @@ end
 function tracker:load_track(track_number, filename)
   local full_path = filesystem:get_tracks_path() .. filename
   if not filesystem:file_or_directory_exists(full_path) then
-    tracker:set_message(filename .. "not found.")
+    tracker:set_message(filename .. " not found.")
   else
     local file = assert(io.open(full_path, "r"))
     local data = {}
