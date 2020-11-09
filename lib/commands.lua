@@ -231,7 +231,7 @@ self:register{
   end,
   action = function(payload)
     tracker:update_every_other(payload)
-    tracker:get_track(payload.x):select()
+    tracker:select_track(payload.x)
   end
 }
 
@@ -601,7 +601,7 @@ self:register{
         tracker:select_range_of_tracks(payload.x1, payload.x2)
       else
         tracker:deselect()
-        tracker:get_track(payload.x1):select()
+        tracker:select_track(payload.x1)
       end
     end
   end
@@ -1701,7 +1701,7 @@ self:register{
       ypc:load_bank(payload.directory)
     elseif payload.action == "load" then
       tracker:deselect()
-      tracker:get_track(payload.x):select()
+      tracker:select_track(payload.x)
       tracker:update_track(payload)
     end
   end

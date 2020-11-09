@@ -32,7 +32,7 @@ function keyboard.event(type, code, val)
     else
       if keys:is_number_code(code) then 
           tracker:deselect()
-          tracker:get_track(tonumber(keys:get_keycode_value(code))):select()
+          tracker:select_track(tonumber(keys:get_keycode_value(code)))
       elseif keys:equals(code, "q") then tracker:unmute()
       elseif keys:equals(code, "w") then tracker:unsolo()
       elseif keys:equals(code, "e") then tracker:enable()

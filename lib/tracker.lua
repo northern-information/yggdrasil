@@ -85,7 +85,6 @@ end
 function tracker:update_track(payload)
   local track = self:get_track(payload.x)
   if track ~= nil then
-    self:get_track(payload.x):select()
     if fn.table_contains_key(payload, "class") then
       if payload.class == "CLADE" then
         track:set_clade(payload.clade)
@@ -312,6 +311,15 @@ end
 
 -- select
 
+
+
+function tracker:select_track(x)
+  if not self:is_in_bounds(x) then return end
+  self:get_track(x):select()
+  self:set_selected(true)
+  view:set_tracker_dirty(true)
+end
+
 function tracker:select_range_of_tracks(x1, x2)
   if x2 == nil then
     local tracks = self:get_selected_tracks()
@@ -378,6 +386,7 @@ function tracker:clear_selected_slots()
       slot:clear()
     end
   end
+  self:refresh()
 end
 
 function tracker:get_selected_tracks()
