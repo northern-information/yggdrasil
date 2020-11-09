@@ -153,7 +153,13 @@ function tracker:save_track(track_number, filename)
   local slots = track:get_slots()
   local data = {}
   for k, slot in pairs(slots) do
-    data[slot:get_y()] = slot:get_ygg_note()
+    local line = ""
+    if slot:get_ygg_note() ~= "" and slot:get_ygg_note() ~= nil then
+      line = slot:get_ygg_note()
+    else
+      line = "."
+    end
+    data[slot:get_y()] = line
   end
   filesystem:save(filesystem:get_tracks_path() .. filename, data)
   tracker:set_message("Saved " .. filename)
