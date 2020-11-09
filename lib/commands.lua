@@ -691,7 +691,6 @@ self:register{
       and fn.is_int(branch[2].leaves[3])
   end,
   payload = function(branch)
-tabutil.print(branch[2].leaves)
     return {
       class = "LEVEL",
       level = branch[2].leaves[3] * .01,

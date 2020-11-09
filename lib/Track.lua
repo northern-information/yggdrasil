@@ -471,7 +471,11 @@ function Track:get_level()
 end
 
 function Track:set_level(f)
-  self.level = tonumber(f)
+  self.level = util.clamp(tonumber(f), 0.0, 1.0)
+end
+
+function Track:adjust_level(f)
+  self:set_level(self.level + tonumber(f))
 end
 
 function Track:get_clade()

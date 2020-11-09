@@ -30,6 +30,8 @@ function keys.init()
     { k = 23,  v = "i" },
     { k = 24,  v = "o" },
     { k = 25,  v = "p" },
+    { k = 26,  v = "["},
+    { k = 27,  v = "]"},
     { k = 28,  v = "RETURN" },
     { k = 29,  v = "CTRL" },
     { k = 3,   v = "2" },
@@ -135,6 +137,14 @@ function keys:is_symbol(code)
   return fn.table_contains(check, code)
 end
 
+function is_left_bracket(code)
+  return 26 == code
+end
+
+function is_right_bracket(code)
+  return 27 == code
+end
+
 function keys:is_return(code)
   return 28 == code
 end
@@ -170,7 +180,7 @@ function keys:handle_caps(val)
     self.caps = false
   end
 end
-
+    
 function keys:is_capsed()
   return self.caps
 end

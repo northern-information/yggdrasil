@@ -279,6 +279,9 @@ function tracker:descend()
   end
 end
 
+
+
+
 -- slot management
 
 
@@ -478,6 +481,18 @@ end
 -- mixer
 
 
+
+function tracker:adjust_level(f)
+  local out = ""
+  for k, track in pairs(self:get_selected_tracks()) do
+    track:adjust_level(f)
+    out = out .. track:get_x() .. "%" .. math.floor(track:get_level() * 100) .. " "
+  end
+  if keys:is_y_mode() then
+    self:set_message(out)
+  end
+  self:refresh()
+end
 
 function tracker:solo(x)
   if x == nil and not self:is_selected() then
