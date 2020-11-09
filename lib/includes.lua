@@ -17,6 +17,7 @@ end
 
 -- note these cannot be alphabetical due to dependencies
 
+dev         = include("lib/dev")          -- dev only stuff
 fn          = include("lib/functions")    -- global untilities
 parameters  = include("lib/parameters")   -- exposed norns parameters
 _midi       = include("lib/_midi")        -- control midi devices
@@ -43,6 +44,3 @@ include("lib/Slot")         -- smallest musical unit
 include("lib/Track")        -- organizes slots
 include("lib/Sample")       -- individual audio sample
 include("lib/Validator")    -- works with the interpreter to validate command invocations
-
--- dev only stuff
-include(lib .. "dev")
