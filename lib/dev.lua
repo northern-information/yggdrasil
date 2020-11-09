@@ -10,31 +10,31 @@ function dev:scene(i)
   if i == 1 then
     tracker:load_track(1, "love-lead.txt")
     tracker:load_track(2, "love-saw.txt")
-    -- local clades = {}
-    -- clades[1] = "SYNTH"
-    -- clades[2] = "MIDI"
-    -- clades[3] = "YPC"
-    -- clades[4] = "CROW"
-    -- local tracks = tracker:get_tracks()
-    -- for k, track in pairs(tracks) do
-    --   track:set_clade(clades[math.random(1, 4)])
-    --   track:set_muted(math.random(1, 2) == 1)
-    --   -- track:set_soloed(math.random(1, 2) == 1)
-    --   track:set_enabled(math.random(1, 2) == 1)
-    --   track:set_descend(math.random(1, 2) == 1)
-    --   track:set_clock(math.random(1, 10) * .1)
-    --   track:set_shadow(math.random(1, 2) == 1 and math.random(1, 8) or false)
-    --   track:set_level(math.random(0, 100) * .01)
-    -- end
-    -- t(1):set_clade("SYNTH")
-    -- t(1):unshadow()
-    -- t(1):unsolo()
-    -- t(1):unmute()
-    -- t(1):enable()
-    -- t(1):set_level(1)
-    -- t(1):refresh()
-    -- cmd("v;macros")
-    -- cmd("v;ipn")
+    local clades = {}
+    clades[1] = "SYNTH"
+    clades[2] = "MIDI"
+    clades[3] = "YPC"
+    clades[4] = "CROW"
+    local tracks = tracker:get_tracks()
+    for k, track in pairs(tracks) do
+      track:set_clade(clades[math.random(1, 4)])
+      track:set_muted(math.random(1, 2) == 1)
+      -- track:set_soloed(math.random(1, 2) == 1)
+      track:set_enabled(math.random(1, 2) == 1)
+      track:set_descend(math.random(1, 2) == 1)
+      track:set_clock(math.random(1, 10) * .1)
+      track:set_shadow(math.random(1, 2) == 1 and math.random(1, 8) or false)
+      track:set_level(math.random(0, 100) * .01)
+    end
+    t(1):set_clade("SYNTH")
+    t(1):unshadow()
+    t(1):unsolo()
+    t(1):unmute()
+    t(1):enable()
+    t(1):set_level(1)
+    t(1):refresh()
+    cmd("v;macros")
+    cmd("v;ipn")
     page:select(1)
   elseif i == 2 then
     for i=1,5 do

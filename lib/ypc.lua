@@ -34,6 +34,7 @@ function ypc.init()
     softcut.post_filter_fc(i, 44100)
   end
   ypc.bank = "factory"
+  ypc:load_bank(ypc.bank)
 end
 
 function ypc:play(track, sample_name, frequency, velocity)

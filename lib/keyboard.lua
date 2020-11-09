@@ -11,14 +11,22 @@ function keyboard.event(type, code, val)
 
   if val == 0 then return end -- ignore other keyups
 
+
   print(code)
   print("")
 
-  if keys:is_y_mode() then
-print(keys:is_shifted() )
-print( keys:is_number_code(code))
-print( tracker:is_selected() )
+  if keys:is_ctrled() then
+    if keys:is_backspace_or_delete(code) and buffer:is_empty() then
+        tracker:clear_selected_slots()
+    elseif keys:get_keycode_value(code) == "RIGHT" then 
+      fn.decrement_increment(keys:is_shifted() and 12 or 1)
+    elseif keys:get_keycode_value(code) == "LEFT" then 
+      fn.decrement_increment(keys:is_shifted() and -12 or -1)
+    end
+  end
 
+
+  if keys:is_y_mode() then
     if keys:is_shifted() and keys:is_number_code(code) then 
       tracker:select_range_of_tracks(tonumber(keys:get_keycode_value(code)))
     else
@@ -69,20 +77,10 @@ print( tracker:is_selected() )
     end
   end
 
-  if keys:is_ctrled() then
-    if keys:is_backspace_or_delete(code) and buffer:is_empty() and tracker:is_selected() then
-        tracker:clear_selected_slots()
-    elseif keys:get_keycode_value(code) == "RIGHT" then 
-      fn.decrement_increment(keys:is_shifted() and 12 or 1)
-    elseif keys:get_keycode_value(code) == "LEFT" then 
-      fn.decrement_increment(keys:is_shifted() and -12 or -1)
-    end
-  end
-
   if keys:is_esc(code) then
         if tracker:has_message() then tracker:clear_message()
     elseif tracker:is_info() then tracker:set_info(false)
-    elseif tracker:is_selected() then tracker:deselect()
+    else tracker:deselect()
     end
   end
 

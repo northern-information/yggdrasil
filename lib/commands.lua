@@ -231,7 +231,7 @@ self:register{
   end,
   action = function(payload)
     tracker:update_every_other(payload)
-    tracker:select_track(y)
+    tracker:get_track(payload.x):select()
   end
 }
 
@@ -580,7 +580,7 @@ self:register{
   end,
   payload = function(branch)
     local out = {
-      class = "FOCUS",
+      class = "SELECT",
       range = false,
       x1 = branch[1].leaves[1]
     }
@@ -1611,19 +1611,15 @@ self:register{
       or v == "vel"
       or v == "v" then
         view:toggle_velocity()
-        tracker:refresh()
     elseif v == "macros" then
         view:toggle_macros()
-        tracker:refresh()
     elseif v == "hud" 
       or v == "h" then
         view:toggle_hud()
-        tracker:refresh()
     elseif v == "phenomenon"
       or v == "phen"
       or v == "p" then
         view:toggle_phenomenon()
-        tracker:refresh()
     elseif v == "mixer" 
       or v == "m" then
         page:select(2)
@@ -1635,12 +1631,12 @@ self:register{
       ypc:show_bank()
     elseif v == "ypc" then 
       view:toggle_ypc()
-      tracker:refresh()
     elseif v == "bpm" then 
       tracker:set_message(fn.get_display_bpm())
     else
       tracker:set_track_view(v)
     end
+    tracker:refresh()
   end
 }
 

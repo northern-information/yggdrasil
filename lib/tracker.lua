@@ -78,10 +78,7 @@ end
 
 function tracker:update_every_other(payload)
   self:deselect()
-  self:select_tracks(payload.x)
-  if self:is_selected() then
-    self:get_track(payload.x):update_every_other(payload)
-  end
+  self:get_track(payload.x):update_every_other(payload)
   self:refresh()
 end
 
@@ -325,7 +322,6 @@ function tracker:select_range_of_tracks(x1, x2)
     table.sort(positions)
     x2 = positions[#positions]
   end
-  print("X2", x2)
   local valid_range = true
   if not self:is_in_bounds(x1) then
     valid_range = false
