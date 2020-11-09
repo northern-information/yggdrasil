@@ -45,8 +45,4 @@ include("lib/Sample")       -- individual audio sample
 include("lib/Validator")    -- works with the interpreter to validate command invocations
 
 -- dev only stuff
-dev = io.open(_path["code"] .. lib .. "dev.lua", "r")
-if dev ~= nil then
-  io.close(dev)
-  include(lib .. "dev")
-end
+include(lib .. "dev")
