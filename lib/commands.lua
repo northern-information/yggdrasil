@@ -235,6 +235,7 @@ self:register{
   action = function(payload)
     tracker:update_every_other(payload)
     tracker:select_track(payload.x)
+    tracker:refresh()
   end
 }
 
@@ -300,6 +301,7 @@ self:register{
   action = function(payload)
     tracker:chord(payload)
     tracker:select_slot(payload.x, payload.y)
+    tracker:refresh()
   end
 }
 
