@@ -91,12 +91,15 @@ self:register{
     )
   end,
   payload = function(branch)
-    return {
-      class = "ASCEND",
-      x = #branch[1].leaves == 3 and branch[1].leaves[1] or nil
+    local out = {
+      class = "ASCEND"
     }
+    if #branch == 2 then
+      out["x"] = branch[1].leaves[1]
+    end
+    return out
   end,
-  action = function(payload) tabutil.print(payload)
+  action = function(payload)
     if payload.x ~= nil then
       tracker:get_track(payload.x):set_descend(false)
     else
@@ -238,18 +241,18 @@ self:register{
 
 
 -- BPM
--- bpm 127.3
+-- bpm;127.3
 self:register{
   invocations = { "bpm" },
   signature = function(branch, invocations)
-    if #branch ~= 2 then return false end
+    if #branch ~= 1 then return false end
     return Validator:new(branch[1], invocations):ok()
-      and fn.is_number(branch[2].leaves[1])
+      and fn.is_number(branch[1].leaves[3])
   end,
   payload = function(branch)
     return {
       class = "BPM",
-      bpm = branch[2].leaves[1]
+      bpm = branch[1].leaves[3]
     }
   end,
   action = function(payload)
@@ -385,10 +388,13 @@ self:register{
     )
   end,
   payload = function(branch)
-    return {
-      class = "DESCEND",
-      x = #branch[1].leaves == 3 and branch[1].leaves[1] or nil
+    local out = {
+      class = "DESCEND"
     }
+    if #branch == 2 then
+      out["x"] = branch[1].leaves[1]
+    end
+    return out
   end,
   action = function(payload) tabutil.print(payload)
     if payload.x ~= nil then
@@ -630,7 +636,7 @@ self:register{
 
 -- INFO
 self:register{
-  invocations = { "info" },
+  invocations = { "info", "version" },
   signature = function(branch, invocations)
     if #branch ~= 1 then return false end
     return Validator:new(branch[1], invocations):ok()
