@@ -654,6 +654,28 @@ self:register{
 }
 
 
+-- JUMP
+-- :4
+self:register{
+  invocations = { ":" },
+  signature = function(branch, invocations)
+    if #branch ~= 1 then return false end
+    return Validator:new(branch[1], invocations):validate_prefix_invocation()
+      and fn.is_int(branch[1].leaves[2])
+  end,
+  payload = function(branch)
+    return {
+      class = "JUMP",
+      y = branch[1].leaves[2]
+    }
+  end,
+  action = function(payload)
+    if page:get_active_page() == 1 then
+      view:set_y(util.clamp(payload.y, 1, tracker:get_rows()))
+    end
+  end
+}
+
 
 -- K3
 -- k3 = some amazing thing
@@ -1598,7 +1620,7 @@ self:register{
       "mixer", "m",
       "clades", "c",
       "bank", "b",
-      "ypc",
+      "ypc", "y",
       "bpm"
       }, branch[1].leaves[3])
   end,
@@ -1636,7 +1658,8 @@ self:register{
     elseif v == "bank" 
       or v == "b" then
       ypc:show_bank()
-    elseif v == "ypc" then 
+    elseif v == "ypc" 
+        or v == "y" then 
       view:toggle_ypc()
     elseif v == "bpm" then 
       tracker:set_message(fn.get_display_bpm())
