@@ -14,8 +14,11 @@ function synth:play(voice, note, velocity, macro1, macro2)
     macro2 = self:get_c2_override() * .01
   end
   local freq = musicutil.note_num_to_freq(music:snap_note(music:transpose_note(note)))
-  local voice_name = voice == 1 and "MikaPerc" or "PolyPercMacrod"
-  -- print(voice_name, v, freq, macro1, macro2)
+  local voice_name = ({
+    "MikaPerc", 
+    "PolyPercMacrod",
+    "YggyToast"
+  })[voice] or "PolyPercMacrod"
   engine.amp(v / 127)
   engine.hz(voice_name, freq, macro1, macro2)
 end
