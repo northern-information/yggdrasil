@@ -91,12 +91,15 @@ self:register{
     )
   end,
   payload = function(branch)
-    return {
-      class = "ASCEND",
-      x = #branch[1].leaves == 3 and branch[1].leaves[1] or nil
+    local out = {
+      class = "ASCEND"
     }
+    if #branch == 2 then
+      out["x"] = branch[1].leaves[1]
+    end
+    return out
   end,
-  action = function(payload) tabutil.print(payload)
+  action = function(payload)
     if payload.x ~= nil then
       tracker:get_track(payload.x):set_descend(false)
     else
@@ -232,24 +235,25 @@ self:register{
   action = function(payload)
     tracker:update_every_other(payload)
     tracker:select_track(payload.x)
+    tracker:refresh()
   end
 }
 
 
 
 -- BPM
--- bpm 127.3
+-- bpm;127.3
 self:register{
   invocations = { "bpm" },
   signature = function(branch, invocations)
-    if #branch ~= 2 then return false end
+    if #branch ~= 1 then return false end
     return Validator:new(branch[1], invocations):ok()
-      and fn.is_number(branch[2].leaves[1])
+      and fn.is_number(branch[1].leaves[3])
   end,
   payload = function(branch)
     return {
       class = "BPM",
-      bpm = branch[2].leaves[1]
+      bpm = branch[1].leaves[3]
     }
   end,
   action = function(payload)
@@ -297,6 +301,7 @@ self:register{
   action = function(payload)
     tracker:chord(payload)
     tracker:select_slot(payload.x, payload.y)
+    tracker:refresh()
   end
 }
 
@@ -385,10 +390,13 @@ self:register{
     )
   end,
   payload = function(branch)
-    return {
-      class = "DESCEND",
-      x = #branch[1].leaves == 3 and branch[1].leaves[1] or nil
+    local out = {
+      class = "DESCEND"
     }
+    if #branch == 2 then
+      out["x"] = branch[1].leaves[1]
+    end
+    return out
   end,
   action = function(payload) tabutil.print(payload)
     if payload.x ~= nil then
@@ -630,7 +638,7 @@ self:register{
 
 -- INFO
 self:register{
-  invocations = { "info" },
+  invocations = { "info", "version" },
   signature = function(branch, invocations)
     if #branch ~= 1 then return false end
     return Validator:new(branch[1], invocations):ok()
@@ -645,6 +653,28 @@ self:register{
   end
 }
 
+
+-- JUMP
+-- :4
+self:register{
+  invocations = { ":" },
+  signature = function(branch, invocations)
+    if #branch ~= 1 then return false end
+    return Validator:new(branch[1], invocations):validate_prefix_invocation()
+      and fn.is_int(branch[1].leaves[2])
+  end,
+  payload = function(branch)
+    return {
+      class = "JUMP",
+      y = branch[1].leaves[2]
+    }
+  end,
+  action = function(payload)
+    if page:get_active_page() == 1 then
+      view:set_y(util.clamp(payload.y, 1, tracker:get_rows()))
+    end
+  end
+}
 
 
 -- K3
@@ -1590,7 +1620,7 @@ self:register{
       "mixer", "m",
       "clades", "c",
       "bank", "b",
-      "ypc",
+      "ypc", "y",
       "bpm"
       }, branch[1].leaves[3])
   end,
@@ -1628,7 +1658,8 @@ self:register{
     elseif v == "bank" 
       or v == "b" then
       ypc:show_bank()
-    elseif v == "ypc" then 
+    elseif v == "ypc" 
+        or v == "y" then 
       view:toggle_ypc()
     elseif v == "bpm" then 
       tracker:set_message(fn.get_display_bpm())

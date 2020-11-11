@@ -31,7 +31,7 @@ end
 function Slot:refresh()
   local m = self:get_midi_note()
   if m ~= nil then
-    self:set_ygg_note(music:convert("midi_to_ygg", m))
+    self:set_ygg_note(music:convert("midi_to_ygg", m)[1])
     self:set_ipn_note(music:convert("midi_to_ipn", m))
     self:set_frequency(music:convert("midi_to_freq", m))
   end
@@ -125,12 +125,13 @@ function Slot:to_string()
   elseif v == "ipn"    then out = self:get_ipn_note()
   elseif v == "freq"   then out = self:get_frequency()
   end
+  out = ((out == nil) or (out == "")) and empty_character or out
   if view:is_velocity() then
-    local v = " v" .. self:get_velocity()
+    local v = "v" .. self:get_velocity()
     out = out ~= nil and out .. v or v
   end
   if view:is_macros() then
-    local c = " " .. self:get_c1() .. " " .. self:get_c2()
+    local c = "m" .. self:get_c1() .. "|" .. self:get_c2()
     out = out ~= nil and out .. c or c
   end
   if self:get_clade() == "YPC" then
