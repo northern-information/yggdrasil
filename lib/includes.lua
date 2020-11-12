@@ -32,6 +32,7 @@ buffer      = include("lib/buffer")       -- liminal space for all the character
 commands    = include("lib/commands")     -- registered text-based commands
 runner      = include("lib/runner")       -- executes valid commands
 tracker     = include("lib/tracker")      -- core of yggdrasil
+editor      = include("lib/editor")       -- window to edit details
 music       = include("lib/music")        -- essentially musicutil abstractions
 synth       = include("lib/synth")        -- supercollider
 graphics    = include("lib/graphics")     -- everything you see on the screen

@@ -60,9 +60,13 @@ function graphics:render_page(page)
       if view:is_hud() then
         self:draw_hud_foreground()
       end
-      self:draw_terminal()
-      self:draw_command_processing()
-      self:draw_y_mode()
+      if editor:is_open() then
+        self:draw_editor()
+      else
+        self:draw_terminal()
+        self:draw_command_processing()
+        self:draw_y_mode()
+      end
     elseif page == "mixer" then
       self:draw_mixer()
       self:draw_terminal()
@@ -79,6 +83,23 @@ function graphics:render_page(page)
   self:teardown()
 end
 
+
+
+-- editor
+
+
+function graphics:draw_editor()
+  local sw = view:get_slot_width()
+  local x = ((view:get_x() - 1) * sw) - (view:get_x_offset() * sw) + sw
+  local w = 128 - x
+  -- background
+  self:rect(x, 0, w, 64, 0)
+  self:mls(x, 0, x, 64, 15)
+  -- title
+  self:rect(x, 0, w, 7, 17)
+  self:text(x + 1, 6, editor:get_title(), 0)
+  self:draw_mixer_glyph(106, 0, editor:track():get_clade(), true)
+end
 
 
 -- tracker
@@ -178,6 +199,9 @@ function graphics:draw_slots(track)
           and #tracker:get_track(slot:get_x()):get_selected_slots() > 1 then
             background = 1
             foreground = 15
+        end
+        if editor:is_open() and editor:slot():get_y() == slot:get_y() then
+          background = self.cursor_frame
         end
         if triggered ~= nil then
           local l = slot_triggers[slot:get_id()].level
