@@ -71,7 +71,7 @@ Engine_YggdrasilSynth : CroneEngine {
 				freq = SinOsc.ar(
 					(1.001 - macro2) * 5,
 					0,
-					macro2 * 0.5,
+					macro2 * 0.2,
 					freq.cpsmidi
 				).midicps;
 
