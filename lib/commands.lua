@@ -1437,7 +1437,7 @@ self:register{
     return (
       Validator:new(branch[2], invocations):ok()
       and fn.table_contains( {"voice", "v" }, branch[2].leaves[3])
-      and fn.is_int(branch[2].leaves[5])
+      and #branch[2].leaves == 5
     ) or (
       fn.is_int(branch[1].leaves[1])
       and Validator:new(branch[2], invocations):ok()
@@ -1460,7 +1460,16 @@ self:register{
     if #branch == 1 then
       synth:toggle_encoder_override()
     elseif #branch == 2 and fn.table_contains( {"voice", "v" }, branch[2].leaves[3]) then
-      out["voice"] = branch[2].leaves[5]
+      local v = branch[2].leaves[5]
+      if fn.is_int(v) then
+        out["voice"] = v
+      elseif v == "ppm" then
+        out["voice"] = 1
+      elseif v == "rikki" then
+        out["voice"] = 2
+      elseif v == "toast" then
+        out["voice"] = 3
+      end
     elseif #branch == 2 and fn.table_contains( {"c1", "c2" }, branch[2].leaves[3]) then
       out[branch[2].leaves[3]] = branch[2].leaves[5]
     elseif #branch == 3 then
