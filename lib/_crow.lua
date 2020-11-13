@@ -12,7 +12,9 @@ end
 
 function _crow:jf(note)
   if not fn.is_int(note) then return end
-  crow.ii.jf.play_note((music:snap_note(music:transpose_note(note)) - 60) / 12, 5)
+        print("aye")
+crow.ii.jf.play_note(1, 5)
+  -- crow.ii.jf.play_note((music:snap_note(music:transpose_note(note)) - 60) / 12, 5)
 end
 
 function _crow:play(note, pair)

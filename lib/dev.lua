@@ -26,15 +26,15 @@ function dev:scene(i)
       track:set_shadow(math.random(1, 2) == 1 and math.random(1, 8) or false)
       track:set_level(math.random(0, 100) * .01)
     end
-    t(1):set_clade("SYNTH")
+    t(1):set_clade("CROW")
     t(1):unshadow()
     t(1):unsolo()
     t(1):unmute()
     t(1):enable()
     t(1):set_level(1)
     t(1):refresh()
-    cmd("v;macros")
     cmd("v;ipn")
+    cmd("1 crow;jf;on")
     page:select(1)
   elseif i == 2 then
     for i=1,5 do
