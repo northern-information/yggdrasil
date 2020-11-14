@@ -4,6 +4,7 @@ function editor.init()
   editor.open = false
   editor.editing_track = nil
   editor.editing_slot = nil
+  editor.fields = {}
 end
 
 function editor:activate(x, y)
@@ -11,9 +12,11 @@ function editor:activate(x, y)
   local track = tracker:get_track(x)
   self:set_editing_track(track)
   self:set_editing_slot(track:get_slot(y))
+  print("get editable fields?")
 end
 
 function editor:commit_and_close()
+  self:set_fields({})
   self:set_open(false)
 end
 
@@ -26,7 +29,6 @@ function editor:get_title()
   local ipn = self:slot():get_ipn_note()
   return self:track():get_x() .. " " .. self:slot():get_y() .. (ipn ~= nil and (" " .. ipn) or "")
 end
-
 
 function editor:set_editing_track(track)
   self.editing_track = track
@@ -56,5 +58,12 @@ function editor:set_open(bool)
   self.open = bool
 end
 
+function editor:set_fields(t)
+  self.fields = t
+end
+
+function editor:get_fields()
+  return self.fields
+end
 
 return editor

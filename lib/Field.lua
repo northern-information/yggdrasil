@@ -9,6 +9,7 @@ function Field:new()
   f.text_buffer = {}
   f.extents_buffer = {}
   f.cursor_index = 0
+  f.focus = false
   return f
 end
 
@@ -41,6 +42,14 @@ function Field:clear()
   self.text_buffer = {}
   self.extents_buffer = {}
   self.cursor_index = 0
+end
+
+function Field:set_focus(bool)
+  self.focus = bool
+end
+
+function Field:is_focus()
+  return self.focus
 end
 
 function Field:is_empty()

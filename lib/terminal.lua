@@ -1,9 +1,9 @@
 terminal = {}
 
 function terminal.init()
+  terminal:set_field(Field:new())
   terminal.history_index = 0
   terminal.history = {}
-  terminal:set_field(Field:new())
 end
 
 function terminal:add(s)
