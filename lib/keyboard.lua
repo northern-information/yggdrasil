@@ -16,7 +16,7 @@ function keyboard.event(type, code, val)
   print("")
 
   if keys:is_return(code) then
-    if buffer:is_empty() then
+    if terminal:is_empty() then
       if not tracker:is_selected() then
         tracker:select_slot(view:get_x(), view:get_y())
       elseif not editor:is_open() then
@@ -24,8 +24,8 @@ function keyboard.event(type, code, val)
       elseif editor:is_open() then
         editor:commit_and_close()
       end
-    elseif not buffer:is_empty() then
-      buffer:execute()
+    elseif not terminal:is_empty() then
+      terminal:execute()
     end
   end
 
@@ -56,7 +56,7 @@ function keyboard.event(type, code, val)
   else
 
     if keys:is_ctrled() then
-      if keys:is_backspace_or_delete(code) and buffer:is_empty() then
+      if keys:is_backspace_or_delete(code) and terminal:is_empty() then
           tracker:clear_selected_slots()
       elseif keys:get_keycode_value(code) == "RIGHT" then 
         fn.decrement_increment(keys:is_shifted() and 12 or 1)
@@ -96,30 +96,30 @@ function keyboard.event(type, code, val)
     else
       if keys:is_letter_code(code) or keys:is_number_code(code) or keys:is_symbol(code) then
         if keys:is_shifted() and (keys:is_number_code(code) or keys:is_symbol(code)) then
-          buffer:add(keys:get_shifted_keycode(code))
+          terminal:add(keys:get_shifted_keycode(code))
         else
-          buffer:add(keys:get_keycode_value(code))
+          terminal:add(keys:get_keycode_value(code))
         end
       end
     end
 
     if keys:is_spacebar(code) then
-      if buffer:is_empty() then
+      if terminal:is_empty() then
         tracker:toggle_playback()
       else
-        buffer:add(" ")
+        terminal:add(" ")
       end
     end
 
     if keys:is_backspace_or_delete(code) then
-      buffer:backspace()
+      terminal:backspace()
     end
 
     if keys:is_arrow(code) then
-          if keys:get_keycode_value(code) == "RIGHT" then buffer:move_cursor_index(1)
-      elseif keys:get_keycode_value(code) == "LEFT"  then buffer:move_cursor_index(-1)
-      elseif keys:get_keycode_value(code) == "UP"    then buffer:up_history()
-      elseif keys:get_keycode_value(code) == "DOWN"  then buffer:down_history()
+          if keys:get_keycode_value(code) == "RIGHT" then terminal:move_cursor_index(1)
+      elseif keys:get_keycode_value(code) == "LEFT"  then terminal:move_cursor_index(-1)
+      elseif keys:get_keycode_value(code) == "UP"    then terminal:up_history()
+      elseif keys:get_keycode_value(code) == "DOWN"  then terminal:down_history()
       end
     end
 

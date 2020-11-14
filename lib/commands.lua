@@ -67,7 +67,7 @@ end
 --[[
 this is the only place you need to configure / add / modify commands! :)
  - "invocations" defines the valid aliases
- - "signature" defines what string from the buffer fits with this command
+ - "signature" defines what string from the terminal fits with this command
  - "payload" defines how to format the string for execution
  - "action" combines the payload with the final executable method/function
 note, new "prefixes" are a special matching case and still need to be added in .init()

@@ -17,7 +17,7 @@ function Track:new(x)
     __tostring = function(t) return t:to_string() end
   })
   t.x = x ~= nil and x or 0
-  t.id = "track-" .. fn.id()
+  t.id = fn.id("track")
   t.depth = 0
   t.playback = true
   t.position = 0

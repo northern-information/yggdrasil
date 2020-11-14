@@ -74,9 +74,9 @@ end
 function cmd(s)
   local t = fn.string_split(s, "")
   for k, v in pairs(t) do
-    buffer:add(v)
+    terminal:add(v)
   end
-  buffer:execute()
+  terminal:execute()
 end
 
 function slot(x, y)

@@ -7,7 +7,7 @@ function Slot:new(x, y)
   })
   s.x = x ~= nil and x or 0
   s.y = y ~= nil and y or 0
-  s.id = "slot-" .. fn.id()
+  s.id = fn.id("slot")
   s.index = 0
   s.empty = true
   s.selected = false

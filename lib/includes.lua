@@ -15,6 +15,16 @@ if config_ ~= nil then
   include(lib .. "config_")
 end
 
+-- classes
+include("lib/Field")        -- text field input
+include("lib/Branch")       -- "words" of commands
+include("lib/Command")      -- "sentences" entered into the terminal
+include("lib/Interpreter")  -- translates text commands into programmatic meaning
+include("lib/Slot")         -- smallest musical unit
+include("lib/Track")        -- organizes slots
+include("lib/Sample")       -- individual audio sample
+include("lib/Validator")    -- works with the interpreter to validate command invocations
+
 -- note these cannot be alphabetical due to dependencies
 
 dev         = include("lib/dev")          -- dev only stuff
@@ -28,7 +38,7 @@ filesystem  = include("lib/filesystem")   -- manipulate files
 page        = include("lib/page")         -- mvc "controller" for the page
 keyboard    = include("lib/keyboard")     -- clickity-clack keyboard stuff
 keys        = include("lib/keys")         -- keycodes, keycodes everywhere
-buffer      = include("lib/buffer")       -- liminal space for all the characters
+terminal    = include("lib/terminal")     -- main text input terminal
 commands    = include("lib/commands")     -- registered text-based commands
 runner      = include("lib/runner")       -- executes valid commands
 tracker     = include("lib/tracker")      -- core of yggdrasil
@@ -36,12 +46,3 @@ editor      = include("lib/editor")       -- window to edit details
 music       = include("lib/music")        -- essentially musicutil abstractions
 synth       = include("lib/synth")        -- supercollider
 graphics    = include("lib/graphics")     -- everything you see on the screen
-
--- classes
-include("lib/Branch")       -- "words" of commands
-include("lib/Command")      -- "sentences" entered into the buffer
-include("lib/Interpreter")  -- translates text commands into programmatic meaning
-include("lib/Slot")         -- smallest musical unit
-include("lib/Track")        -- organizes slots
-include("lib/Sample")       -- individual audio sample
-include("lib/Validator")    -- works with the interpreter to validate command invocations

@@ -445,27 +445,24 @@ end
 
 
 function graphics:draw_terminal()
-  local message = tracker:has_message()
-  local message_value = tracker:get_message_value()
-  local info = tracker:is_info()
   local height = 9
-  if message then
+  if tracker:has_message() then
     height = 18
-  elseif info then
+  elseif tracker:is_info() then
     height = 40
   end
   self:mls(0, 64 - height, 128, 64 - height - 1, 15)
   self:rect(0, 64 - height, 128, height, 0)
-  if message then
-    self:text(5, 54, message_value, 1)
-  elseif info then
+  if tracker:has_message() then
+    self:text(5, 54, tracker:get_message_value(), 1)
+  elseif tracker:is_info() then
     self:draw_yggdrasil_gui_logo()
     self:text(64, 40, fn.get_semver_string(), 1)
   end
   local total = 0
   local y = 64 - height - 4
-  local tb = buffer:get_tb()
-  local eb = buffer:get_eb()
+  local tb = terminal:get_field():get_text_buffer()
+  local eb = terminal:get_field():get_extents_buffer()
   if #tb > 0 then
     for k, character in pairs(tb) do
       if k == 1 then
@@ -474,8 +471,8 @@ function graphics:draw_terminal()
         self:text(total, 62, character, 15)
       end
       total = eb[k] + total + 1
-      if k == buffer:get_cursor_index() then
-        if buffer:get_cursor_index() < #eb then
+      if k == terminal:get_field():get_cursor_index() then
+        if terminal:get_field():get_cursor_index() < #eb then
           self:draw_cursor(total)
         else
           self:draw_cursor(total + 1)
@@ -485,7 +482,7 @@ function graphics:draw_terminal()
   else
     self:draw_cursor(1)
   end
-  if buffer:get_cursor_index() == 0 and #tb > 0 then
+  if terminal:get_field():get_cursor_index() == 0 and #tb > 0 then
     self:draw_cursor(1)
   end
 end
@@ -495,7 +492,6 @@ function graphics:draw_cursor(x)
     self:mlrs(x, 56, 0, 7, self.cursor_frame)
   end
 end
-
 
 function graphics:draw_command_processing()
   if self.run_command_frame < self.frame then return end  

@@ -11,9 +11,9 @@ function fn.init()
   fn.id_counter = 1000
 end
 
-function fn.id()
+function fn.id(prefix)
   fn.id_counter = fn.id_counter + 1
-  return fn.id_prefix .. os.time(os.date("!*t")) .. "-" .. fn.id_counter
+  return fn.id_prefix .. prefix .. "-".. os.time(os.date("!*t")) .. "-" .. fn.id_counter
 end
 
 function fn.get_display_bpm()
