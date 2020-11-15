@@ -94,7 +94,8 @@ function graphics:draw_editor()
   local w = 128 - x
   -- background
   self:rect(x, 0, w, 64, 0)
-  self:mls(x, 0, x, 64, 15)
+  self:mls(x, 6, x, 64, 15)
+  self:mls(x, 6, x + 6, 0, 15)
   -- title
   -- self:rect(x, 0, w, 7, 17)
   -- self:draw_mixer_glyph(106, 0, editor:get_track():get_clade(), false)
@@ -105,7 +106,7 @@ end
 
 function graphics:draw_validator_cube(valid)
   local x = 116
-  local y = 0
+  local y = 2
   if valid then
     -- horizontals
     self:mlrs(x + 4, y + 1, 7, 0)
@@ -186,7 +187,13 @@ function graphics:draw_hud_foreground()
   end
   -- vertical indicator to scroll down
   if view:get_rows_below() then
-    local adjust_y = tracker:has_message() and -9 or 0
+    local adjust_y = 0
+    -- these are designed to be mutually exclusive as of 2020-11-15
+    if tracker:has_message() then
+      adjust_y = -9
+    elseif editor:is_open() then
+      adjust_y = 8
+    end
     for i = 1, 16 do 
       self:mls(swm, 56 - i + adjust_y, swm, 55 - i + adjust_y, 16 - i)
     end
@@ -292,7 +299,13 @@ function graphics:draw_cols()
           self:mls(x, ii - 1 + adjust_y, x, ii + adjust_y, 16 - ii)
         end
         if view:get_rows_below() then
-          local adjust_y = tracker:has_message() and -9 or 0
+          local adjust_y = 0
+          -- these are designed to be mutually exclusive as of 2020-11-15
+          if tracker:has_message() then
+            adjust_y = -9
+          elseif editor:is_open() then
+            adjust_y = 8
+          end
           self:mls(x, 56 - ii + adjust_y, x, 55 - ii + adjust_y, 16 - ii)
         end
       end

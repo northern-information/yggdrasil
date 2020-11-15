@@ -59,6 +59,7 @@ function dev:scene(i)
     cmd("4 ypc;load;wineglass_halffull_513hz.wav")
     page:select(1)
   elseif i == 3 then 
+    cmd("v;h")
     cmd("1 1 71")
     editor:activate(1, 1)
     page:select(1)
