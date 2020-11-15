@@ -2,22 +2,30 @@ editor = {}
 
 function editor.init()
   editor.open = false
-  editor.editing_track = nil
-  editor.editing_slot = nil
+  editor.track = nil
+  editor.slot = nil
   editor.fields = {}
+  editor.valid = true
 end
 
 function editor:activate(x, y)
   self:set_open(true)
   local track = tracker:get_track(x)
-  self:set_editing_track(track)
-  self:set_editing_slot(track:get_slot(y))
+  self:set_track(track)
+  self:set_slot(track:get_slot(y))
   print("get editable fields?")
 end
 
-function editor:commit_and_close()
-  self:set_fields({})
+function editor:clear()
   self:set_open(false)
+  self:set_track(nil)
+  self:set_slot(nil)
+  self:set_fields({})
+end
+
+function editor:commit_and_close()
+  -- commit...
+  self:clear()
 end
 
 
@@ -25,25 +33,25 @@ end
 -- getters & setters
 
 function editor:get_title()
-  if self:slot() == nil or self:track() == nil then return "No slot or track to edit." end
-  local ipn = self:slot():get_ipn_note()
-  return self:track():get_x() .. " " .. self:slot():get_y() .. (ipn ~= nil and (" " .. ipn) or "")
+  if self:get_slot() == nil or self:get_track() == nil then return "No slot or track to edit." end
+  local ipn = self:get_slot():get_ipn_note()
+  return self:get_track():get_x() .. " " .. self:get_slot():get_y() .. (ipn ~= nil and (" " .. ipn) or "")
 end
 
-function editor:set_editing_track(track)
-  self.editing_track = track
+function editor:set_track(track)
+  self.track = track
 end
 
-function editor:track()
-  return self.editing_track
+function editor:get_track()
+  return self.track
 end
 
-function editor:set_editing_slot(slot)
-  self.editing_slot = slot
+function editor:set_slot(slot)
+  self.slot = slot
 end
 
-function editor:slot()
-  return self.editing_slot
+function editor:get_slot()
+  return self.slot
 end
 
 function editor:close()
@@ -64,6 +72,14 @@ end
 
 function editor:get_fields()
   return self.fields
+end
+
+function editor:is_valid()
+  return self.valid
+end
+
+function editor:set_valid(bool)
+  self.valid = bool
 end
 
 return editor

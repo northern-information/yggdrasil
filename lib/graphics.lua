@@ -96,10 +96,59 @@ function graphics:draw_editor()
   self:rect(x, 0, w, 64, 0)
   self:mls(x, 0, x, 64, 15)
   -- title
-  self:rect(x, 0, w, 7, 17)
-  self:text(x + 1, 6, editor:get_title(), 0)
-  self:draw_mixer_glyph(106, 0, editor:track():get_clade(), true)
+  -- self:rect(x, 0, w, 7, 17)
+  -- self:draw_mixer_glyph(106, 0, editor:get_track():get_clade(), false)
+  -- self:text_right(128, 15, editor:get_title(), 15)
+  -- validator
+  self:draw_validator_cube(editor:is_valid())
 end
+
+function graphics:draw_validator_cube(valid)
+  local x = 116
+  local y = 0
+  if valid then
+    -- horizontals
+    self:mlrs(x + 4, y + 1, 7, 0)
+    self:mlrs(x, y + 5, 8, 0)
+    self:mlrs(x + 4, y + 8, 8, 0)
+    self:mlrs(x + 1, y + 12, 7, 0)
+    -- verticals
+    self:mlrs(x + 1, y + 5, 0, 6)
+    self:mlrs(x + 5, y, 0, 3)
+    self:mlrs(x + 5, y + 6, 0, 2)
+    self:mlrs(x + 8, y + 4, 0, 2)
+    self:mlrs(x + 8, y + 9, 0, 2)
+    self:mlrs(x + 12, y + 2, 0, 6)
+    -- angles (from top to bottom)
+    self:mlrs(x + 3, y + 2, 1, 0)
+    self:mlrs(x + 10, y + 2, 1, 0)
+    self:mlrs(x + 2, y + 3, 1, 0)
+    self:mlrs(x + 9, y + 3, 1, 0)
+    self:mlrs(x + 1, y + 4, 1, 0)
+    self:mlrs(x + 8, y + 4, 1, 0)
+    self:mlrs(x + 3, y + 9, 1, 0)
+    self:mlrs(x + 10, y + 9, 1, 0)
+    self:mlrs(x + 2, y + 10, 1, 0)
+    self:mlrs(x + 9, y + 10, 1, 0)
+    self:mlrs(x + 1, y + 11, 1, 0)
+    self:mlrs(x + 8, y + 11, 1, 0)
+  else
+    self:mlrs(x + 1, y + 1, 10, 10)
+    self:mlrs(x + 11, y + 1, -10, 10)
+  end
+end
+
+function graphics:return_arrow(x, y)
+  self:mlrs(x + 15, y + 6, 10, 0)
+  self:mlrs(x + 25, y + 2, 0, 4)
+  self:mlrs(x + 16, y + 5, 2, 0)
+  self:mlrs(x + 16, y + 7, 2, 0)
+  self:mlrs(x + 17, y + 4, 2, 0)
+  self:mlrs(x + 17, y + 8, 2, 0)
+  self:mlrs(x + 18, y + 3, 2, 0)
+  self:mlrs(x + 18, y + 9, 2, 0)
+end
+
 
 
 -- tracker
@@ -200,7 +249,7 @@ function graphics:draw_slots(track)
             background = 1
             foreground = 15
         end
-        if editor:is_open() and editor:slot():get_y() == slot:get_y() then
+        if editor:is_open() and editor:get_slot():get_y() == slot:get_y() then
           background = self.cursor_frame
         end
         if triggered ~= nil then

@@ -4,7 +4,6 @@ function Validator:new(branch, invocations)
   local v = setmetatable({}, { 
     __index = Validator,
   })
-
   v.branch = branch
   v.invocations = invocations
   v.is_valid = v:is_invocation_match()
