@@ -1,23 +1,5 @@
 view = {}
 
-function dv()
-print("view.tracker", view.tracker)
-print("view.velocity", view.velocity)
-print("view.phenomenon", view.phenomenon)
-print("view.ypc", view.ypc)
-print("view.hud", view.hud)
-print("view.clades", view.clades)
-print("view.mixer", view.mixer)
-print("view.x", view.x)
-print("view.x_offset", view.x_offset)
-print("view.y", view.y)
-print("view.y_offset", view.y_offset)
-print("view.mixer_multiple", view.mixer_multiple)
-print("view.m.tracks", view.m.tracks)
-print("view.m.track_width", view.m.track_width)
-print("view.m.track_height", view.m.track_height)
-end
-
 function view.init()
   -- page
   view.tracker = false
@@ -25,7 +7,7 @@ function view.init()
   view.macros = false
   view.phenomenon = false
   view.ypc = false
-  view.hud = false
+  view.hud = config.settings.default_hud
   view.clades = false
   view.mixer = false
   -- tracker

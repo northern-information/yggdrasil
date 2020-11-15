@@ -3,9 +3,9 @@ config = {}
 config["settings"] = {
   ["version_major"] = 1,
   ["version_minor"] = 0,
-  ["version_patch"] = 7,
+  ["version_patch"] = 8,
   ["root"] = 0,
-  ["scale"] = 47,
+  ["scale"] = 41,
   ["octaves"] = 11,
   ["save_path"] =  _path.data .. "yggdrasil/",
   ["sample_path"] = _path.audio .. "yggdrasil/samples/",
@@ -15,7 +15,8 @@ config["settings"] = {
   ["default_tracks"] = 8,
   ["default_depth"] = 8,
   ["default_clade"] = "SYNTH",
-  ["max_tracks"] = 50
+  ["max_tracks"] = 50,
+  ["default_hud"] = false
 }
 
 config["page_titles"] = {
