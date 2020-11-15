@@ -84,17 +84,14 @@ function Sample:load(filename, position)
 
   -- get frequency information from the filename itself
   -- the frequency should be the LAST number in filename
-  local hz = 0
-  for num in string.gmatch(filename,"%d[%d.]*") do 
+  local hz = 440
+  for num in string.gmatch(filename,"(%d+)hz") do 
     hz = tonumber(num)
   end
   if hz > 10 and hz < 20000 then
-    self.frequency=hz
-  else
-    -- defualt frequency
-    self.frequency=440
+    self.frequency = hz
   end
-  print("loaded "..self.name.." at "..hz.."hz")
+  print("loaded " .. self.name .. " at " .. self.frequency .. "hz")
 
   -- read it into softcut
   softcut.buffer_read_mono(filename, 0, position, -1, 1, 1)
