@@ -98,8 +98,8 @@ function graphics:draw_editor()
   self:mls(x, 6, x + 6, 0, 15)
   -- title
   -- self:rect(x, 0, w, 7, 17)
-  -- self:draw_mixer_glyph(106, 0, editor:get_track():get_clade(), false)
-  -- self:text_right(128, 15, editor:get_title(), 15)
+  self:draw_mixer_glyph(66, 0, editor:get_track():get_clade(), false)
+  self:text(66, 15, editor:get_title(), 15)
   -- validator
   self:draw_validator_cube(editor:is_valid())
 end
