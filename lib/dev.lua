@@ -59,10 +59,12 @@ function dev:scene(i)
     cmd("4 ypc;load;wineglass_halffull_513hz.wav")
     page:select(1)
   elseif i == 3 then 
-    cmd("v;h")
-    cmd("1 1 71")
-    editor:activate(1, 1)
+    -- cmd("v;h")
     page:select(1)
+    cmd("7 d;16")
+    cmd("7 8 71")
+    tracker:select_slot(7, 8)
+    editor:activate(7, 8)
   end
   config.settings.debug_interpreter = debug_interpreter_cache
   config.settings.debug_music = debug_music_cache

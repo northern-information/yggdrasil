@@ -33,9 +33,9 @@ end
 -- getters & setters
 
 function editor:get_title()
-  if self:get_slot() == nil or self:get_track() == nil then return "No slot or track to edit." end
+  if self:get_slot() == nil or self:get_track() == nil then return "EMPTINESS..." end
   local ipn = self:get_slot():get_ipn_note()
-  return self:get_track():get_x() .. " " .. self:get_slot():get_y() .. (ipn ~= nil and (" " .. ipn) or "")
+  return "X" .. self:get_track():get_x() .. "Y" .. self:get_slot():get_y() .. (ipn ~= nil and ipn or "")
 end
 
 function editor:set_track(track)

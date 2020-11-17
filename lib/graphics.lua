@@ -92,21 +92,55 @@ function graphics:draw_editor()
   local sw = view:get_slot_width()
   local x = ((view:get_x() - 1) * sw) - (view:get_x_offset() * sw) + sw
   local w = 128 - x
+  local left_edge = w + 2
   -- background
-  self:rect(x, 0, w, 64, 0)
-  self:mls(x, 6, x, 64, 15)
-  self:mls(x, 6, x + 6, 0, 15)
+  self:rect(x - 1, 0, w + 1, 64, 0)
+  self:mls(x, 7, x, 64, 15)
+  -- self:mls(x, 6, x + 6, 0, 15)
   -- title
-  -- self:rect(x, 0, w, 7, 17)
-  self:draw_mixer_glyph(66, 0, editor:get_track():get_clade(), false)
-  self:text(66, 15, editor:get_title(), 15)
+  self:rect(x - 1, 0, w + 1, 8, 17)
+  if screen.text_extents(editor:get_title()) < 41 then
+    self:draw_mixer_glyph(106, 0, editor:get_track():get_clade(), true)
+  end
+  self:text(left_edge, 6, editor:get_title(), 0)
+
   -- validator
   self:draw_validator_cube(editor:is_valid())
+  
+  -- highlighter
+  self:rect(left_edge + 22, 23, 44, 9, 1)
+  self:rect(125, 23, 3, 9, 15)
+  
+  -- invalid field
+  self:rect(125, 33, 3, 9, 15)
+  self:mlrs(126, 34, 1, 5, 0)
+  self:mlrs(126, 40, 1, 1, 0)
+  -- highlight
+  
+  -- data entry
+  local fields = { "YGG", "MID", "VEL", "MA1", "MA2", "WAV" }
+  local i = 1
+  for k, v in pairs(fields) do
+    self:text_right(left_edge + 20, 20 + (10 * i), v, 15)
+    self:text(left_edge + 24, 20 + (10 * i), 127, 15)
+    i = i + 1
+  end
+  -- message
+  local message = "0-127"
+  self:text(left_edge + 24, 18, message, 1)
+end
+
+function graphics:draw_editor_console()
+
+end
+
+function graphics:draw_editor_form()
+
 end
 
 function graphics:draw_validator_cube(valid)
-  local x = 116
-  local y = 2
+  local x = 74
+  local y = 10
   if valid then
     -- horizontals
     self:mlrs(x + 4, y + 1, 7, 0)
@@ -173,6 +207,7 @@ end
 
 function graphics:draw_hud_foreground()
   local swm, sw, sh =  view:get_slot_width_min(), view:get_slot_width(), view:get_slot_height()
+  local top_row_adjustment = 1
   self:rect(0, 0, swm, 64, 0)
   self:rect(0, 0, 128, sh, 0)
   -- vertical indicator to scroll up
@@ -183,7 +218,7 @@ function graphics:draw_hud_foreground()
   end
   -- horizontal rule under the top numbers
   if view:get_rows_above() then
-    self:mls(swm - 1, sh, 128, sh, 15)
+    self:mls(swm - 1, sh + top_row_adjustment, 128, sh, 15)
   end
   -- vertical indicator to scroll down
   if view:get_rows_below() then
@@ -198,6 +233,10 @@ function graphics:draw_hud_foreground()
       self:mls(swm, 56 - i + adjust_y, swm, 55 - i + adjust_y, 16 - i)
     end
   end
+  -- bottom rule to match top rule
+  if editor:is_open() then
+    self:mls(swm - 1, 64, 64, 64, 15)
+  end
   -- col numbers, start at 2 because of the column HUD
   local start = 2
   if view:get_slot_extents() > swm then
@@ -207,7 +246,7 @@ function graphics:draw_hud_foreground()
     local value = i + view:get_x_offset()
     self:text_right(
       (i * sw - 2),
-      (sh - 2),
+      (sh - 2 + top_row_adjustment),
       ((value < 1 or value > tracker:get_cols()) and "" or value),
       15
     )
