@@ -118,12 +118,14 @@ function graphics:draw_editor()
   -- highlight
   
   -- data entry
-  local fields = { "YGG", "MID", "VEL", "MA1", "MA2", "WAV" }
+  local fields = editor:get_fields()
   local i = 1
-  for k, v in pairs(fields) do
-    self:text_right(left_edge + 20, 20 + (10 * i), v, 15)
-    self:text(left_edge + 24, 20 + (10 * i), 127, 15)
-    i = i + 1
+  for k, field in pairs(fields) do
+    if field.display ~= nil and field.value_getter() ~= nil then 
+      self:text_right(left_edge + 20, 20 + (10 * i), field.display, 15)
+      self:text(left_edge + 24, 20 + (10 * i), field.value_getter(), 15)
+      i = i + 1
+    end
   end
   -- message
   local message = "0-127"

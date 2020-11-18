@@ -172,6 +172,10 @@ function music:is_valid_ygg(s)
   return match
 end
 
+function music:is_valid_midi(s)
+  return (s >= -12) and (s <= 131)
+end
+
 function music:transpose_note(note)
   return note + (self.transpose * 12)
 end

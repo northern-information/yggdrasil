@@ -19,7 +19,7 @@ function keyboard.event(type, code, val)
     if terminal:is_empty() then
       if not tracker:is_selected() then
         tracker:select_slot(view:get_x(), view:get_y())
-      elseif not editor:is_open() then
+      elseif not editor:is_open() and #tracker:get_selected_slots() == 1 then
         editor:activate(view:get_x(), view:get_y())
       elseif editor:is_open() then
         editor:commit_and_close()
@@ -46,6 +46,7 @@ function keyboard.event(type, code, val)
       elseif keys:get_keycode_value(code) == "DOWN"  then view:pan_y(1)
       end
       tracker:select_slot(view:get_x(), view:get_y())
+      editor:clear()
       editor:activate(view:get_x(), view:get_y())
     end
     

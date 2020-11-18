@@ -12,8 +12,16 @@ function editor:activate(x, y)
   self:set_open(true)
   local track = tracker:get_track(x)
   self:set_track(track)
-  self:set_slot(track:get_slot(y))
-  print("get editable fields?")
+  local slot = track:get_slot(y)
+  self:set_slot(slot)
+  local fields = slot:get_editor_fields()
+  for k, field in pairs(fields) do
+    self:add_field(field)
+  end
+end
+
+function editor:add_field(field)
+  self.fields[#self.fields + 1] = field
 end
 
 function editor:clear()

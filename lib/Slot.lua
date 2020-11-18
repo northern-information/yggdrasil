@@ -28,6 +28,35 @@ function Slot:new(x, y)
   return s
 end
 
+function Slot:get_editor_fields()
+  return {
+    {
+      field_id = "ygg_note",
+      display = "YGG",
+      tab_index = 1,
+      value_getter = function() return self:get_ygg_note() end,
+      value_setter = function(x) return self:set_ygg_note(x) end,
+      validator = function(x) return music:is_valid_ygg(x) end,
+    },
+    {
+      field_id = "midi_note",
+      display = "M|D|",
+      tab_index = 2,
+      value_getter = function() return self:get_midi_note() end,
+      value_setter = function(x) return self:set_midi_note(x) end,
+      validator = function(x) return music:is_valid_midi(x) end,
+    },
+    {
+      field_id = "velocity",
+      display = "VEL",
+      tab_index = 3,
+      value_getter = function() return self:get_velocity() end,
+      value_setter = function(x) return self:set_velocity(x) end,
+      validator = function(x) return (x >= 0) and (x <= 127) end,
+    }
+  }
+end
+
 function Slot:refresh()
   local m = self:get_midi_note()
   if m ~= nil then
