@@ -6,6 +6,7 @@ function editor.init()
   editor.slot = nil
   editor.fields = {}
   editor.valid = true
+  editor.tab_index = 0
 end
 
 function editor:activate(x, y)
@@ -13,14 +14,31 @@ function editor:activate(x, y)
   local track = tracker:get_track(x)
   self:set_track(track)
   local slot = track:get_slot(y)
-  self:set_slot(slot)
-  local fields = slot:get_editor_fields()
-  for k, field in pairs(fields) do
-    self:add_field(field)
+  if slot ~= nil then
+    self:set_slot(slot)
+    local fields = slot:get_editor_fields()
+    for k, field in pairs(fields) do
+      self:add_field(field)
+    end
+    self:select_field(1)
   end
 end
 
+function editor:select_field(i)
+  for k, field in pairs(self.fields) do
+    field.input_field:set_focus(false)
+  end
+  self.fields[i].input_field:set_focus(true)
+  self:set_tab_index(i)
+end
+
+function editor:cycle_fields(i)
+  self:select_field(fn.cycle(self:get_tab_index() + i, 1, #self:get_fields()))
+end
+
 function editor:add_field(field)
+  field["input_field"] = Field:new()
+  field.input_field:load_string(field:value_getter())
   self.fields[#self.fields + 1] = field
 end
 
@@ -28,6 +46,7 @@ function editor:clear()
   self:set_open(false)
   self:set_track(nil)
   self:set_slot(nil)
+  self:set_tab_index(0)
   self:set_fields({})
 end
 
@@ -72,6 +91,14 @@ end
 
 function editor:set_open(bool)
   self.open = bool
+end
+
+function editor:set_tab_index(i)
+  self.tab_index = i
+end
+
+function editor:get_tab_index()
+  return self.tab_index
 end
 
 function editor:set_fields(t)

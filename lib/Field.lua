@@ -30,6 +30,13 @@ function Field:add(s)
   self:move_cursor_index(1)
 end
 
+function Field:load_string(s)
+  local ts = tostring(s)
+  for i = 1, #ts do
+    self:add(ts:sub(i, i))
+  end
+end
+
 function Field:backspace()
   if self.cursor_index > 0 then
     table.remove(self.text_buffer, self.cursor_index)  

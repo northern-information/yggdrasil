@@ -54,7 +54,7 @@ function dev:scene(i)
     cmd("4 4 72")
     cmd("ypc;bank;factory")
     for x = 1, 3 do
-        cmd(x .. " ypc;load;piano1_uiowa_440hz.wav")
+      cmd(x .. " ypc;load;piano1_uiowa_440hz.wav")
     end
     cmd("4 ypc;load;wineglass_halffull_513hz.wav")
     page:select(1)

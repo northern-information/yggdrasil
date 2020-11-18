@@ -78,4 +78,13 @@ function terminal:get_field()
   return self.field
 end
 
+function terminal:set_focus(bool)
+  self.field:set_focus(bool)
+end
+
+function terminal:is_focus()
+  return self.field:get_focus()
+end
+
+
 return terminal

@@ -21,24 +21,27 @@ function keyboard.event(type, code, val)
         tracker:select_slot(view:get_x(), view:get_y())
       elseif not editor:is_open() and #tracker:get_selected_slots() == 1 then
         editor:activate(view:get_x(), view:get_y())
+        editor:select_field(1)
       elseif editor:is_open() then
         editor:commit_and_close()
+        terminal:set_focus(true)
       end
     elseif not terminal:is_empty() then
       terminal:execute()
+      terminal:set_focus(true)
     end
   end
 
   if keys:is_esc(code) then
         if tracker:has_message() then tracker:clear_message()
     elseif tracker:is_info()     then tracker:set_info(false)
-    elseif editor:is_open()      then editor:close()
+    elseif editor:is_open()      then editor:clear() editor:close()
     else tracker:deselect()
     end
   end
 
   if editor:is_open() then
-  
+
     if keys:is_arrow(code) then
           if keys:get_keycode_value(code) == "RIGHT" then view:pan_x(1)
       elseif keys:get_keycode_value(code) == "LEFT"  then view:pan_x(-1)
@@ -50,6 +53,13 @@ function keyboard.event(type, code, val)
       editor:activate(view:get_x(), view:get_y())
     end
     
+    if keys:is_tab(code) then
+      if keys:is_shifted() then
+        editor:cycle_fields(-1)
+      else
+        editor:cycle_fields(1)
+      end
+    end
 
 
 

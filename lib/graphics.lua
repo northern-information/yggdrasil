@@ -107,23 +107,35 @@ function graphics:draw_editor()
   -- validator
   self:draw_validator_cube(editor:is_valid())
   
-  -- highlighter
-  self:rect(left_edge + 22, 23, 44, 9, 1)
-  self:rect(125, 23, 3, 9, 15)
-  
-  -- invalid field
-  self:rect(125, 33, 3, 9, 15)
-  self:mlrs(126, 34, 1, 5, 0)
-  self:mlrs(126, 40, 1, 1, 0)
-  -- highlight
+
   
   -- data entry
   local fields = editor:get_fields()
   local i = 1
   for k, field in pairs(fields) do
     if field.display ~= nil and field.value_getter() ~= nil then 
-      self:text_right(left_edge + 20, 20 + (10 * i), field.display, 15)
-      self:text(left_edge + 24, 20 + (10 * i), field.value_getter(), 15)
+      local y = 20 + (10 * i)
+      local y2 = 20 + (10 * i) - 7
+      local value = tostring(field.input_field)
+      -- highlight
+      if field.input_field.focus then
+        self:rect(left_edge + 22, y2, 44, 9, 1)
+        self:rect(125, y2, 3, 9, 15)
+      end
+      -- validation warning
+      if not field.validator(value) then
+        self:rect(125, y2, 3, 9, 15)
+        self:mlrs(126, y2 + 1, 1, 5, 0)
+        self:mlrs(126, y2 + 7, 1, 1, 0)
+      end
+      -- label text
+      self:text_right(left_edge + 20, y, field.display, 15)
+      -- value text
+      self:draw_field(left_edge + 24, y, field.input_field, 15)
+      -- blinking curor
+      if field.input_field.focus then
+        -- self:mlrs(left_edge + 24 + field.input_field:get_extents(), 56, 0, 7, self.cursor_frame)
+      end
       i = i + 1
     end
   end
@@ -562,37 +574,27 @@ function graphics:draw_terminal()
     self:draw_yggdrasil_gui_logo()
     self:text(64, 40, fn.get_semver_string(), 1)
   end
-  local total = 0
-  local y = 64 - height - 4
-  local tb = terminal:get_field():get_text_buffer()
-  local eb = terminal:get_field():get_extents_buffer()
-  if #tb > 0 then
-    for k, character in pairs(tb) do
-      if k == 1 then
-        self:text(0, 62, character, 15)
-      else
-        self:text(total, 62, character, 15)
-      end
-      total = eb[k] + total + 1
-      if k == terminal:get_field():get_cursor_index() then
-        if terminal:get_field():get_cursor_index() < #eb then
-          self:draw_cursor(total)
-        else
-          self:draw_cursor(total + 1)
-        end
-      end
-    end
-  else
-    self:draw_cursor(1)
-  end
-  if terminal:get_field():get_cursor_index() == 0 and #tb > 0 then
-    self:draw_cursor(1)
-  end
+  self:draw_field(0, 62, terminal:get_field())
 end
 
-function graphics:draw_cursor(x)
-  if not keys:is_y_mode() then
-    self:mlrs(x, 56, 0, 7, self.cursor_frame)
+function graphics:draw_field(x, y, field)
+  local tb = field:get_text_buffer()
+  local eb = field:get_extents_buffer()
+  
+  -- draw text
+  if #tb > 0 then
+    self:text(x, y, tostring(field), 15)
+  end
+
+  -- draw cursor
+  if field:is_focus() and not keys:is_y_mode() then
+    local cursor_x = (field:get_cursor_index() < #eb) and 0 or 1
+    local i = 1
+    while (i <= field:get_cursor_index()) do
+      cursor_x = cursor_x + eb[i] + 1
+      i = i + 1
+    end
+    self:mlrs(x + cursor_x, y - 6, 0, 7, self.cursor_frame)
   end
 end
 
