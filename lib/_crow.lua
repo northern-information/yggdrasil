@@ -4,8 +4,8 @@ function _crow.init()
   crow.init()
   crow.clear()
   crow.reset()
-  crow.output[2].action = "{ to(5, .025), to(0, .025) }"
-  crow.output[4].action = "{ to(5, .025), to(0, .025) }"
+  crow.output[2].action = "pulse(.1, 5, 1)"
+  crow.output[4].action = "pulse(.1, 5, 1)"
   crow.ii.pullup(true)
   crow.ii.jf.mode(1)
 end

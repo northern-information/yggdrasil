@@ -11,8 +11,8 @@ end
 
 function _midi:play(note, velocity, channel, device, origin_track)
   if not fn.is_int(note) then return end
+  self:kill_notes_on_track(origin_track) -- kill all notes before registering new one
   self:register_note(note, velocity, channel, device, origin_track)
-  self:kill_notes_on_track(origin_track)
   self.devices[device]:note_on(note, velocity, channel)
 end
 
