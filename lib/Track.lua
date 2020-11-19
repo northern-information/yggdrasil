@@ -283,7 +283,7 @@ function Track:get_shadowable_attribute(attribute)
   if not shadow_id then return self[attribute] end
 
   local getter = track['get_'..attribute]
-  return getter ~= nil and self[attribute] or getter()
+  return getter ~= nil and getter() or self[attribute]
 end
 
 function Track:set_shadow(shadow)
