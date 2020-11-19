@@ -569,7 +569,7 @@ function Track:is_jf()
   return self:get_shadowable_attribute("jf")
 end
 
-function Track:set_is_jf(bool)
+function Track:set_jf(bool)
   self.jf = bool
 end
 

@@ -93,7 +93,7 @@ function tracker:update_track(payload)
           track:set_pair(payload.pair)
         end
         if payload.jf ~= nil then
-          track:set_is_jf(payload.jf)
+          track:set_jf(payload.jf)
         end
       elseif payload.class == "DEPTH" then
         if payload.depth ~= nil then
