@@ -364,7 +364,7 @@ self:register{
         and fn.is_int(branch[2].leaves[5])
     ) or (
         Validator:new(branch[2], invocations):ok()
-        and branch[2].leaves[3] == "jf" 
+        and branch[2].leaves[3] == "is_jf" 
         and (branch[2].leaves[5] == "on"
             or branch[2].leaves[5] == "off")
     )
@@ -374,8 +374,8 @@ self:register{
       class = "CROW",
       x = branch[1].leaves[1]
     }
-    if branch[2].leaves[3] == "jf" then
-      out["jf"] = (branch[2].leaves[5] == "on")
+    if branch[2].leaves[3] == "is_jf" then
+      out["is_jf"] = (branch[2].leaves[5] == "on")
     else
       out["pair"] = branch[2].leaves[5]
     end

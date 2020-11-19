@@ -42,7 +42,7 @@ function Track:new(x)
   t.device = 1
   -- crow
   t.pair = 1
-  t.jf = false
+  t.is_jf = false
   return t
 end
 
@@ -274,8 +274,16 @@ function Track:get_shadow_attribute(attribute)
   elseif attribute == "channel" then return track:get_channel()
   elseif attribute == "device"  then return track:get_device()
   elseif attribute == "pair"    then return track:get_pair()
-  elseif attribute == "jf"      then return track:is_jf()
+  elseif attribute == "is_jf"   then return track:get_is_jf()
   end
+end
+
+function Track:get_shadowable_attribute(attribute)
+  local shadow_id = self:get_shadow()
+  if not shadow_id then return self[attribute] end
+
+  local getter = track['get_'..attribute]
+  return getter ~= nil and self[attribute] or getter()
 end
 
 function Track:set_shadow(shadow)
@@ -557,12 +565,12 @@ function Track:set_pair(i)
   self.pair = util.clamp(i, 1, 2)
 end
 
-function Track:is_jf()
-  return self:is_shadow() and self:get_shadow_attribute("jf") or self.jf
+function Track:get_is_jf()
+  return self:get_shadowable_attribute("is_jf")
 end
 
-function Track:set_jf(bool)
-  self.jf = bool
+function Track:set_is_jf(bool)
+  self.is_jf = bool
 end
 
 function Track:get_clock()

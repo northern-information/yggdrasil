@@ -74,7 +74,7 @@ function Slot:trigger()
         mixed_level / 127.0
       )
     elseif clade == "CROW" then 
-      if track:is_jf() then
+      if track:get_is_jf() then
         _crow:jf(self:get_midi_note())
       else
         _crow:play(self:get_midi_note(), track:get_pair())
