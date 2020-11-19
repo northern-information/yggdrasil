@@ -105,10 +105,13 @@ function graphics:draw_editor()
   self:text(left_edge, 6, editor:get_title(), 0)
 
   -- validator
-  self:draw_validator_cube(editor:is_valid())
+  self:draw_validator_cube(editor:is_valid(), editor:is_unsaved_changes())
   
+  -- commit indicator
+  if editor:is_valid() and editor:is_unsaved_changes() then
+    self:draw_commit_indicator()
+  end
 
-  
   -- data entry
   local fields = editor:get_fields()
   local i = 1
@@ -132,70 +135,66 @@ function graphics:draw_editor()
       self:text_right(left_edge + 20, y, field.display, 15)
       -- value text
       self:draw_field(left_edge + 24, y, field.input_field, 15)
-      -- blinking curor
-      if field.input_field.focus then
-        -- self:mlrs(left_edge + 24 + field.input_field:get_extents(), 56, 0, 7, self.cursor_frame)
-      end
       i = i + 1
     end
   end
-  -- message
-  local message = "0-127"
-  self:text(left_edge + 24, 18, message, 1)
 end
 
-function graphics:draw_editor_console()
-
+function graphics:draw_commit_indicator()
+  local x = 90
+  local y = 19
+  self:text(x, y, "COMM|T", self.cursor_frame)
+  self:return_arrow(x + 13, y - 8, self.cursor_frame)
+  -- self:mlrs(x + 30, y - 2, 8, 0, self.cursor_frame )
+  -- self:mlrs(x + 38, y - 5, 0, 3, self.cursor_frame )
+  -- self:mlrs(x + 32, y - 4, 0, 3, self.cursor_frame )
 end
 
-function graphics:draw_editor_form()
-
-end
-
-function graphics:draw_validator_cube(valid)
+function graphics:draw_validator_cube(valid, unsaved_changes)
   local x = 74
   local y = 10
+  local l = 1
   if valid then
     -- horizontals
-    self:mlrs(x + 4, y + 1, 7, 0)
-    self:mlrs(x, y + 5, 8, 0)
-    self:mlrs(x + 4, y + 8, 8, 0)
-    self:mlrs(x + 1, y + 12, 7, 0)
-    -- verticals
-    self:mlrs(x + 1, y + 5, 0, 6)
-    self:mlrs(x + 5, y, 0, 3)
-    self:mlrs(x + 5, y + 6, 0, 2)
-    self:mlrs(x + 8, y + 4, 0, 2)
-    self:mlrs(x + 8, y + 9, 0, 2)
-    self:mlrs(x + 12, y + 2, 0, 6)
+    self:mlrs(x + 4, y + 1, 7, 0, l)
+    self:mlrs(x, y + 5, 8, 0, l)
+    self:mlrs(x + 4, y + 8, 8, 0, l)
+    self:mlrs(x + 1, y + 12, 7, 0, l)
+    -- verticals, 1)
+    self:mlrs(x + 1, y + 5, 0, 6, l)
+    self:mlrs(x + 5, y, 0, 3, l)
+    self:mlrs(x + 5, y + 6, 0, 2, l)
+    self:mlrs(x + 8, y + 4, 0, 2, l)
+    self:mlrs(x + 8, y + 9, 0, 2, l)
+    self:mlrs(x + 12, y + 2, 0, 6, l)
     -- angles (from top to bottom)
-    self:mlrs(x + 3, y + 2, 1, 0)
-    self:mlrs(x + 10, y + 2, 1, 0)
-    self:mlrs(x + 2, y + 3, 1, 0)
-    self:mlrs(x + 9, y + 3, 1, 0)
-    self:mlrs(x + 1, y + 4, 1, 0)
-    self:mlrs(x + 8, y + 4, 1, 0)
-    self:mlrs(x + 3, y + 9, 1, 0)
-    self:mlrs(x + 10, y + 9, 1, 0)
-    self:mlrs(x + 2, y + 10, 1, 0)
-    self:mlrs(x + 9, y + 10, 1, 0)
-    self:mlrs(x + 1, y + 11, 1, 0)
-    self:mlrs(x + 8, y + 11, 1, 0)
+    self:mlrs(x + 3, y + 2, 1, 0, l)
+    self:mlrs(x + 10, y + 2, 1, 0, l)
+    self:mlrs(x + 2, y + 3, 1, 0, l)
+    self:mlrs(x + 9, y + 3, 1, 0, l)
+    self:mlrs(x + 1, y + 4, 1, 0, l)
+    self:mlrs(x + 8, y + 4, 1, 0, l)
+    self:mlrs(x + 3, y + 9, 1, 0, l)
+    self:mlrs(x + 10, y + 9, 1, 0, l)
+    self:mlrs(x + 2, y + 10, 1, 0, l)
+    self:mlrs(x + 9, y + 10, 1, 0, l)
+    self:mlrs(x + 1, y + 11, 1, 0, l)
+    self:mlrs(x + 8, y + 11, 1, 0, l)
   else
-    self:mlrs(x + 1, y + 1, 10, 10)
-    self:mlrs(x + 11, y + 1, -10, 10)
+    self:mlrs(x + 1, y + 1, 10, 10, self.glow)
+    self:mlrs(x + 11, y + 1, -10, 10, self.glow)
   end
 end
 
-function graphics:return_arrow(x, y)
-  self:mlrs(x + 15, y + 6, 10, 0)
-  self:mlrs(x + 25, y + 2, 0, 4)
-  self:mlrs(x + 16, y + 5, 2, 0)
-  self:mlrs(x + 16, y + 7, 2, 0)
-  self:mlrs(x + 17, y + 4, 2, 0)
-  self:mlrs(x + 17, y + 8, 2, 0)
-  self:mlrs(x + 18, y + 3, 2, 0)
-  self:mlrs(x + 18, y + 9, 2, 0)
+function graphics:return_arrow(x, y, l)
+  self:mlrs(x + 15, y + 6, 10, 0, l)
+  self:mlrs(x + 25, y + 2, 0, 4, l)
+  self:mlrs(x + 16, y + 5, 2, 0, l)
+  self:mlrs(x + 16, y + 7, 2, 0, l)
+  self:mlrs(x + 17, y + 4, 2, 0, l)
+  self:mlrs(x + 17, y + 8, 2, 0, l)
+  self:mlrs(x + 18, y + 3, 2, 0, l)
+  self:mlrs(x + 18, y + 9, 2, 0, l)
 end
 
 

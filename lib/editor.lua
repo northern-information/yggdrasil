@@ -5,7 +5,6 @@ function editor.init()
   editor.track = nil
   editor.slot = nil
   editor.fields = {}
-  editor.valid = true
   editor.tab_index = 0
 end
 
@@ -36,6 +35,10 @@ function editor:cycle_fields(i)
   self:select_field(fn.cycle(self:get_tab_index() + i, 1, #self:get_fields()))
 end
 
+function editor:increment_fields(i)
+  self:select_field(util.clamp(self:get_tab_index() + i, 1, #self:get_fields()))
+end
+
 function editor:add_field(field)
   field["input_field"] = Field:new()
   field.input_field:load_string(field:value_getter())
@@ -59,10 +62,35 @@ end
 
 -- getters & setters
 
+
+
 function editor:get_title()
   if self:get_slot() == nil or self:get_track() == nil then return "EMPTINESS..." end
   local ipn = self:get_slot():get_ipn_note()
   return "X" .. self:get_track():get_x() .. "Y" .. self:get_slot():get_y() .. (ipn ~= nil and ipn or "")
+end
+
+
+function editor:is_valid()
+  for k, field in pairs(self:get_fields()) do
+    if not field.validator(tostring(field.input_field)) then
+      return false
+    end
+  end
+  return true
+end
+
+function editor:is_unsaved_changes()
+  for k, field in pairs(self:get_fields()) do
+    if tostring(field.value_getter()) ~= tostring(field.input_field) then
+      return true
+    end
+  end
+  return false
+end
+
+function editor:get_focused_field()
+  return self.fields[self.tab_index]
 end
 
 function editor:set_track(track)
@@ -107,14 +135,6 @@ end
 
 function editor:get_fields()
   return self.fields
-end
-
-function editor:is_valid()
-  return self.valid
-end
-
-function editor:set_valid(bool)
-  self.valid = bool
 end
 
 return editor

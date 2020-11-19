@@ -10,11 +10,10 @@ function dev:scene(i)
   if i == 1 then
     tracker:load_track(1, "love-lead.txt")
     tracker:load_track(2, "love-saw.txt")
-    -- cmd("v;ipn")
-    -- cmd("1 crow;jf;on")
+    fn.dismiss_messages()
     page:select(1)
   elseif i == 2 then
-    for i=1,5 do
+    for i = 1, 5 do
       t(i):set_clade("YPC")
       t(i):unshadow()
       t(i):unsolo()
@@ -62,6 +61,11 @@ end
 function slot(x, y)
   return tracker:get_track(x):get_slot(y)
 end
+
+function s(x, y)
+  return tracker:get_track(x):get_slot(y)
+end
+
 
 function track(x)
   return tracker:get_track(x)

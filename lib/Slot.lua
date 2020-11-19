@@ -44,7 +44,7 @@ function Slot:get_editor_fields()
       tab_index = 2,
       value_getter = function() return self:get_midi_note() end,
       value_setter = function(x) return self:set_midi_note(tonumber(x)) end,
-      validator = function(x) return music:is_valid_midi(tonumber(x)) end,
+      validator = function(x) return (fn.is_int(tonumber(x))) and (music:is_valid_midi(tonumber(x))) end,
     },
     {
       field_id = "velocity",
@@ -52,7 +52,7 @@ function Slot:get_editor_fields()
       tab_index = 3,
       value_getter = function() return self:get_velocity() end,
       value_setter = function(x) return self:set_velocity(tonumber(x)) end,
-      validator = function(x) return (tonumber(x) >= 0) and (tonumber(x) <= 127) end,
+      validator = function(x) return (fn.is_int(tonumber(x))) and (tonumber(x) >= 0) and (tonumber(x) <= 127) end,
     }
   }
 end

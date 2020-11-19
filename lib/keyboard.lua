@@ -1,19 +1,23 @@
 keyboard = hid.connect()
 
 function keyboard.event(type, code, val)
+
   screen.ping()
   graphics:ping_cursor_frame()
-
   if keys:is_shift(code) then keys:handle_shift(val) end
   if keys:is_ctrl(code) then keys:handle_ctrl(val) end
-
   if not fn.break_splash() then fn.dismiss_messages() end
-
   if val == 0 then return end -- ignore other keyups
+  if config.settings.dev_mode then
+    print(code)
+    print("")
+  end
 
 
-  print(code)
-  print("")
+
+  -- eternal return
+
+
 
   if keys:is_return(code) then
     if terminal:is_empty() then
@@ -32,6 +36,12 @@ function keyboard.event(type, code, val)
     end
   end
 
+
+
+  -- eternal escape
+
+
+
   if keys:is_esc(code) then
         if tracker:has_message() then tracker:clear_message()
     elseif tracker:is_info()     then tracker:set_info(false)
@@ -40,9 +50,15 @@ function keyboard.event(type, code, val)
     end
   end
 
+
+
+  -- editor
+
+
+
   if editor:is_open() then
 
-    if keys:is_arrow(code) then
+    if keys:is_arrow(code) and keys:is_ctrled() then
           if keys:get_keycode_value(code) == "RIGHT" then view:pan_x(1)
       elseif keys:get_keycode_value(code) == "LEFT"  then view:pan_x(-1)
       elseif keys:get_keycode_value(code) == "UP"    then view:pan_y(-1)
@@ -51,18 +67,33 @@ function keyboard.event(type, code, val)
       tracker:select_slot(view:get_x(), view:get_y())
       editor:clear()
       editor:activate(view:get_x(), view:get_y())
-    end
+
+    elseif keys:is_arrow(code) then
+          if keys:get_keycode_value(code) == "RIGHT" then editor:get_focused_field().input_field:move_cursor_index(1)
+      elseif keys:get_keycode_value(code) == "LEFT"  then editor:get_focused_field().input_field:move_cursor_index(-1)
+      elseif keys:get_keycode_value(code) == "UP"    then editor:increment_fields(-1)
+      elseif keys:get_keycode_value(code) == "DOWN"  then editor:increment_fields(1)
+      end
     
-    if keys:is_tab(code) then
+    elseif keys:is_tab(code) then
       if keys:is_shifted() then
         editor:cycle_fields(-1)
       else
         editor:cycle_fields(1)
       end
+
+
+    elseif keys:is_letter_code(code) or keys:is_number_code(code) or keys:is_symbol(code) then
+      if keys:is_shifted() and (keys:is_number_code(code) or keys:is_symbol(code)) then
+        editor:get_focused_field().input_field:add(keys:get_shifted_keycode(code))
+      else
+        editor:get_focused_field().input_field:add(keys:get_keycode_value(code))
+      end
+
+    elseif keys:is_backspace_or_delete(code) then
+      editor:get_focused_field().input_field:backspace()
+
     end
-
-
-
 
   else
 
