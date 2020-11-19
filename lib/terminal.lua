@@ -56,13 +56,11 @@ end
 
 function terminal:history_cleanup()
   local history = self:get_history()
+  local field = self:get_field()
+  field:clear()
   if history ~= nil then
-    self:clear()
-    local field = self:get_field()
     field:set(history.history_table, history.history_extents)
-    field:set_cursor_index(#history.history_extents)
-  else
-    self:clear()
+    field:move_cursor_index(#history.history_extents)
   end
 end
 

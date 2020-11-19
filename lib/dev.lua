@@ -38,7 +38,7 @@ function dev:scene(i)
     -- cmd("v;h")
     page:select(1)
     cmd("7 d;16")
-    cmd("7 8 71")
+    cmd("7 8 75")
     tracker:select_slot(7, 8)
     editor:activate(7, 8)
   end

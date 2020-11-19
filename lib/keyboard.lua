@@ -26,9 +26,8 @@ function keyboard.event(type, code, val)
       elseif not editor:is_open() and #tracker:get_selected_slots() == 1 then
         editor:activate(view:get_x(), view:get_y())
         editor:select_field(1)
-      elseif editor:is_open() then
-        editor:commit_and_close()
-        terminal:set_focus(true)
+      elseif editor:is_open() and editor:is_unsaved_changes() and editor:is_valid() then
+        editor:commit()
       end
     elseif not terminal:is_empty() then
       terminal:execute()
@@ -82,16 +81,15 @@ function keyboard.event(type, code, val)
         editor:cycle_fields(1)
       end
 
-
     elseif keys:is_letter_code(code) or keys:is_number_code(code) or keys:is_symbol(code) then
       if keys:is_shifted() and (keys:is_number_code(code) or keys:is_symbol(code)) then
-        editor:get_focused_field().input_field:add(keys:get_shifted_keycode(code))
+        editor:add(keys:get_shifted_keycode(code))
       else
-        editor:get_focused_field().input_field:add(keys:get_keycode_value(code))
+        editor:add(keys:get_keycode_value(code))
       end
 
     elseif keys:is_backspace_or_delete(code) then
-      editor:get_focused_field().input_field:backspace()
+      editor:backspace()
 
     end
 

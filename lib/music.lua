@@ -200,9 +200,9 @@ end
 
 function music:convert(direction, value)
   local db = self:get_database()
-  if direction == "midi_to_ygg"  then for k, v in pairs(db) do if v.m == value then return v.y end end end
-  if direction == "midi_to_ipn"  then for k, v in pairs(db) do if v.m == value then return v.i end end end
-  if direction == "midi_to_freq" then for k, v in pairs(db) do if v.m == value then return v.f end end end
+  if direction == "midi_to_ygg"  then for k, v in pairs(db) do if v.m == tonumber(value) then return v.y end end end
+  if direction == "midi_to_ipn"  then for k, v in pairs(db) do if v.m == tonumber(value) then return v.i end end end
+  if direction == "midi_to_freq" then for k, v in pairs(db) do if v.m == tonumber(value) then return v.f end end end
   if direction == "ygg_to_midi"  then
     for k, v in pairs(db) do 
       for kk, vv in pairs(v.y) do

@@ -424,6 +424,10 @@ function tracker:cycle_select(d)
     local direction = d > 0 and 1 or -1
     next_select = fn.cycle(sorted_index + direction, 1, #slots)
     self:select_slot(slots[next_select].x, slots[next_select].y)
+    if editor:is_open() then
+      editor:clear()
+      editor:activate(slots[next_select].x, slots[next_select].y)
+    end
   end
 end
 

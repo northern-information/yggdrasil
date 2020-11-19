@@ -7,6 +7,8 @@ function graphics.init()
   graphics.quarter_frame = 0
   graphics.cursor_frame = 0
   graphics.run_command_frame = 0
+  graphics.commit_frame = 0
+  graphics.commit_icon = {}
   graphics.glow = 0
   graphics.glow_up = true
   graphics.transition_frame = 0
@@ -62,6 +64,7 @@ function graphics:render_page(page)
       end
       if editor:is_open() then
         self:draw_editor()
+        self:draw_commit_processing()
       else
         self:draw_terminal()
         self:draw_command_processing()
@@ -90,7 +93,8 @@ end
 
 function graphics:draw_editor()
   local sw = view:get_slot_width()
-  local x = ((view:get_x() - 1) * sw) - (view:get_x_offset() * sw) + sw
+  -- local x = ((view:get_x() - 1) * sw) - (view:get_x_offset() * sw) + sw
+  local x = 64
   local w = 128 - x
   local left_edge = w + 2
   -- background
@@ -113,20 +117,18 @@ function graphics:draw_editor()
   end
 
   -- data entry
-  local fields = editor:get_fields()
-  local i = 1
-  for k, field in pairs(fields) do
-    if field.display ~= nil and field.value_getter() ~= nil then 
+  for i = 1, #editor:get_field_index() do
+    local field = editor:get_field_by_index(i)
+    if field.display ~= nil then 
       local y = 20 + (10 * i)
       local y2 = 20 + (10 * i) - 7
-      local value = tostring(field.input_field)
       -- highlight
       if field.input_field.focus then
         self:rect(left_edge + 22, y2, 44, 9, 1)
         self:rect(125, y2, 3, 9, 15)
       end
       -- validation warning
-      if not field.validator(value) then
+      if not editor:validate(field) then
         self:rect(125, y2, 3, 9, 15)
         self:mlrs(126, y2 + 1, 1, 5, 0)
         self:mlrs(126, y2 + 7, 1, 1, 0)
@@ -145,9 +147,30 @@ function graphics:draw_commit_indicator()
   local y = 19
   self:text(x, y, "COMM|T", self.cursor_frame)
   self:return_arrow(x + 13, y - 8, self.cursor_frame)
-  -- self:mlrs(x + 30, y - 2, 8, 0, self.cursor_frame )
-  -- self:mlrs(x + 38, y - 5, 0, 3, self.cursor_frame )
-  -- self:mlrs(x + 32, y - 4, 0, 3, self.cursor_frame )
+end
+
+function graphics:draw_commit_processing()
+  if self.commit_frame < self.frame then return end  
+  local x = 65
+  local y = 9
+  self:rect(x, y, 63, 13, 0)
+  local l = self.frame < self.commit_frame - 15 and 15 or (self.commit_frame - self.frame)
+  local this = math.random(1, 10)
+  self.commit_icon[this] = util.clamp(self.commit_icon[this] - math.random(1, 2), -7, 0)
+  for i = 1, #self.commit_icon do
+    self:mlrs(x + 10 + i, y + 13, 0, self.commit_icon[i] * 2, l)
+  end
+  for i = 1, #self.commit_icon do
+    local l = math.abs(self.commit_icon[i])
+    self:mlrs(x + 10 + i, y + 13, 0, -math.floor(l / 2) * 2, 0)
+  end
+  self:rect(x - 1, y - 1, 64, 2, 0)
+  self:text(90, 19, "DONE", l)
+end
+
+function graphics:draw_commit()
+  self.commit_icon = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }
+  self.commit_frame = self.frame + 30
 end
 
 function graphics:draw_validator_cube(valid, unsaved_changes)
@@ -581,7 +604,7 @@ function graphics:draw_field(x, y, field)
   local eb = field:get_extents_buffer()
   
   -- draw text
-  if #tb > 0 then
+  if #tb > 0 and tostring(field) ~= "nil" then
     self:text(x, y, tostring(field), 15)
   end
 
