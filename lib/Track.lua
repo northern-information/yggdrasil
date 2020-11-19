@@ -278,6 +278,14 @@ function Track:get_shadow_attribute(attribute)
   end
 end
 
+function Track:get_shadowable_attribute(attribute)
+  local shadow_id = self:get_shadow()
+  if not shadow_id then return self[attribute] end
+
+  local getter = track['get_'..attribute] or track['is_'..attribute]
+  return getter ~= nil and getter() or self[attribute]
+end
+
 function Track:set_shadow(shadow)
   if shadow == false then
     self.shadow = false
@@ -558,7 +566,7 @@ function Track:set_pair(i)
 end
 
 function Track:is_jf()
-  return self:is_shadow() and self:get_shadow_attribute("jf") or self.jf
+  return self:get_shadowable_attribute("jf")
 end
 
 function Track:set_jf(bool)
