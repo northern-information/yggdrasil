@@ -487,7 +487,7 @@ function Track:adjust_level(f)
 end
 
 function Track:get_clade()
-  return self:is_shadow() and self:get_shadow_attribute("clade") or self.clade
+  return self:get_shadowable_attribute("clade")
 end
 
 function Track:set_clade(s)
@@ -534,7 +534,7 @@ function Track:set_view(s)
 end
 
 function Track:get_device()
-  return self:is_shadow() and self:get_shadow_attribute("device") or self.device
+  return self:get_shadowable_attribute("device")
 end
 
 function Track:set_device(i)
@@ -542,7 +542,7 @@ function Track:set_device(i)
 end
 
 function Track:get_channel()
-  return self:is_shadow() and self:get_shadow_attribute("channel") or self.channel
+  return self:get_shadowable_attribute("channel")
 end
 
 function Track:set_channel(i)
@@ -550,7 +550,7 @@ function Track:set_channel(i)
 end
 
 function Track:get_voice()
-  return self:is_shadow() and self:get_shadow_attribute("voice") or self.voice
+  return self:get_shadowable_attribute("voice")
 end
 
 function Track:set_voice(i)
@@ -558,7 +558,7 @@ function Track:set_voice(i)
 end
 
 function Track:get_pair()
-  return self:is_shadow() and self:get_shadow_attribute("pair") or self.pair
+  return self:get_shadowable_attribute("pair")
 end
 
 function Track:set_pair(i)
