@@ -21,6 +21,9 @@ function page:select(i)
   if y.init_done and (i < 1 or i > #page.titles) then return end
   graphics:trigger_transition()
   self.active_page = i
+  if i == 1 then
+    terminal:set_focus(true)
+  end
   view:refresh()
   fn.dirty_screen(true)
 end

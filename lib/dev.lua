@@ -10,11 +10,10 @@ function dev:scene(i)
   if i == 1 then
     tracker:load_track(1, "love-lead.txt")
     tracker:load_track(2, "love-saw.txt")
-    -- cmd("v;ipn")
-    -- cmd("1 crow;jf;on")
+    fn.dismiss_messages()
     page:select(1)
   elseif i == 2 then
-    for i=1,5 do
+    for i = 1, 5 do
       t(i):set_clade("YPC")
       t(i):unshadow()
       t(i):unsolo()
@@ -31,10 +30,17 @@ function dev:scene(i)
     cmd("4 4 72")
     cmd("ypc;bank;factory")
     for x = 1, 3 do
-        cmd(x .. " ypc;load;piano1_uiowa_440hz.wav")
+      cmd(x .. " ypc;load;piano1_uiowa_440hz.wav")
     end
     cmd("4 ypc;load;wineglass_halffull_513hz.wav")
     page:select(1)
+  elseif i == 3 then 
+    -- cmd("v;h")
+    page:select(1)
+    cmd("7 d;16")
+    cmd("7 8 75")
+    tracker:select_slot(7, 8)
+    editor:activate(7, 8)
   end
   config.settings.debug_interpreter = debug_interpreter_cache
   config.settings.debug_music = debug_music_cache
@@ -47,14 +53,19 @@ end
 function cmd(s)
   local t = fn.string_split(s, "")
   for k, v in pairs(t) do
-    buffer:add(v)
+    terminal:add(v)
   end
-  buffer:execute()
+  terminal:execute()
 end
 
 function slot(x, y)
   return tracker:get_track(x):get_slot(y)
 end
+
+function s(x, y)
+  return tracker:get_track(x):get_slot(y)
+end
+
 
 function track(x)
   return tracker:get_track(x)

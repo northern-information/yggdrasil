@@ -7,7 +7,7 @@ function Slot:new(x, y)
   })
   s.x = x ~= nil and x or 0
   s.y = y ~= nil and y or 0
-  s.id = "slot-" .. fn.id()
+  s.id = fn.id("slot")
   s.index = 0
   s.empty = true
   s.selected = false
@@ -26,6 +26,38 @@ function Slot:new(x, y)
   s.sample_name = ""
   s:refresh()
   return s
+end
+
+function Slot:get_editor_fields()
+  return {
+    {
+      field_id = "ygg_note",
+      display = "YGG",
+      tab_index = 1,
+      value_getter = function() return self:get_ygg_note() end,
+      value_setter = function(x) self:set_ygg_note(x) end,
+      value_clear = function() self:clear_notes() end,
+      validator = function(x) return music:is_valid_ygg(x) end,
+    },
+    {
+      field_id = "midi_note",
+      display = "M|D|",
+      tab_index = 2,
+      value_getter = function() return self:get_midi_note() end,
+      value_setter = function(x) self:set_midi_note(tonumber(x)) end,
+      value_clear = function() self:clear_notes() end,
+      validator = function(x) return (fn.is_int(tonumber(x))) and (music:is_valid_midi(tonumber(x))) end,
+    },
+    {
+      field_id = "velocity",
+      display = "VEL",
+      tab_index = 3,
+      value_getter = function() return self:get_velocity() end,
+      value_setter = function(x) self:set_velocity(tonumber(x)) end,
+      value_clear = function() self:set_velocity(0) end,
+      validator = function(x) return (fn.is_int(tonumber(x))) and (tonumber(x) >= 0) and (tonumber(x) <= 127) end,
+    }
+  }
 end
 
 function Slot:refresh()

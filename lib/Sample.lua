@@ -91,7 +91,7 @@ function Sample:load(filename, position)
   if hz > 10 and hz < 20000 then
     self.frequency = hz
   end
-  print("loaded " .. self.name .. " at " .. self.frequency .. "hz")
+  -- print("loaded " .. self.name .. " at " .. self.frequency .. "hz")
 
   -- read it into softcut
   softcut.buffer_read_mono(filename, 0, position, -1, 1, 1)

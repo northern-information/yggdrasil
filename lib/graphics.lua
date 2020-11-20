@@ -7,6 +7,8 @@ function graphics.init()
   graphics.quarter_frame = 0
   graphics.cursor_frame = 0
   graphics.run_command_frame = 0
+  graphics.commit_frame = 0
+  graphics.commit_icon = {}
   graphics.glow = 0
   graphics.glow_up = true
   graphics.transition_frame = 0
@@ -60,9 +62,14 @@ function graphics:render_page(page)
       if view:is_hud() then
         self:draw_hud_foreground()
       end
-      self:draw_terminal()
-      self:draw_command_processing()
-      self:draw_y_mode()
+      if editor:is_open() then
+        self:draw_editor()
+        self:draw_commit_processing()
+      else
+        self:draw_terminal()
+        self:draw_command_processing()
+        self:draw_y_mode()
+      end
     elseif page == "mixer" then
       self:draw_mixer()
       self:draw_terminal()
@@ -77,6 +84,140 @@ function graphics:render_page(page)
   end
   fn.dirty_screen(true)
   self:teardown()
+end
+
+
+
+-- editor
+
+
+function graphics:draw_editor()
+  local sw = view:get_slot_width()
+  -- local x = ((view:get_x() - 1) * sw) - (view:get_x_offset() * sw) + sw
+  local x = 64
+  local w = 128 - x
+  local left_edge = w + 2
+  -- background
+  self:rect(x - 1, 0, w + 1, 64, 0)
+  self:mls(x, 7, x, 64, 15)
+  -- self:mls(x, 6, x + 6, 0, 15)
+  -- title
+  self:rect(x - 1, 0, w + 1, 8, 17)
+  if screen.text_extents(editor:get_title()) < 41 then
+    self:draw_mixer_glyph(106, 0, editor:get_track():get_clade(), true)
+  end
+  self:text(left_edge, 6, editor:get_title(), 0)
+
+  -- validator
+  self:draw_validator_cube(editor:is_valid(), editor:is_unsaved_changes())
+  
+  -- commit indicator
+  if editor:is_valid() and editor:is_unsaved_changes() then
+    self:draw_commit_indicator()
+  end
+
+  -- data entry
+  for i = 1, #editor:get_field_index() do
+    local field = editor:get_field_by_index(i)
+    if field.display ~= nil then 
+      local y = 20 + (10 * i)
+      local y2 = 20 + (10 * i) - 7
+      -- highlight
+      if field.input_field.focus then
+        self:rect(left_edge + 22, y2, 44, 9, 1)
+        self:rect(125, y2, 3, 9, 15)
+      end
+      -- validation warning
+      if not editor:validate(field) then
+        self:rect(125, y2, 3, 9, 15)
+        self:mlrs(126, y2 + 1, 1, 5, 0)
+        self:mlrs(126, y2 + 7, 1, 1, 0)
+      end
+      -- label text
+      self:text_right(left_edge + 20, y, field.display, 15)
+      -- value text
+      self:draw_field(left_edge + 24, y, field.input_field, 15)
+      i = i + 1
+    end
+  end
+end
+
+function graphics:draw_commit_indicator()
+  local x = 90
+  local y = 19
+  self:text(x, y, "COMM|T", self.cursor_frame)
+  self:return_arrow(x + 13, y - 8, self.cursor_frame)
+end
+
+function graphics:draw_commit_processing()
+  if self.commit_frame < self.frame then return end  
+  local x = 65
+  local y = 9
+  self:rect(x, y, 63, 13, 0)
+  local l = self.frame < self.commit_frame - 15 and 15 or (self.commit_frame - self.frame)
+  local this = math.random(1, 10)
+  self.commit_icon[this] = util.clamp(self.commit_icon[this] - math.random(1, 2), -7, 0)
+  for i = 1, #self.commit_icon do
+    self:mlrs(x + 10 + i, y + 13, 0, self.commit_icon[i] * 2, l)
+  end
+  for i = 1, #self.commit_icon do
+    local l = math.abs(self.commit_icon[i])
+    self:mlrs(x + 10 + i, y + 13, 0, -math.floor(l / 2) * 2, 0)
+  end
+  self:rect(x - 1, y - 1, 64, 2, 0)
+  self:text(90, 19, "DONE", l)
+end
+
+function graphics:draw_commit()
+  self.commit_icon = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }
+  self.commit_frame = self.frame + 30
+end
+
+function graphics:draw_validator_cube(valid, unsaved_changes)
+  local x = 74
+  local y = 10
+  local l = 1
+  if valid then
+    -- horizontals
+    self:mlrs(x + 4, y + 1, 7, 0, l)
+    self:mlrs(x, y + 5, 8, 0, l)
+    self:mlrs(x + 4, y + 8, 8, 0, l)
+    self:mlrs(x + 1, y + 12, 7, 0, l)
+    -- verticals, 1)
+    self:mlrs(x + 1, y + 5, 0, 6, l)
+    self:mlrs(x + 5, y, 0, 3, l)
+    self:mlrs(x + 5, y + 6, 0, 2, l)
+    self:mlrs(x + 8, y + 4, 0, 2, l)
+    self:mlrs(x + 8, y + 9, 0, 2, l)
+    self:mlrs(x + 12, y + 2, 0, 6, l)
+    -- angles (from top to bottom)
+    self:mlrs(x + 3, y + 2, 1, 0, l)
+    self:mlrs(x + 10, y + 2, 1, 0, l)
+    self:mlrs(x + 2, y + 3, 1, 0, l)
+    self:mlrs(x + 9, y + 3, 1, 0, l)
+    self:mlrs(x + 1, y + 4, 1, 0, l)
+    self:mlrs(x + 8, y + 4, 1, 0, l)
+    self:mlrs(x + 3, y + 9, 1, 0, l)
+    self:mlrs(x + 10, y + 9, 1, 0, l)
+    self:mlrs(x + 2, y + 10, 1, 0, l)
+    self:mlrs(x + 9, y + 10, 1, 0, l)
+    self:mlrs(x + 1, y + 11, 1, 0, l)
+    self:mlrs(x + 8, y + 11, 1, 0, l)
+  else
+    self:mlrs(x + 1, y + 1, 10, 10, self.glow)
+    self:mlrs(x + 11, y + 1, -10, 10, self.glow)
+  end
+end
+
+function graphics:return_arrow(x, y, l)
+  self:mlrs(x + 15, y + 6, 10, 0, l)
+  self:mlrs(x + 25, y + 2, 0, 4, l)
+  self:mlrs(x + 16, y + 5, 2, 0, l)
+  self:mlrs(x + 16, y + 7, 2, 0, l)
+  self:mlrs(x + 17, y + 4, 2, 0, l)
+  self:mlrs(x + 17, y + 8, 2, 0, l)
+  self:mlrs(x + 18, y + 3, 2, 0, l)
+  self:mlrs(x + 18, y + 9, 2, 0, l)
 end
 
 
@@ -102,6 +243,7 @@ end
 
 function graphics:draw_hud_foreground()
   local swm, sw, sh =  view:get_slot_width_min(), view:get_slot_width(), view:get_slot_height()
+  local top_row_adjustment = 1
   self:rect(0, 0, swm, 64, 0)
   self:rect(0, 0, 128, sh, 0)
   -- vertical indicator to scroll up
@@ -112,14 +254,24 @@ function graphics:draw_hud_foreground()
   end
   -- horizontal rule under the top numbers
   if view:get_rows_above() then
-    self:mls(swm - 1, sh, 128, sh, 15)
+    self:mls(swm - 1, sh + top_row_adjustment, 128, sh, 15)
   end
   -- vertical indicator to scroll down
   if view:get_rows_below() then
-    local adjust_y = tracker:has_message() and -9 or 0
+    local adjust_y = 0
+    -- these are designed to be mutually exclusive as of 2020-11-15
+    if tracker:has_message() then
+      adjust_y = -9
+    elseif editor:is_open() then
+      adjust_y = 8
+    end
     for i = 1, 16 do 
       self:mls(swm, 56 - i + adjust_y, swm, 55 - i + adjust_y, 16 - i)
     end
+  end
+  -- bottom rule to match top rule
+  if editor:is_open() then
+    self:mls(swm - 1, 64, 64, 64, 15)
   end
   -- col numbers, start at 2 because of the column HUD
   local start = 2
@@ -130,7 +282,7 @@ function graphics:draw_hud_foreground()
     local value = i + view:get_x_offset()
     self:text_right(
       (i * sw - 2),
-      (sh - 2),
+      (sh - 2 + top_row_adjustment),
       ((value < 1 or value > tracker:get_cols()) and "" or value),
       15
     )
@@ -179,6 +331,9 @@ function graphics:draw_slots(track)
             background = 1
             foreground = 15
         end
+        if editor:is_open() and editor:get_slot():get_y() == slot:get_y() then
+          background = self.cursor_frame
+        end
         if triggered ~= nil then
           local l = slot_triggers[slot:get_id()].level
           foreground = math.abs(15 - l)
@@ -219,7 +374,13 @@ function graphics:draw_cols()
           self:mls(x, ii - 1 + adjust_y, x, ii + adjust_y, 16 - ii)
         end
         if view:get_rows_below() then
-          local adjust_y = tracker:has_message() and -9 or 0
+          local adjust_y = 0
+          -- these are designed to be mutually exclusive as of 2020-11-15
+          if tracker:has_message() then
+            adjust_y = -9
+          elseif editor:is_open() then
+            adjust_y = 8
+          end
           self:mls(x, 56 - ii + adjust_y, x, 55 - ii + adjust_y, 16 - ii)
         end
       end
@@ -421,57 +582,43 @@ end
 
 
 function graphics:draw_terminal()
-  local message = tracker:has_message()
-  local message_value = tracker:get_message_value()
-  local info = tracker:is_info()
   local height = 9
-  if message then
+  if tracker:has_message() then
     height = 18
-  elseif info then
+  elseif tracker:is_info() then
     height = 40
   end
   self:mls(0, 64 - height, 128, 64 - height - 1, 15)
   self:rect(0, 64 - height, 128, height, 0)
-  if message then
-    self:text(5, 54, message_value, 1)
-  elseif info then
+  if tracker:has_message() then
+    self:text(5, 54, tracker:get_message_value(), 1)
+  elseif tracker:is_info() then
     self:draw_yggdrasil_gui_logo()
     self:text(64, 40, fn.get_semver_string(), 1)
   end
-  local total = 0
-  local y = 64 - height - 4
-  local tb = buffer:get_tb()
-  local eb = buffer:get_eb()
-  if #tb > 0 then
-    for k, character in pairs(tb) do
-      if k == 1 then
-        self:text(0, 62, character, 15)
-      else
-        self:text(total, 62, character, 15)
-      end
-      total = eb[k] + total + 1
-      if k == buffer:get_cursor_index() then
-        if buffer:get_cursor_index() < #eb then
-          self:draw_cursor(total)
-        else
-          self:draw_cursor(total + 1)
-        end
-      end
+  self:draw_field(0, 62, terminal:get_field())
+end
+
+function graphics:draw_field(x, y, field)
+  local tb = field:get_text_buffer()
+  local eb = field:get_extents_buffer()
+  
+  -- draw text
+  if #tb > 0 and tostring(field) ~= "nil" then
+    self:text(x, y, tostring(field), 15)
+  end
+
+  -- draw cursor
+  if field:is_focus() and not keys:is_y_mode() then
+    local cursor_x = (field:get_cursor_index() < #eb) and 0 or 1
+    local i = 1
+    while (i <= field:get_cursor_index()) do
+      cursor_x = cursor_x + eb[i] + 1
+      i = i + 1
     end
-  else
-    self:draw_cursor(1)
-  end
-  if buffer:get_cursor_index() == 0 and #tb > 0 then
-    self:draw_cursor(1)
+    self:mlrs(x + cursor_x, y - 6, 0, 7, self.cursor_frame)
   end
 end
-
-function graphics:draw_cursor(x)
-  if not keys:is_y_mode() then
-    self:mlrs(x, 56, 0, 7, self.cursor_frame)
-  end
-end
-
 
 function graphics:draw_command_processing()
   if self.run_command_frame < self.frame then return end  
