@@ -269,14 +269,17 @@ end
 
 function Track:get_shadowable_attribute(attribute)
   local shadow_id = self:get_shadow()
-  if not shadow_id then return self[attribute] end
-  local track = tracker:get_track_by_id(self:get_shadow())  
-      if attribute == "clade"   then return track:get_clade() 
-  elseif attribute == "voice"   then return track:get_voice() 
-  elseif attribute == "channel" then return track:get_channel() 
-  elseif attribute == "device"  then return track:get_device()  
-  elseif attribute == "pair"    then return track:get_pair()  
-  elseif attribute == "jf"      then return track:is_jf()
+  if not shadow_id then
+    return self[attribute]
+  else
+    local track = tracker:get_track_by_id(shadow_id)  
+        if attribute == "clade"   then return track:get_clade() 
+    elseif attribute == "voice"   then return track:get_voice() 
+    elseif attribute == "channel" then return track:get_channel() 
+    elseif attribute == "device"  then return track:get_device()  
+    elseif attribute == "pair"    then return track:get_pair()  
+    elseif attribute == "jf"      then return track:is_jf()
+    end
   end
 end
 

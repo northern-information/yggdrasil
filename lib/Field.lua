@@ -25,7 +25,7 @@ function Field:add(s)
   local new_index = self:get_cursor_index() + 1
   table.insert(self.text_buffer, new_index, s)
   -- force spaces to have a width of 1px
-  local extents = (s == " ") and 1 or screen.text_extents(s)
+  local extents = (s == " ") and 3 or screen.text_extents(s)
   table.insert(self.extents_buffer, new_index, extents)
   self:move_cursor_index(1)
 end

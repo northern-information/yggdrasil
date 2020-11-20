@@ -139,7 +139,10 @@ end
 
 function editor:is_unsaved_changes()
   for k, field in pairs(self:get_fields()) do
-    if tostring(field.value_getter()) ~= tostring(field.input_field) then
+    local old_value = field.value_getter()
+    if old_value == nil and not field.input_field:is_empty() then
+      return true
+    elseif old_value ~= nil and tostring(old_value) ~= tostring(field.input_field) then
       return true
     end
   end

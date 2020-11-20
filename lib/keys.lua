@@ -69,6 +69,7 @@ function keys.init()
     -- { k = 41,  v = "`" },
     { k = 13,  v = "=" },
     { k = 12,  v = "-" },
+    { k = 97,  v = "CTRL" },
   }
   keys.shift_codes = {
     -- { k = 10,  v = "(" },
@@ -186,7 +187,7 @@ function keys:is_capsed()
 end
 
 function keys:is_ctrl(code)
-  return 29 == code
+  return (29 == code) or (97 == code)
 end
 
 function keys:handle_ctrl(val)
