@@ -104,12 +104,11 @@ Engine_YggdrasilSynth : CroneEngine {
 				\out, context.out_b,
 				\freq, freq,
 				\amp, amp,
-                \macro1, macro1,
-                \macro2, macro2,
+        \macro1, macro1,
+        \macro2, macro2,
 				\t_trig, 1
 			], target:pg);
             voices.add(voice);
-			("synth" + synthName + "f" + freq + "c1" + macro1 + "c2" + macro1).postln;
 		});
 
 		this.addCommand("panic", "", {

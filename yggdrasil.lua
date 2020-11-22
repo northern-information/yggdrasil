@@ -26,6 +26,7 @@ function init()
   synth.init()
   editor.init()
   tracker.init()
+  clipboard.init()
   tracker:refresh()
   runner:start()
   y.screen_dirty = true
@@ -44,7 +45,7 @@ function enc(e, d)
     tracker:cycle_select(d)
   elseif e == 2 then
     if synth:is_encoder_override() then
-      synth:scroll_c1(d)
+      synth:scroll_m1(d)
     else
       if not view:is_transposed() then
         view:pan_x(d)
@@ -54,7 +55,7 @@ function enc(e, d)
     end
   elseif e == 3 then
     if synth:is_encoder_override() then
-      synth:scroll_c2(d)
+      synth:scroll_m2(d)
     else
       if not view:is_transposed() then
         view:pan_y(d)

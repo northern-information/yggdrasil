@@ -11,6 +11,8 @@ function dev:scene(i)
     tracker:load_track(1, "love-lead.txt")
     tracker:load_track(2, "love-saw.txt")
     fn.dismiss_messages()
+    cmd("1 1")
+    cmd("ymode")
     page:select(1)
   elseif i == 2 then
     for i = 1, 5 do

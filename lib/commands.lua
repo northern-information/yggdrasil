@@ -349,6 +349,7 @@ self:register{
 }
 
 
+
 -- CROW
 -- 1 crow;pair;1
 -- 1 crow;p;2
@@ -1437,8 +1438,8 @@ self:register{
 -- SYNTH
 -- 1 synth;voice;2
 -- 1 synth;v;2
--- 1 synth;c1;99
--- 1 2 synth;c2;8
+-- 1 synth;m1;99
+-- 1 2 synth;m2;8
 -- synth;enc
 self:register{
   invocations = { "synth" },
@@ -1454,14 +1455,14 @@ self:register{
     ) or (
       fn.is_int(branch[1].leaves[1])
       and Validator:new(branch[2], invocations):ok()
-      and fn.table_contains( {"c1", "c2" }, branch[2].leaves[3])
+      and fn.table_contains( {"m1", "m2" }, branch[2].leaves[3])
       and fn.is_number(branch[2].leaves[5])
     )
     elseif #branch == 3 then
       return fn.is_int(branch[1].leaves[1])
       and fn.is_int(branch[2].leaves[1])
       and Validator:new(branch[3], invocations):ok()
-      and fn.table_contains( {"c1", "c2" }, branch[3].leaves[3])
+      and fn.table_contains( {"m1", "m2" }, branch[3].leaves[3])
       and fn.is_number(branch[3].leaves[5])
     end
   end,
@@ -1483,7 +1484,7 @@ self:register{
       elseif v == "toast" then
         out["voice"] = 3
       end
-    elseif #branch == 2 and fn.table_contains( {"c1", "c2" }, branch[2].leaves[3]) then
+    elseif #branch == 2 and fn.table_contains( {"m1", "m2" }, branch[2].leaves[3]) then
       out[branch[2].leaves[3]] = branch[2].leaves[5]
     elseif #branch == 3 then
       out["y"] = branch[2].leaves[1]

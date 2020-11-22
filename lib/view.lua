@@ -75,19 +75,20 @@ function view:refresh()
   end
 end
 
-function view:handle_pan(direction)
+function view:handle_pan(direction, amount)
+  local a = amount or 1
   tracker:set_follow(false)
   if not self:is_transposed() then
-        if direction == "k" then self:pan_y(-1)
-    elseif direction == "h" then self:pan_x(-1)
-    elseif direction == "j" then self:pan_y(1)
-    elseif direction == "l" then self:pan_x(1)
+        if  direction == "UP"    or direction == "k" then self:pan_y(-1 * a)
+    elseif  direction == "LEFT"  or direction == "h" then self:pan_x(-1 * a)
+    elseif  direction == "DOWN"  or direction == "j" then self:pan_y(1 * a)
+    elseif  direction == "RIGHT" or direction == "l" then self:pan_x(1 * a)
     end
   else
-        if direction == "k" then self:pan_x(-1)
-    elseif direction == "h" then self:pan_y(-1)
-    elseif direction == "j" then self:pan_x(1)
-    elseif direction == "l" then self:pan_y(1)
+        if  direction == "UP"    or direction == "k" then self:pan_x(-1 * a)
+    elseif  direction == "LEFT"  or direction == "h" then self:pan_y(-1 * a)
+    elseif  direction == "DOWN"  or direction == "j" then self:pan_x(1 * a)
+    elseif  direction == "RIGHT" or direction == "l" then self:pan_y(1 * a)
     end
   end
 end

@@ -262,7 +262,8 @@ function graphics:draw_hud_foreground()
     -- these are designed to be mutually exclusive as of 2020-11-15
     if tracker:has_message() then
       adjust_y = -9
-    elseif editor:is_open() then
+    end
+    if editor:is_open() then
       adjust_y = 8
     end
     for i = 1, 16 do 
@@ -609,7 +610,7 @@ function graphics:draw_field(x, y, field)
   end
 
   -- draw cursor
-  if field:is_focus() and not keys:is_y_mode() then
+  if field:is_focus() and (not keys:is_y_mode() or editor:is_open()) then
     local cursor_x = (field:get_cursor_index() < #eb) and 0 or 1
     local i = 1
     while (i <= field:get_cursor_index()) do
@@ -1011,6 +1012,7 @@ function graphics:yggdrasil_random_on()
   local on = math.random(1, #self.yggdrasil_splash_segments)
   if self.yggdrasil_splash_segments[on].l == 0 then
     self.yggdrasil_splash_segments[on].l = 15
+    _midi:play(music:get_random_note(.2, .3), 127, 1, 1, 1)
   end
 end
 

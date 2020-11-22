@@ -2,17 +2,16 @@
 crow = require("crow")
 musicutil = require("musicutil")
 tabutil = require("tabutil")
--- engine.name = "MikaPerc"
+
+-- supercollider
 engine.name = "YggdrasilSynth"
 
-local lib = "yggdrasil/lib/"
-
--- stores application configuration
+-- application configuration and dev override
 config = include("lib/config")
-config_ = io.open(_path["code"] .. lib .. "config_.lua", "r")
+config_ = io.open(_path["code"] .. "yggdrasil/lib/config_.lua", "r")
 if config_ ~= nil then
   io.close(config_)
-  include(lib .. "config_")
+  include("yggdrasil/lib/config_")
 end
 
 -- classes
@@ -26,7 +25,6 @@ include("lib/Sample")       -- individual audio sample
 include("lib/Validator")    -- works with the interpreter to validate command invocations
 
 -- note these cannot be alphabetical due to dependencies
-
 dev         = include("lib/dev")          -- dev only stuff
 fn          = include("lib/functions")    -- global untilities
 parameters  = include("lib/parameters")   -- exposed norns parameters
@@ -46,3 +44,4 @@ editor      = include("lib/editor")       -- window to edit details
 music       = include("lib/music")        -- essentially musicutil abstractions
 synth       = include("lib/synth")        -- supercollider
 graphics    = include("lib/graphics")     -- everything you see on the screen
+clipboard   = include("lib/clipboard")    -- cut, copy, paste

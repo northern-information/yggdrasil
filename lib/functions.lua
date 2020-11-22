@@ -59,9 +59,11 @@ function fn.string_split(input_string, split_character)
   return t
 end
 
+local screenshot_counter = 1
 function fn.screenshot()
   local which_screen = string.match(string.match(string.match(norns.state.script,"/home/we/dust/code/(.*)"),"/(.*)"),"(.+).lua")
-  _norns.screen_export_png("/home/we/dust/" .. which_screen .. "-" .. os.time() .. ".png")
+  _norns.screen_export_png("/home/we/dust/" .. screenshot_counter .. "-" .. which_screen .. "-" .. os.time() .. ".png")
+  screenshot_counter = screenshot_counter + 1
 end
 
 function fn.rerun()
@@ -72,22 +74,6 @@ function fn.print_matron_message(message)
   print("") print("") print("")      
   print(message)
   print("") print("") print("")
-end
-
-function fn.decrement_increment(i)
-  local slots = tracker:get_selected_slots()
-  if #slots > 0 then
-    for k, slot in pairs(slots) do
-      if slot:get_midi_note() ~= nil then
-        tracker:update_slot({
-          class = "TRANSPOSE_SLOT",
-          x = slot:get_x(),
-          y = slot:get_y(),
-          value = i
-        })
-      end
-    end    
-  end
 end
 
 function fn.new()

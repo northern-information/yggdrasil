@@ -5,18 +5,22 @@ function keys.init()
   keys.alt   = false
   keys.ctrl  = false
   keys.opt   = false
+  keys.mod   = false
   keys.shift = false
   keys.caps  = false
   keys.codes = {
+    -- { k = 41,  v = "`" },
     { k = 1,   v = "ESC" },
     { k = 10,  v = "9" },
     { k = 103, v = "UP" },
     { k = 105, v = "LEFT" },
     { k = 106, v = "RIGHT" },
     { k = 108, v = "DOWN" },
-    { k = 111, v = "DELETE" },
-    { k = 125, v = "OPT" },
     { k = 11,  v = "0" },
+    { k = 111, v = "DELETE" },
+    { k = 12,  v = "-" },
+    { k = 125, v = "OPT" },
+    { k = 13,  v = "=" },
     { k = 14,  v = "BACKSPACE" },
     { k = 15,  v = "TAB" },
     { k = 16,  v = "q" },
@@ -66,26 +70,23 @@ function keys.init()
     { k = 7,   v = "6" },
     { k = 8,   v = "7" },
     { k = 9,   v = "8" },
-    -- { k = 41,  v = "`" },
-    { k = 13,  v = "=" },
-    { k = 12,  v = "-" },
     { k = 97,  v = "CTRL" },
   }
   keys.shift_codes = {
     -- { k = 10,  v = "(" },
     -- { k = 11,  v = ")" },
-    { k = 12,  v = "_" },
-    { k = 13,  v = "+" },
-    { k = 2,   v = "!" },
     -- { k = 3,   v = "@" },
-    { k = 4,   v = "#" },
     -- { k = 41,  v = "~" },
     -- { k = 5,   v = "$" },
     -- { k = 6,   v = "%" },
     -- { k = 7,   v = "^" },
     -- { k = 8,   v = "&" },
     -- { k = 9,   v = "*" },
+    { k = 12,  v = "_" },
+    { k = 13,  v = "+" },
+    { k = 2,   v = "!" },
     { k = 39,  v = ":" },
+    { k = 4,   v = "#" },
     { k = 51,  v = "<" },
     { k = 52,  v = ">" },
     { k = 53,  v = "?" },
@@ -111,7 +112,6 @@ function keys:get_shifted_keycode(code)
     end
   end
 end
-
 
 function keys:is_letter_code(code)
   -- a thru z
@@ -232,6 +232,10 @@ end
 
 function keys:is_alted()
   return self.alt
+end
+
+function keys:is_mod()
+  return self:is_ctrled() or self:is_opted() or self:is_alted()
 end
 
 function keys:is_shift(code)

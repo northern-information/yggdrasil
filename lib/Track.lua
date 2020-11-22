@@ -14,6 +14,7 @@ end
 function Track:new(x)
   local t = setmetatable({}, { 
     __index = Track,
+    __newindex = function(t, k, v) t:new_index(t, k, v) end,
     __tostring = function(t) return t:to_string() end
   })
   t.x = x ~= nil and x or 0
@@ -46,7 +47,22 @@ function Track:new(x)
   return t
 end
 
+function Track:new_index(t, k, v)
+  if t.save_keys == nil then
+    rawset(t, "save_keys", {})
+  end
+  local block_list = {
+    "x", "slots", "id", "track_clock"
+  }
+  if not fn.table_contains(block_list, k) then
+    table.insert(t.save_keys, k)
+  end
+  rawset(t, k, v)
+end
 
+function Track:get_save_keys()
+  return self.save_keys
+end
 
 function Track:refresh()
   local e = 0
@@ -88,6 +104,8 @@ function Track:clear()
   self:enable()
   self:set_level(1.0)
 end
+
+
 
 --- tracking
 
@@ -195,11 +213,11 @@ function Track:update_slot(payload)
     if fn.table_contains_key(payload, "velocity") then
       slot:set_velocity(payload.velocity)
     end
-    if fn.table_contains_key(payload, "c1") then
-      slot:set_c1(payload.c1)
+    if fn.table_contains_key(payload, "m1") then
+      slot:set_m1(payload.m1)
     end
-    if fn.table_contains_key(payload, "c2") then
-      slot:set_c2(payload.c2)
+    if fn.table_contains_key(payload, "m2") then
+      slot:set_m2(payload.m2)
     end
     slot:refresh()
     self:refresh()

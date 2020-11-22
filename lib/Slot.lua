@@ -3,6 +3,7 @@ Slot = {}
 function Slot:new(x, y)
   local s = setmetatable({}, { 
     __index = Slot,
+    __newindex = function(s, k, v) s:new_index(s, k, v) end,
     __tostring = function(s) return s:to_string() end
   })
   s.x = x ~= nil and x or 0
@@ -16,8 +17,8 @@ function Slot:new(x, y)
   s.ipn_note = nil
   s.frequency = nil
   s.velocity = 127
-  s.c1 = 50
-  s.c2 = 50
+  s.m1 = 50
+  s.m2 = 50
   s.clade = ""
   s.view = ""
   s.phenomenon = false
@@ -26,6 +27,23 @@ function Slot:new(x, y)
   s.sample_name = ""
   s:refresh()
   return s
+end
+
+function Slot:new_index(s, k, v)
+  if s.save_keys == nil then
+    rawset(s, "save_keys", {})
+  end
+  local block_list = {
+    "x", "index", "id"
+  }
+  if not fn.table_contains(block_list, k) then
+    table.insert(s.save_keys, k)
+  end
+  rawset(s, k, v)
+end
+
+function Slot:get_save_keys()
+  return self.save_keys
 end
 
 function Slot:get_editor_fields()
@@ -87,8 +105,8 @@ function Slot:trigger()
         track:get_voice(),
         self:get_midi_note(),
         mixed_level,
-        self:get_c1() * .01, 
-        self:get_c2() * .01
+        self:get_m1() * .01, 
+        self:get_m2() * .01
       )
     elseif clade == "MIDI" and self:get_midi_note() ~= nil then
       _midi:play(
@@ -166,7 +184,7 @@ function Slot:to_string()
     out = out ~= nil and out .. v or v
   end
   if view:is_macros() then
-    local c = "m" .. self:get_c1() .. "|" .. self:get_c2()
+    local c = "m" .. self:get_m1() .. "|" .. self:get_m2()
     out = out ~= nil and out .. c or c
   end
   if self:get_clade() == "YPC" then
@@ -359,18 +377,18 @@ function Slot:get_extents()
   return self.extents
 end
 
-function Slot:set_c1(i)
-  self.c1 = util.clamp(i, 0, 99)
+function Slot:set_m1(i)
+  self.m1 = util.clamp(i, 0, 99)
 end
 
-function Slot:get_c1()
-  return self.c1
+function Slot:get_m1()
+  return self.m1
 end
 
-function Slot:set_c2(i)
-  self.c2 = util.clamp(i, 0, 99)
+function Slot:set_m2(i)
+  self.m2 = util.clamp(i, 0, 99)
 end
 
-function Slot:get_c2()
-  return self.c2
+function Slot:get_m2()
+  return self.m2
 end

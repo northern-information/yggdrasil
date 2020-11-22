@@ -194,6 +194,16 @@ function music:snap_note(note)
   return musicutil.snap_note_to_array(note, self.scale_notes)
 end
 
+function music:get_random_note(range_min, range_max)
+  if range_min > range_max then
+    range_min = 0
+    range_max = 1
+  end
+  local count = #self.scale_notes
+  local key = util.clamp(math.random(math.floor(count * range_min), math.floor(count * range_max)), 1, count)
+  return music.scale_notes[key]
+end
+
 function music:get_database()
   return self.database
 end

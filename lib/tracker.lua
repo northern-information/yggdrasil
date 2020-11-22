@@ -3,6 +3,7 @@ tracker = {}
 function tracker.init()
   tracker.selected = false
   tracker.selected_index = 0
+  tracker.selected_type = nil
   tracker.follow = false
   tracker.message = false
   tracker.message_value = ""
@@ -12,6 +13,8 @@ function tracker.init()
   tracker.info = false
   tracker.generation = 0
   tracker.any_soloed = false
+  tracker.clipboard_type = nil
+  tracker.clipboard = {}
   --[[ cols will always == #tracks.
     rows * cols ~= always equal #slots, however.
     tracks can have different depths. ]]
@@ -21,6 +24,45 @@ function tracker.init()
   for x = 1, tracker.cols do
     tracker:append_track_after(x - 1)
   end
+end
+
+
+function tracker:paste_slot(x, y, clipboard_slot)
+  local track = self:get_track(x)
+  if y > track:get_depth() then
+    track:fill(y)
+  end
+  local target_slot = track:get_slot(y)
+  target_slot:set_x(x)
+  for k, save_key in pairs(target_slot:get_save_keys()) do
+    target_slot[save_key] = clipboard_slot[save_key]
+  end
+  tracker:deselect()
+  tracker:select_slot(x, y)
+  tracker:refresh()
+end
+
+function tracker:paste_track(x, y, clipboard_track)
+  local target_track = self:get_track(x)
+  local new_depth = clipboard_track:get_depth() + y - 1
+  if self:get_rows() < new_depth then
+    self:set_rows(new_depth)
+  end
+  target_track:fill(new_depth)
+  for k, save_key in pairs(target_track:get_save_keys()) do
+    target_track[save_key] = clipboard_track[save_key]
+  end
+  local slots = clipboard_track:get_slots()
+  local i = 0
+  for k, slot in pairs(slots) do
+    self:paste_slot(x, y + i, slot)
+    i = i + 1
+  end
+  target_track:update_slot_x()
+  target_track:update_slot_y()
+  tracker:deselect()
+  tracker:select_track(x)
+  tracker:refresh()
 end
 
 function tracker.tracker_clock()
@@ -329,6 +371,7 @@ function tracker:select_track(x)
   if not self:is_in_bounds(x) then return end
   self:get_track(x):select()
   self:set_selected(true)
+  self:set_selected_type("track")
   view:set_tracker_dirty(true)
 end
 
@@ -357,6 +400,7 @@ function tracker:select_range_of_tracks(x1, x2)
     self:get_track(x):select()
     self:set_selected(true)
   end
+  self:set_selected_type("tracks")
   view:set_tracker_dirty(true)
 end
    
@@ -373,6 +417,7 @@ function tracker:select_slot(x, y)
         view:set_x(x)
         view:set_y(y)
         slot:set_selected(true)
+        self:set_selected_type("slot")
       end
     end
   end
@@ -444,6 +489,7 @@ end
 
 function tracker:deselect()
   self:set_selected(false)
+  self:set_selected_type(nil)
   self:set_selected_index(0)
   for k, track in pairs(self:get_selected_tracks()) do
     if track ~= nil then
@@ -638,6 +684,14 @@ end
 
 
 -- primitive getters, setters, & checks
+
+function tracker:set_selected_type(s)
+  self.selected_type = s
+end
+
+function tracker:get_selected_type()
+  return self.selected_type
+end
 
 
 function tracker:increment_generation()

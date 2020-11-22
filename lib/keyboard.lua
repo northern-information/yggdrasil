@@ -6,6 +6,8 @@ function keyboard.event(type, code, val)
   graphics:ping_cursor_frame()
   if keys:is_shift(code) then keys:handle_shift(val) end
   if keys:is_ctrl(code) then keys:handle_ctrl(val) end
+  if keys:is_opt(code) then keys:handle_opt(val) end
+  if keys:is_alt(code) then keys:handle_alt(val) end
   if not fn.break_splash() then fn.dismiss_messages() end
   if val == 0 then return end -- ignore other keyups
   if config.settings.dev_mode then
@@ -19,20 +21,25 @@ function keyboard.event(type, code, val)
 
 
 
-  if keys:is_return(code) then
-    if terminal:is_empty() then
-      if not tracker:is_selected() then
+  if keys:is_return(code) and terminal:is_empty() then
+    if not tracker:is_selected() then
+      tracker:select_slot(view:get_x(), view:get_y())
+    elseif #tracker:get_selected_slots() == 1 then
+      local slot = tracker:get_selected_slots()[1]
+      if tracker:is_selected() and (view:get_x() ~= slot:get_x() or view:get_y() ~= slot:get_y()) then
         tracker:select_slot(view:get_x(), view:get_y())
-      elseif not editor:is_open() and #tracker:get_selected_slots() == 1 then
+      elseif not editor:is_open() then
         editor:activate(view:get_x(), view:get_y())
         editor:select_field(1)
       elseif editor:is_open() and editor:is_unsaved_changes() and editor:is_valid() then
         editor:commit()
       end
-    elseif not terminal:is_empty() then
-      terminal:execute()
-      terminal:set_focus(true)
     end
+  end
+
+  if keys:is_return(code) and not terminal:is_empty() then
+    terminal:execute()
+    terminal:set_focus(true)
   end
 
 
@@ -57,21 +64,22 @@ function keyboard.event(type, code, val)
 
   if editor:is_open() then
 
-    if keys:is_arrow(code) and keys:is_ctrled() then
-          if keys:get_keycode_value(code) == "RIGHT" then view:pan_x(1)
-      elseif keys:get_keycode_value(code) == "LEFT"  then view:pan_x(-1)
-      elseif keys:get_keycode_value(code) == "UP"    then view:pan_y(-1)
-      elseif keys:get_keycode_value(code) == "DOWN"  then view:pan_y(1)
+    if keys:is_arrow(code) and keys:is_mod() then
+      local pan = keys:is_shifted() and 10 or 1
+          if keys:equals(code, "RIGHT") then view:pan_x(1 * pan)
+      elseif keys:equals(code, "LEFT")  then view:pan_x(-1 * pan)
+      elseif keys:equals(code, "UP")    then view:pan_y(-1 * pan)
+      elseif keys:equals(code, "DOWN")  then view:pan_y(1 * pan)
       end
       tracker:select_slot(view:get_x(), view:get_y())
       editor:clear()
       editor:activate(view:get_x(), view:get_y())
 
     elseif keys:is_arrow(code) then
-          if keys:get_keycode_value(code) == "RIGHT" then editor:get_focused_field().input_field:move_cursor_index(1)
-      elseif keys:get_keycode_value(code) == "LEFT"  then editor:get_focused_field().input_field:move_cursor_index(-1)
-      elseif keys:get_keycode_value(code) == "UP"    then editor:increment_fields(-1)
-      elseif keys:get_keycode_value(code) == "DOWN"  then editor:increment_fields(1)
+          if keys:equals(code, "RIGHT") then editor:get_focused_field().input_field:move_cursor_index(1)
+      elseif keys:equals(code, "LEFT")  then editor:get_focused_field().input_field:move_cursor_index(-1)
+      elseif keys:equals(code, "UP")    then editor:increment_fields(-1)
+      elseif keys:equals(code, "DOWN")  then editor:increment_fields(1)
       end
     
     elseif keys:is_tab(code) then
@@ -81,7 +89,7 @@ function keyboard.event(type, code, val)
         editor:cycle_fields(1)
       end
 
-    elseif keys:is_letter_code(code) or keys:is_number_code(code) or keys:is_symbol(code) then
+    elseif keys:is_letter_code(code) or keys:is_number_code(code) or keys:is_symbol(code) and not keys:is_mod() then
       if keys:is_shifted() and (keys:is_number_code(code) or keys:is_symbol(code)) then
         editor:add(keys:get_shifted_keycode(code))
       else
@@ -95,27 +103,30 @@ function keyboard.event(type, code, val)
 
   else
 
-    if keys:is_ctrled() then
+    if keys:is_mod() then
       if keys:is_backspace_or_delete(code) and terminal:is_empty() then
-          tracker:clear_selected_slots()
-      elseif keys:get_keycode_value(code) == "RIGHT" then 
-        fn.decrement_increment(keys:is_shifted() and 12 or 1)
-      elseif keys:get_keycode_value(code) == "LEFT" then 
-        fn.decrement_increment(keys:is_shifted() and -12 or -1)
+        tracker:clear_selected_slots()
+      elseif keys:equals(code, "x") then 
+        clipboard:cut_items()
+      elseif keys:equals(code, "c") then 
+        clipboard:copy_items()
+      elseif keys:equals(code, "v") then 
+        clipboard:paste_items()
       end
-    end
-
-
-    if keys:is_y_mode() then
+    elseif keys:is_y_mode() then
       if keys:is_shifted() then
             if keys:is_number_code(code) then tracker:select_range_of_tracks(tonumber(keys:get_keycode_value(code)))
         elseif keys:equals(code, "[") then tracker:adjust_level(-0.1)
         elseif keys:equals(code, "]") then tracker:adjust_level(0.1)
+        elseif keys:equals(code, "h") then view:handle_pan(keys:get_keycode_value(code), 10)
+        elseif keys:equals(code, "j") then view:handle_pan(keys:get_keycode_value(code), 10)
+        elseif keys:equals(code, "k") then view:handle_pan(keys:get_keycode_value(code), 10)
+        elseif keys:equals(code, "l") then view:handle_pan(keys:get_keycode_value(code), 10)
         end
       else
         if keys:is_number_code(code) then 
-            tracker:deselect()
-            tracker:select_track(tonumber(keys:get_keycode_value(code)))
+          tracker:deselect()
+          tracker:select_track(tonumber(keys:get_keycode_value(code)))
         elseif keys:equals(code, "q") then tracker:unmute()
         elseif keys:equals(code, "w") then tracker:unsolo()
         elseif keys:equals(code, "e") then tracker:enable()
@@ -123,8 +134,6 @@ function keyboard.event(type, code, val)
         elseif keys:equals(code, "a") then tracker:mute()
         elseif keys:equals(code, "s") then tracker:solo()
         elseif keys:equals(code, "d") then tracker:disable()
-        elseif keys:equals(code, "f") then fn.decrement_increment(keys:is_shifted() and -12 or -1)
-        elseif keys:equals(code, "g") then fn.decrement_increment(keys:is_shifted() and 12 or 1)
         elseif keys:equals(code, "h") then view:handle_pan(keys:get_keycode_value(code))
         elseif keys:equals(code, "j") then view:handle_pan(keys:get_keycode_value(code))
         elseif keys:equals(code, "k") then view:handle_pan(keys:get_keycode_value(code))
@@ -156,10 +165,15 @@ function keyboard.event(type, code, val)
     end
 
     if keys:is_arrow(code) then
-          if keys:get_keycode_value(code) == "RIGHT" then terminal:move_cursor_index(1)
-      elseif keys:get_keycode_value(code) == "LEFT"  then terminal:move_cursor_index(-1)
-      elseif keys:get_keycode_value(code) == "UP"    then terminal:up_history()
-      elseif keys:get_keycode_value(code) == "DOWN"  then terminal:down_history()
+      if keys:is_mod() then
+        local pan = keys:is_shifted() and 10 or 1
+        view:handle_pan(keys:get_keycode_value(code), pan)
+      else
+            if keys:equals(code, "RIGHT") then terminal:move_cursor_index(1)
+        elseif keys:equals(code, "LEFT")  then terminal:move_cursor_index(-1)
+        elseif keys:equals(code, "UP")    then terminal:up_history()
+        elseif keys:equals(code, "DOWN")  then terminal:down_history()
+        end
       end
     end
 
