@@ -13,7 +13,7 @@ function dev:scene(i)
     fn.dismiss_messages()
     cmd("1 1")
     -- cmd("ymode")
-    terminal:get_field():load_string("1 mute && 2 mute")
+    terminal:get_field():load_string("$1 = 2 mute")
     page:select(1)
   elseif i == 2 then
     for i = 1, 5 do

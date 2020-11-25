@@ -38,6 +38,7 @@ keyboard    = include("lib/keyboard")     -- clickity-clack keyboard stuff
 keys        = include("lib/keys")         -- keycodes, keycodes everywhere
 terminal    = include("lib/terminal")     -- main text input terminal
 commands    = include("lib/commands")     -- registered text-based commands
+variables   = include("lib/variables")    -- user-set variables
 runner      = include("lib/runner")       -- executes valid commands
 tracker     = include("lib/tracker")      -- core of yggdrasil
 editor      = include("lib/editor")       -- window to edit details

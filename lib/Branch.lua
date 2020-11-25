@@ -1,10 +1,12 @@
 Branch = {}
 
 -- branches are the space delimited strings
--- leaves are {;,:} delimited strings, inclusive of the delimiters
+-- leaves are ; : delimited strings, inclusive of the delimiters
 
 function Branch:new(raw_input)
-  local b = setmetatable({}, { __index = Branch })
+  local b = setmetatable({}, {
+    __index = Branch,
+  })
   b.raw_input = raw_input ~= nil and raw_input or ""
   b.leaves = {}
   local value = b.raw_input

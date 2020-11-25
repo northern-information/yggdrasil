@@ -22,9 +22,6 @@ function commands:get_all()
   return self.all
 end
 
-function commands:get_prefixes()
-  return self.prefixes
-end
 
 function commands:register(t)
   local class = self:extract_class(t)
@@ -70,9 +67,48 @@ this is the only place you need to configure / add / modify commands! :)
  - "signature" defines what string from the terminal fits with this command
  - "payload" defines how to format the string for execution
  - "action" combines the payload with the final executable method/function
-note, new "prefixes" are a special matching case and still need to be added in .init()
 ]]
 function commands:register_all()
+
+
+
+-- $
+-- $1 = 2 mute
+self:register{
+  invocations = { "$" },
+  signature = function(branch, invocations)
+    if #branch < 3 then return false end
+    return
+      Validator:new(branch[1], invocations):validate_prefix_invocation()
+      and branch[2].leaves[1] == "=" -- :)
+      and branch[3] ~= nil
+  end,
+  payload = function(branch)
+    local out = {
+      class = "$",
+      index = 0,
+      string = ""
+    }
+    out.index = fn.is_variable(branch[1].leaves[1])
+    -- strings variables can be any length so:
+    branch[1] = nil -- remove the $1
+    branch[2] = nil -- remove the =
+    for kb, b in pairs(branch) do
+      for lb, leaf in pairs(b) do
+        if (type(leaf) == "table") then -- just some defensive nonsense
+          for _, l in pairs(leaf) do
+            out.string = out.string .. l  -- unmake the leaves
+          end
+        end
+      end
+      out.string = out.string .. " " -- unmake the branches
+    end
+    return out
+  end,
+  action = function(payload)
+    variables:add_item(payload.index, payload.string)
+  end
+}
 
 
 
@@ -412,7 +448,7 @@ self:register{
     end
     return out
   end,
-  action = function(payload) tabutil.print(payload)
+  action = function(payload)
     if payload.x ~= nil then
       tracker:get_track(payload.x):set_descend(true)
     else
@@ -456,7 +492,6 @@ self:register{
   action = function(payload)
     if payload.x == "all" then
       for k, track in pairs(tracker:get_tracks()) do
-        print(track:get_x())
         tracker:set_track_depth(track:get_x(), payload.depth)
       end
     else

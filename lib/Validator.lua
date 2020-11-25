@@ -27,8 +27,9 @@ function Validator:is_invocation_match()
       print("is_complex_invocation", is_simple_invocation)
     end
     if is_string_invocation 
-       or is_simple_invocation
-       or is_complex_invocation then
+    or is_simple_invocation
+    or is_complex_invocation
+    or is_variable_invocation then
       result = true
     end
   end

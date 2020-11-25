@@ -83,7 +83,11 @@ function fn.new()
   for x = 1, tracker:get_cols() do tracker:append_track_after(x - 1) end
 end
 
+
+
 --- value checking and manipulation
+
+
 
 function fn.get_largest_extents_from_zero_to(i)
   local extents = 0
@@ -118,6 +122,15 @@ end
 function fn.is_space(test)
   if test == nil then return false end
   return test == " "
+end
+
+function fn.is_variable(s)
+  local check, count = string.gsub(s, "%$", "")
+  if fn.is_int(tonumber(check)) and count > 0 then
+    return tonumber(check)
+  else
+    return false
+  end
 end
 
 
