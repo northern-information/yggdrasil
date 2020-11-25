@@ -9,16 +9,19 @@ function runner:start()
 end
 
 function runner:run(raw_input)
-  local interpreter = Interpreter:new(raw_input)
-  debug_interpreter(interpreter)
-  if not interpreter:is_valid() then
-    tracker:set_message("Unfound: " .. tostring(interpreter))
-  else
-    graphics:draw_run_command()
-    tracker:clear_message()
-    interpreter:execute()
-    if filesystem ~= nil then
-      filesystem:file_append(self:get_current_run_file(), tostring(interpreter))
+  local commands = fn.string_split(raw_input, "&&")
+  for k, raw_input in pairs(commands) do
+    local interpreter = Interpreter:new(raw_input)
+    debug_interpreter(interpreter)
+    if not interpreter:is_valid() then
+      tracker:set_message("Unfound: " .. tostring(interpreter))
+    else
+      graphics:draw_run_command()
+      tracker:clear_message()
+      interpreter:execute()
+      if filesystem ~= nil then
+        filesystem:file_append(self:get_current_run_file(), tostring(interpreter))
+      end
     end
   end
 end
