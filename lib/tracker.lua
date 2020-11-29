@@ -783,6 +783,7 @@ end
 function tracker:set_message(s)
   self.message = true
   self.message_value = s
+  graphics:set_message_extents(screen.text_extents(s))
 end
 
 function tracker:get_message_value()
@@ -792,6 +793,7 @@ end
 function tracker:clear_message()
   self.message = false
   self.message_value = ""
+  graphics:reset_message_position()
 end
 
 function tracker:has_message()

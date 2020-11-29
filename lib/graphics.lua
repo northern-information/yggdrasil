@@ -15,6 +15,10 @@ function graphics.init()
   graphics.glow_up = true
   graphics.transition_frame = 0
   graphics.command_icon = {}
+  graphics.message_position = 0
+  graphics.message_frame = 0
+  graphics.message_extents = 0
+  graphics.message_direction = -1
   -- splash screen
   graphics.ni_splash_lines_open = {}
   graphics.ni_splash_lines_close = {}
@@ -593,12 +597,31 @@ function graphics:draw_terminal()
   self:draw_command_processing()
   self:draw_expand_processing()
   if tracker:has_message() then
-    self:text(5, 54, tracker:get_message_value(), 1)
+    self:draw_message()
   elseif tracker:is_info() then
     self:draw_yggdrasil_gui_logo()
     self:text(64, 40, fn.get_semver_string(), 1)
   end
   self:draw_field(0, 62, terminal:get_field())
+end
+
+function graphics:draw_message()
+  local screen_width = 128
+  local difference = self.message_extents - screen_width -- 157 - 128 = 29
+  self.message_frame = self.message_frame + 1
+  if (self.message_extents > screen_width) and (self.message_frame >= 30) then
+    self.message_position = util.clamp(self.message_position + self.message_direction, -self.message_extents, 0)
+    -- shimmy back and forth
+    if (
+        (math.abs(self.message_position) >= difference) 
+                or self.message_position == 0
+        ) 
+      and (self.message_frame >= difference + 60) then
+      self.message_frame = 0
+      self.message_direction = self.message_direction * -1
+    end
+  end
+  self:text(self.message_position, 54, tracker:get_message_value(), 1)
 end
 
 function graphics:draw_field(x, y, field)
@@ -713,6 +736,16 @@ function graphics:teardown()
   screen.update()
 end
 
+function graphics:reset_message_position()
+  self.message_position = 0
+  self.message_frame = 0
+  self.message_extents = 0
+  self.message_direction = -1
+end
+
+function graphics:set_message_extents(i)
+  self.message_extents = i
+end
 
 
 -- slots
