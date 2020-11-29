@@ -84,29 +84,10 @@ self:register{
       and branch[3] ~= nil
   end,
   payload = function(branch)
-    local out = {
-      class = "$",
-      index = 0,
-      string = ""
-    }
-    out.index = fn.is_variable(branch[1].leaves[1])
-    -- strings variables can be any length so:
-    branch[1] = nil -- remove the $1
-    branch[2] = nil -- remove the =
-    for kb, b in pairs(branch) do
-      for lb, leaf in pairs(b) do
-        if (type(leaf) == "table") then -- just some defensive nonsense
-          for _, l in pairs(leaf) do
-            out.string = out.string .. l  -- unmake the leaves
-          end
-        end
-      end
-      out.string = out.string .. " " -- unmake the branches
-    end
-    return out
+    return { class = "$" }
   end,
   action = function(payload)
-    variables:add_item(payload.index, payload.string)
+    -- handled in Interpreter
   end
 }
 
@@ -230,6 +211,7 @@ self:register{
           or music:chord_to_midi(branch[3].leaves[1])
         )
     elseif #branch == 4 then
+      tabutil.print(branch)
       return fn.is_int(branch[1].leaves[1]) 
         and fn.is_int(branch[2].leaves[1])
         and Validator:new(branch[3], invocations):ok()

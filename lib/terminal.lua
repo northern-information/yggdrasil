@@ -25,8 +25,17 @@ end
 function terminal:execute()
   self:save_history()
   self:set_history_index(0)
-  runner:run(tostring(self:get_field()))
-  self:set_field(Field:new())
+  local raw_field = tostring(self:get_field())
+  local expanded = variables:expand(tostring(self:get_field())) 
+  -- only commands without an assignment can get expanded
+  if string.find(raw_field, "=") == nil and raw_field ~= expanded then
+    graphics:draw_expand()
+    self:get_field():clear()
+    self:get_field():load_string(expanded)
+  else
+    runner:run(tostring(self:get_field()))
+    self:set_field(Field:new())
+  end
 end
 
 function terminal:get_history()

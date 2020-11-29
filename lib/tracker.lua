@@ -394,6 +394,10 @@ function tracker:select_range_of_tracks(x1, x2)
     valid_range = false
     self:set_message("Track " .. x2 .. " is out of bounds.")
   end
+  -- all that work and we're just selecting one track
+  if not fn.is_int(x2) then
+    x2 = x1
+  end
   local t = {x1, x2}
   table.sort(t)
   for x = t[1], t[2] do

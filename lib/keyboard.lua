@@ -115,7 +115,7 @@ function keyboard.event(type, code, val)
       end
     elseif keys:is_y_mode() then
       if keys:is_shifted() then
-            if keys:is_number_code(code) then tracker:select_range_of_tracks(tonumber(keys:get_keycode_value(code)))
+            if keys:is_number_code(code) and tracker:is_selected() then tracker:select_range_of_tracks(tonumber(keys:get_keycode_value(code)))
         elseif keys:equals(code, "[") then tracker:adjust_level(-0.1)
         elseif keys:equals(code, "]") then tracker:adjust_level(0.1)
         elseif keys:equals(code, "h") then view:handle_pan(keys:get_keycode_value(code), 10)

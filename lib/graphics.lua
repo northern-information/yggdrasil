@@ -9,6 +9,8 @@ function graphics.init()
   graphics.run_command_frame = 0
   graphics.commit_frame = 0
   graphics.commit_icon = {}
+  graphics.expand_frame = 0
+  graphics.expand_icon = {}
   graphics.glow = 0
   graphics.glow_up = true
   graphics.transition_frame = 0
@@ -68,17 +70,20 @@ function graphics:render_page(page)
       else
         self:draw_terminal()
         self:draw_command_processing()
+        self:draw_expand_processing()
         self:draw_y_mode()
       end
     elseif page == "mixer" then
       self:draw_mixer()
       self:draw_terminal()
       self:draw_command_processing()
+      self:draw_expand_processing()
       self:draw_y_mode()
     elseif page == "clades" then
       self:draw_clades()
       self:draw_terminal()
       self:draw_command_processing()
+      self:draw_expand_processing()
       self:draw_y_mode()
     end
   end
@@ -173,10 +178,10 @@ function graphics:draw_commit()
   self.commit_frame = self.frame + 30
 end
 
-function graphics:draw_validator_cube(valid, unsaved_changes)
+function graphics:draw_validator_cube(valid, unsaved_changes, level)
   local x = 74
   local y = 10
-  local l = 1
+  local l = level ~= nil and level or 1
   if valid then
     -- horizontals
     self:mlrs(x + 4, y + 1, 7, 0, l)
@@ -611,7 +616,7 @@ function graphics:draw_field(x, y, field)
 
   -- draw cursor
   if field:is_focus() and (not keys:is_y_mode() or editor:is_open()) then
-    local cursor_x = (field:get_cursor_index() < #eb) and 0 or 1
+    local cursor_x = 1
     local i = 1
     while (i <= field:get_cursor_index()) do
       cursor_x = cursor_x + eb[i] + 1
@@ -641,6 +646,32 @@ end
 function graphics:draw_run_command()
   self.command_icon = {0, 0, 0, 0, 0}
   self.run_command_frame = self.frame + 30
+end
+
+function graphics:draw_expand_processing()
+  if self.expand_frame < self.frame then return end  
+  local x = 123
+  local y = 58
+  local f = self.expand_frame - self.frame
+  local l = self.frame < self.expand_frame - 15 and 15 or f
+  local i = 0
+  for k, v in pairs(self.expand_icon) do
+    if v > 0 then
+      self:rect(x - v, y + i, v * 2, 1, l)
+    end
+    self.expand_icon[k] = util.clamp(v + 1, -30, 5)
+    i = i + 1
+  end
+  if f < 6 then
+    self:rect(x - self.expand_x, y, self.expand_x * 2, 5, 0)
+    self.expand_x = self.expand_x + 1
+  end
+end
+
+function graphics:draw_expand()
+  self.expand_icon = {0, -3, -6, -9, -12}
+  self.expand_x = 0
+  self.expand_frame = self.frame + 30
 end
 
 

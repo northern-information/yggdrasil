@@ -26,7 +26,7 @@ include("lib/Validator")    -- works with the interpreter to validate command in
 
 -- note these cannot be alphabetical due to dependencies
 dev         = include("lib/dev")          -- dev only stuff
-fn          = include("lib/functions")    -- global untilities
+fn          = include("lib/functions")    -- global utilities
 parameters  = include("lib/parameters")   -- exposed norns parameters
 _midi       = include("lib/_midi")        -- control midi devices
 _crow       = include("lib/_crow")        -- control crow

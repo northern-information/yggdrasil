@@ -26,7 +26,7 @@ function parameters.init()
     parameters.update()
   end)
 
-  local clades = {"SYNTH","MIDI","CROW","YPC"}
+  local clades = {"SYNTH", "MIDI", "CROW", "YPC"}
   params:add_option("default_clade", "DEFAULT CLADE", clades)
   params:set_action("default_clade", function(i) 
     config.settings.default_clade = clades[i]

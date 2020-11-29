@@ -8,11 +8,14 @@ function runner:start()
   filesystem:file_new(self:get_current_run_file())
 end
 
-function runner:run(raw_input)
-  local commands = fn.string_split(raw_input, "&&")
-  for k, raw_input in pairs(commands) do
-    local expanded_input = variables:expand(raw_input)
-    local interpreter = Interpreter:new(expanded_input)
+function runner:run(input)
+  local commands = {input}
+  -- if this is not an assignment, split the &&s
+  if string.find(input, "=") == nil then
+    commands = fn.string_split(input, "&&")
+  end
+  for k, command in pairs(commands) do
+    local interpreter = Interpreter:new(command)
     debug_interpreter(interpreter)
     if not interpreter:is_valid() then
       tracker:set_message("Unfound: " .. tostring(interpreter))
