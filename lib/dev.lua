@@ -13,7 +13,7 @@ function dev:scene(i)
     fn.dismiss_messages()
     -- cmd("1 1")
     -- cmd("$1 = 2 mute")
-    terminal:get_field():load_string("$1 = unmute && unsolo")
+    -- terminal:get_field():load_string("$1 = unmute && unsolo")
     page:select(1)
   elseif i == 2 then
     for i = 1, 5 do

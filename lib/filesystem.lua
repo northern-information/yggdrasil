@@ -7,6 +7,7 @@ function filesystem.init()
     factory_path = config.settings.factory_path,
     factory_bank = config.settings.sample_path .. "factory/",
     runs_path = config.settings.runs_path,
+    routines_path = config.settings.routines_path,
     tracks_path = config.settings.tracks_path
   }
   for k, path in pairs(filesystem.paths) do
@@ -16,7 +17,6 @@ function filesystem.init()
   end
   filesystem:copy_factory_bank()
 end
-
 
 function filesystem:save(file_path, data)
   if file_path == nil or track == nil then return end
@@ -63,12 +63,22 @@ function filesystem:file_or_directory_exists(path)
    local ok, err, code = os.rename(path, path)
    if not ok then
       if code == 13 then
-         -- Permission denied, but it exists
+         -- permission denied, but it exists
          return true
       end
    end
    return ok, err
 end
+
+function filesystem:file_read(file_path)
+  if not self:file_or_directory_exists(file_path) then return {} end
+  lines = {}
+  for line in io.lines(file_path) do 
+    lines[#lines + 1] = line
+  end
+  return lines
+end
+
 
 function filesystem:set_load_file(s)
   self.load_file = s
@@ -104,6 +114,10 @@ end
 
 function filesystem:get_runs_path()
   return self.paths.runs_path
+end
+
+function filesystem:get_routines_path()
+  return self.paths.routines_path
 end
 
 return filesystem

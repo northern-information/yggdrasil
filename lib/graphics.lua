@@ -69,21 +69,15 @@ function graphics:render_page(page)
         self:draw_commit_processing()
       else
         self:draw_terminal()
-        self:draw_command_processing()
-        self:draw_expand_processing()
         self:draw_y_mode()
       end
     elseif page == "mixer" then
       self:draw_mixer()
       self:draw_terminal()
-      self:draw_command_processing()
-      self:draw_expand_processing()
       self:draw_y_mode()
     elseif page == "clades" then
       self:draw_clades()
       self:draw_terminal()
-      self:draw_command_processing()
-      self:draw_expand_processing()
       self:draw_y_mode()
     end
   end
@@ -596,6 +590,8 @@ function graphics:draw_terminal()
   end
   self:mls(0, 64 - height, 128, 64 - height - 1, 15)
   self:rect(0, 64 - height, 128, height, 0)
+  self:draw_command_processing()
+  self:draw_expand_processing()
   if tracker:has_message() then
     self:text(5, 54, tracker:get_message_value(), 1)
   elseif tracker:is_info() then

@@ -2,10 +2,21 @@ runner = {}
 
 function runner.init()
   runner.current_run = "yggdrasil-run-" .. os.date("%Y-%m-%d-%H-%M-%S")
+  runner.startup_routine_file = "startup.txt"
 end
 
 function runner:start()
   filesystem:file_new(self:get_current_run_file())
+end
+
+function runner:startup_routine()
+  local startup = filesystem:get_routines_path() .. self.startup_routine_file
+  if filesystem:file_or_directory_exists(startup) then
+    local lines = filesystem:file_read(startup)
+    for k, line in pairs(lines) do
+      fn.cmd(line)
+    end
+  end
 end
 
 function runner:run(input)

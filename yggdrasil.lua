@@ -37,6 +37,7 @@ function init()
   y.frame_clock_id = clock.run(graphics.frame_clock)
   y.tracker_clock_id = clock.run(tracker.tracker_clock)
   page:select(parameters.is_splash_screen_on and 0 or 1)
+  runner:startup_routine()
   if config.settings.dev_mode then dev:scene(config.settings.dev_scene) end
   redraw()
 end

@@ -83,6 +83,14 @@ function fn.new()
   for x = 1, tracker:get_cols() do tracker:append_track_after(x - 1) end
 end
 
+function fn.cmd(s)
+  local t = fn.string_split(s, "")
+  for k, v in pairs(t) do
+    terminal:add(v)
+  end
+  terminal:execute()
+end
+
 
 
 --- value checking and manipulation
