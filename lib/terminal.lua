@@ -1,7 +1,7 @@
 terminal = {}
 
 function terminal.init()
-  terminal:set_field(Field:new())
+  terminal:set_field(Field:new(128))
   terminal.history_index = 0
   terminal.history = {}
 end
@@ -34,7 +34,7 @@ function terminal:execute()
     self:get_field():load_string(expanded)
   else
     runner:run(tostring(self:get_field()))
-    self:set_field(Field:new())
+    self:set_field(Field:new(128))
   end
 end
 

@@ -627,21 +627,32 @@ end
 function graphics:draw_field(x, y, field)
   local tb = field:get_text_buffer()
   local eb = field:get_extents_buffer()
-  
+  local offset = field:is_overflow() and field:get_offset() or 0
   -- draw text
   if #tb > 0 and tostring(field) ~= "nil" then
-    self:text(x, y, tostring(field), 15)
+    self:text(x + offset, y, tostring(field), 15)
   end
-
   -- draw cursor
   if field:is_focus() and (not keys:is_y_mode() or editor:is_open()) then
-    local cursor_x = 1
-    local i = 1
-    while (i <= field:get_cursor_index()) do
-      cursor_x = cursor_x + eb[i] + 1
-      i = i + 1
+    local cursor_x = 0
+    -- if the cursor is at the very beginning, add one so it doesn't fall off the screen
+    if field:get_cursor_index() == 0 then
+      cursor_x = 1
+    else
+      -- the cursor is in the middle so add up the extents...
+      local i = 1
+      while (i <= field:get_cursor_index()) do
+        cursor_x = cursor_x + eb[i] + 1 -- ... so adjust one pixel for kerning
+        i = i + 1
+      end
     end
-    self:mlrs(x + cursor_x, y - 6, 0, 7, self.cursor_frame)
+    -- if the cursor is at the end of the line... 
+    if field:get_cursor_index() == #eb and #eb ~= 0 then
+      cursor_x = cursor_x + 1 -- ... so adjust one pixel for kerning
+    end
+    -- the cursor can never go beyond the field so clamp to the field width
+    local final_x = util.clamp(x + cursor_x, 0, field:get_width())
+    self:mlrs(final_x, y - 6, 0, 7, self.cursor_frame)
   end
 end
 

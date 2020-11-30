@@ -41,7 +41,7 @@ function editor:increment_fields(i)
 end
 
 function editor:add_field(field)
-  field["input_field"] = Field:new()
+  field["input_field"] = Field:new(39)
   local value = field:value_getter() ~= nil and field:value_getter() or ""
   field.input_field:load_string(value)
   self.field_index[#self:get_field_index() + 1] = field.field_id
