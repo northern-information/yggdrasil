@@ -765,6 +765,30 @@ self:register{
 
 
 
+-- LOAD
+-- 2 load what-is-love.txt
+self:register{
+  invocations = { "load" },
+  signature = function(branch, invocations)
+    if #branch ~= 3 then return false end
+    return fn.is_int(branch[1].leaves[1])
+       and Validator:new(branch[2], invocations):ok()
+       and #branch[3].leaves == 1
+  end,
+  payload = function(branch)
+    return {
+      class = "LOAD",
+      filename = branch[3].leaves[1],
+      x = branch[1].leaves[1],
+    }
+  end,
+  action = function(payload)
+    tracker:load_track(payload.x, payload.filename)
+  end
+}
+
+
+
 -- LUCKY
 -- 3 4 !
 self:register{
@@ -878,28 +902,69 @@ self:register{
 
 
 
--- OFF
--- 3 4 off
+-- NOTE
+-- 1 1 72
+-- 1 1 c5
 self:register{
-  invocations = { "off", "o" },
+  invocations = {},
   signature = function(branch, invocations)
-    if #branch ~= 3 then return false end
-    return fn.is_int(branch[1].leaves[1])
-       and fn.is_int(branch[2].leaves[1])
-       and Validator:new(branch[3], invocations):ok()
+    if #branch ~= 3 then return faslse end
+    return (
+      fn.is_int(branch[1].leaves[1])
+      and fn.is_int(branch[2].leaves[1])
+      and fn.is_int(branch[3].leaves[1])
+    ) or (
+      fn.is_int(branch[1].leaves[1])
+      and fn.is_int(branch[2].leaves[1])
+      and music:is_valid_ygg(branch[3].leaves[1])
+    )
   end,
   payload = function(branch)
+    local midi_note = 0
+    if fn.is_int(branch[3].leaves[1]) then
+      midi_note = branch[3].leaves[1]
+    else
+      midi_note = music:convert("ygg_to_midi", branch[3].leaves[1])
+    end
     return {
-        class = "OFF",
-        phenomenon = true,
-        prefix = "o",
-        value = nil,
-        x = branch[1].leaves[1], 
-        y = branch[2].leaves[1],
+      class = "NOTE",
+      midi_note = midi_note,
+      x = branch[1].leaves[1],
+      y = branch[2].leaves[1],
     }
   end,
   action = function(payload)
     tracker:update_slot(payload)
+    tracker:select_slot(payload.x, payload.y)
+  end
+}
+
+
+
+-- OFF
+-- 1 1 off
+-- 1 1 o
+self:register{
+  invocations = { "off", "o" },
+  signature = function(branch, invocations)
+    if #branch ~= 3 then return faslse end
+    return
+      fn.is_int(branch[1].leaves[1])
+      and fn.is_int(branch[2].leaves[1])
+      and Validator:new(branch[3], invocations):ok()
+  end,
+  payload = function(branch)
+    return {
+      class = "OFF",
+      phenomenon = true,
+      prefix = "o",
+      x = branch[1].leaves[1], 
+      y = branch[2].leaves[1]
+    }
+  end,
+  action = function(payload)
+    tracker:update_slot(payload)
+    tracker:select_slot(payload.x, payload.y)
   end
 }
 
@@ -1126,69 +1191,6 @@ self:register{
 
 
 
--- NOTE
--- 1 1 72
--- 1 1 c5
-self:register{
-  invocations = {},
-  signature = function(branch, invocations)
-    if #branch ~= 3 then return faslse end
-    return (
-      fn.is_int(branch[1].leaves[1])
-      and fn.is_int(branch[2].leaves[1])
-      and fn.is_int(branch[3].leaves[1])
-    ) or (
-      fn.is_int(branch[1].leaves[1])
-      and fn.is_int(branch[2].leaves[1])
-      and music:is_valid_ygg(branch[3].leaves[1])
-    )
-  end,
-  payload = function(branch)
-    local midi_note = 0
-    if fn.is_int(branch[3].leaves[1]) then
-      midi_note = branch[3].leaves[1]
-    else
-      midi_note = music:convert("ygg_to_midi", branch[3].leaves[1])
-    end
-    return {
-      class = "NOTE",
-      midi_note = midi_note,
-      x = branch[1].leaves[1],
-      y = branch[2].leaves[1],
-    }
-  end,
-  action = function(payload)
-    tracker:update_slot(payload)
-    tracker:select_slot(payload.x, payload.y)
-  end
-}
-
-
-
--- load
--- 2 load what-is-love.txt
-self:register{
-  invocations = { "load" },
-  signature = function(branch, invocations)
-    if #branch ~= 3 then return false end
-    return fn.is_int(branch[1].leaves[1])
-       and Validator:new(branch[2], invocations):ok()
-       and #branch[3].leaves == 1
-  end,
-  payload = function(branch)
-    return {
-      class = "LOAD",
-      filename = branch[3].leaves[1],
-      x = branch[1].leaves[1],
-    }
-  end,
-  action = function(payload)
-    tracker:load_track(payload.x, payload.filename)
-  end
-}
-
-
-
 -- VELOCITY
 -- 1 1 velocity;100
 -- 1 1 vel;100
@@ -1243,14 +1245,13 @@ self:register{
       and Validator:new(branch[3], invocations):validate_prefix_invocation()
   end,
   payload = function(branch)
-    local out = {
+    return {
       class = "RUIN",
       phenomenon = true,
       prefix = "ruin",
       x = branch[1].leaves[1], 
       y = branch[2].leaves[1]
     }
-    return out
   end,
   action = function(payload)
      tracker:update_slot(payload)

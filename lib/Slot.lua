@@ -147,8 +147,7 @@ function Slot:trigger()
         local new_y = 0
         repeat
           new_y = slots[math.random(1, #slots)]:get_y()
-          
-        until new_y ~= self:get_y()
+        until (new_y ~= self:get_y())
         track:set_position(new_y)
       end
     elseif p == "OFF" then
@@ -194,11 +193,9 @@ function Slot:to_string()
     end
   end
   if self:is_phenomenon() then
-    if view:is_phenomenon() and self.payload.class ~= "OFF" then
+    if view:is_phenomenon() then
       local p = "+" .. tostring(self.payload)
       out = out ~= nil and out .. p or p
-    elseif self.payload.class == "OFF" then
-      out = self.payload.prefix
     end
   end
   return out ~= nil and tostring(out) or empty_character
