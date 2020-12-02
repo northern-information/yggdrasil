@@ -168,9 +168,13 @@ function keyboard.event(type, code, val)
     end
 
     if keys:is_arrow(code) then
-      if keys:is_mod() then
+      if keys:is_mod() and terminal:is_empty() then
         local pan = keys:is_shifted() and 10 or 1
         view:handle_pan(keys:get_keycode_value(code), pan)
+      elseif keys:is_mod() and not terminal:is_empty() then
+            if keys:equals(code, "RIGHT") then terminal:space_move_cursor_index(1)
+        elseif keys:equals(code, "LEFT")  then terminal:space_move_cursor_index(-1)
+        end
       else
             if keys:equals(code, "RIGHT") then terminal:move_cursor_index(1)
         elseif keys:equals(code, "LEFT")  then terminal:move_cursor_index(-1)

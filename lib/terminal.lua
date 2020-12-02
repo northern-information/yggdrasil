@@ -22,6 +22,10 @@ function terminal:move_cursor_index(i)
   self:get_field():move_cursor_index(i)
 end
 
+function terminal:space_move_cursor_index(i)
+  self:get_field():space_move_cursor_index(i)
+end
+
 function terminal:execute()
   self:save_history()
   self:set_history_index(0)

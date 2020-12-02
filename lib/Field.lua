@@ -83,7 +83,44 @@ function Field:is_empty()
 end
 
 function Field:move_cursor_index(i)
-  self.cursor_index = util.clamp(self.cursor_index + i, 0, #self.extents_buffer)
+  self.cursor_index = util.clamp(self.cursor_index + i, 0, #self:get_extents_buffer())
+  self:refresh()
+end
+
+function Field:space_move_cursor_index(i)  
+  local seek_forward = i > 0
+  local cached_cursor_index = self:get_cursor_index()
+  local space_table = {}
+  local eb_count = #self:get_extents_buffer()
+  -- build up a table of all the spaces
+  local this = 1
+  for k, v in pairs(self:get_text_buffer()) do
+    if v == " " then
+      space_table[#space_table + 1] = this - 1 -- left of the space
+      space_table[#space_table + 1] = this     -- right of the space
+    end
+    this = this + 1
+  end
+  -- insert the very start and end of the string
+  space_table[0] = 0                       
+  space_table[#space_table + 1] = eb_count
+  if seek_forward and (cached_cursor_index == eb_count) then   -- the cursor is already at the end
+    -- do nothing
+  elseif not seek_forward and (cached_cursor_index == 0) then   -- the cursor is already at the beginning
+    -- do nothing
+  elseif seek_forward then   -- we're going forward, so find the next space index
+    local iterator = 1
+    repeat
+      self.cursor_index = space_table[iterator]
+      iterator = iterator + 1
+    until (self.cursor_index > cached_cursor_index)
+  elseif not seek_forward then   -- we're going backward, so find the last space index
+    local iterator = #space_table
+    repeat
+      self.cursor_index = space_table[iterator]
+      iterator = iterator - 1
+    until (self.cursor_index < cached_cursor_index)
+  end
   self:refresh()
 end
 
