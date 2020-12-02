@@ -103,7 +103,7 @@ function graphics:draw_editor()
   self:rect(x - 1, 0, w + 1, 64, 0)
   self:mls(x, 7, x, 64, 15)
   -- title
-  self:rect(x - 1, 0, w + 1, 8, 17)
+  self:rect(x - 1, 0, w + 1, 8, 15)
   if screen.text_extents(editor:get_title()) < 41 then
     self:draw_mixer_glyph(106, 0, editor:get_track():get_clade(), true)
   end
