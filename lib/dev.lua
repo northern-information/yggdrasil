@@ -11,9 +11,7 @@ function dev:scene(i)
     tracker:load_track(1, "love-lead.txt")
     tracker:load_track(2, "love-saw.txt")
     fn.dismiss_messages()
-    -- cmd("")
-    -- cmd("$1 = 2 mute")
-    terminal:get_field():load_string("abcdefghijklmnopqrstuvxyz0123456789")
+    terminal:get_field():load_string("abc def ghi jkl mno pqr stu vxy z01 234 567 89")
     page:select(1)
   elseif i == 2 then
     for i = 1, 5 do

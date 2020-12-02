@@ -1,17 +1,17 @@
 keys = {}
 
 function keys.init()
-  keys.y_mode  = false
-  keys.alt   = false
-  keys.ctrl  = false
-  keys.opt   = false
-  keys.mod   = false
-  keys.shift = false
-  keys.caps  = false
-  keys.codes = {
-    -- { k = 41,  v = "`" },
+  keys.y_mode = false
+  keys.alt    = false
+  keys.ctrl   = false
+  keys.opt    = false
+  keys.mod    = false
+  keys.shift  = false
+  keys.caps   = false
+  keys.codes  = {
     { k = 1,   v = "ESC" },
     { k = 10,  v = "9" },
+    { k = 100, v = "ALT" },
     { k = 103, v = "UP" },
     { k = 105, v = "LEFT" },
     { k = 106, v = "RIGHT" },
@@ -34,8 +34,8 @@ function keys.init()
     { k = 23,  v = "i" },
     { k = 24,  v = "o" },
     { k = 25,  v = "p" },
-    { k = 26,  v = "["},
-    { k = 27,  v = "]"},
+    { k = 26,  v = "[" },
+    { k = 27,  v = "]" },
     { k = 28,  v = "RETURN" },
     { k = 29,  v = "CTRL" },
     { k = 3,   v = "2" },
@@ -50,6 +50,7 @@ function keys.init()
     { k = 38,  v = "l" },
     { k = 39,  v = ";" },
     { k = 4,   v = "3" },
+    { k = 41,  v = "`" },
     { k = 42,  v = "SHIFT" },
     { k = 44,  v = "z" },
     { k = 45,  v = "x" },
@@ -219,7 +220,7 @@ function keys:is_opted()
 end
 
 function keys:is_alt(code)
-  return 56 == code
+  return 56 == code or 100 == code
 end
 
 function keys:handle_alt(val)

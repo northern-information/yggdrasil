@@ -33,6 +33,9 @@ function keyboard.event(type, code, val)
         editor:select_field(1)
       elseif editor:is_open() and editor:is_unsaved_changes() and editor:is_valid() then
         editor:commit()
+      elseif editor:is_open() and editor:is_valid() then
+        editor:clear()
+        editor:close()
       end
     end
   end

@@ -96,29 +96,24 @@ end
 
 function graphics:draw_editor()
   local sw = view:get_slot_width()
-  -- local x = ((view:get_x() - 1) * sw) - (view:get_x_offset() * sw) + sw
   local x = 64
   local w = 128 - x
   local left_edge = w + 2
   -- background
   self:rect(x - 1, 0, w + 1, 64, 0)
   self:mls(x, 7, x, 64, 15)
-  -- self:mls(x, 6, x + 6, 0, 15)
   -- title
   self:rect(x - 1, 0, w + 1, 8, 17)
   if screen.text_extents(editor:get_title()) < 41 then
     self:draw_mixer_glyph(106, 0, editor:get_track():get_clade(), true)
   end
   self:text(left_edge, 6, editor:get_title(), 0)
-
   -- validator
   self:draw_validator_cube(editor:is_valid(), editor:is_unsaved_changes())
-  
   -- commit indicator
   if editor:is_valid() and editor:is_unsaved_changes() then
     self:draw_commit_indicator()
   end
-
   -- data entry
   for i = 1, #editor:get_field_index() do
     local field = editor:get_field_by_index(i)
@@ -139,7 +134,7 @@ function graphics:draw_editor()
       -- label text
       self:text_right(left_edge + 20, y, field.display, 15)
       -- value text
-      self:draw_field(left_edge + 24, y, field.input_field, 15)
+      self:draw_field(left_edge + 24, y, field.input_field)
       i = i + 1
     end
   end
@@ -382,7 +377,8 @@ function graphics:draw_cols()
           -- these are designed to be mutually exclusive as of 2020-11-15
           if tracker:has_message() then
             adjust_y = -9
-          elseif editor:is_open() then
+          end
+          if editor:is_open() then
             adjust_y = 8
           end
           self:mls(x, 56 - ii + adjust_y, x, 55 - ii + adjust_y, 16 - ii)
@@ -637,22 +633,22 @@ function graphics:draw_field(x, y, field)
     local cursor_x = 0
     -- if the cursor is at the very beginning, add one so it doesn't fall off the screen
     if field:get_cursor_index() == 0 then
-      cursor_x = 1
+      cursor_x = cursor_x + 1
     else
       -- the cursor is in the middle so add up the extents...
       local i = 1
       while (i <= field:get_cursor_index()) do
-        cursor_x = cursor_x + eb[i] + 1 -- ... so adjust one pixel for kerning
+        cursor_x = cursor_x + eb[i] + 1 -- ... and adjust one pixel for kerning
         i = i + 1
       end
     end
     -- if the cursor is at the end of the line... 
     if field:get_cursor_index() == #eb and #eb ~= 0 then
-      cursor_x = cursor_x + 1 -- ... so adjust one pixel for kerning
+      cursor_x = cursor_x + 1 -- ... adjust one pixel for kerning
     end
     -- the cursor can never go beyond the field so clamp to the field width
-    local final_x = util.clamp(x + cursor_x, 0, field:get_width())
-    self:mlrs(final_x, y - 6, 0, 7, self.cursor_frame)
+    local final_x = util.clamp(cursor_x, 0, field:get_width())
+    self:mlrs(x + final_x, y - 6, 0, 7, self.cursor_frame)
   end
 end
 

@@ -25,7 +25,6 @@ function Field:to_string()
 end
 
 function Field:refresh()
-  print("sum extents of cursor index",  self:sum_extents(self:get_cursor_index()))
   if self:sum_extents(self:get_cursor_index()) > self:get_width() then
     self:set_overflow(true)
     self:set_offset(self:get_width() - self:sum_extents(self:get_cursor_index()))
@@ -33,14 +32,16 @@ function Field:refresh()
     self:set_overflow(false)
     self:set_offset(0)
   end
-  print('offset', self:get_offset())
 end
 
 function Field:add(s)
   local new_index = self:get_cursor_index() + 1
   table.insert(self.text_buffer, new_index, s)
-  -- force spaces to have a width of 3px
-  local extents = (s == " ") and 3 or screen.text_extents(s)
+  local extents = screen.text_extents(s)
+  if s == " " then
+    -- force spaces to have a width of 3px
+    extents = 3
+  end
   table.insert(self.extents_buffer, new_index, extents)
   self:move_cursor_index(1)
   self:refresh()
@@ -55,7 +56,7 @@ end
 
 function Field:backspace()
   if self.cursor_index > 0 then
-    table.remove(self.text_buffer, self.cursor_index)  
+    table.remove(self.text_buffer, self.cursor_index)
     table.remove(self.extents_buffer, self.cursor_index)
     self:move_cursor_index(-1)
   end
