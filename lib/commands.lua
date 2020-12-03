@@ -28,14 +28,14 @@ function commands:register(t)
   --[[
   loop through all registered classes
   then all their invocations
-  then all the incomping invocations
+  then all the incoming invocations
   and alert if there are duplicates
   ]]
   for k, command in pairs(self.all) do
     for kk, existing_invocation in pairs(command.invocations) do
       for kkk, new_invocation in pairs(t.invocations) do
         if existing_invocation == new_invocation then
-          print_matron_message("Error: Invocation " .. new_invocation .. " on " .. class .. " is already registered to " .. k .. "! Overwriting...")
+          fn.print_matron_message("Error: Invocation " .. new_invocation .. " on " .. class .. " is already registered to " .. k .. "! Overwriting...")
         end
       end
     end
