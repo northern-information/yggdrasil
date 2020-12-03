@@ -1653,7 +1653,7 @@ self:register{
       and fn.table_contains({ 
       "midi", "ipn", "ygg", "freq", 
       "velocity", "vel", "v",
-      "macros",
+      "m1","m2",
       "index",
       "phenomenon", "p",
       "tracker", "t",
@@ -1681,8 +1681,10 @@ self:register{
       or v == "vel"
       or v == "v" then
         view:toggle_velocity()
-    elseif v == "macros" then
-        view:toggle_macros()
+    elseif v == "m1" then
+        view:toggle_m1()
+    elseif v == "m2" then
+        view:toggle_m2()
     elseif v == "hud" 
       or v == "h" then
         view:toggle_hud()

@@ -182,8 +182,12 @@ function Slot:to_string()
     local v = "v" .. self:get_velocity()
     out = out ~= nil and out .. v or v
   end
-  if view:is_macros() then
-    local c = "m" .. self:get_m1() .. "|" .. self:get_m2()
+  if view:is_m1() then
+    local c = "m" .. self:get_m1()
+    out = out ~= nil and out .. c or c
+  end
+  if view:is_m2() then
+    local c = "m" .. self:get_m2()
     out = out ~= nil and out .. c or c
   end
   if self:get_clade() == "YPC" then

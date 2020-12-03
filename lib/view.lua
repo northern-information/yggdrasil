@@ -4,7 +4,8 @@ function view.init()
   -- page
   view.tracker = false
   view.velocity = false
-  view.macros = false
+  view.m1 = false
+  view.m2 = false
   view.phenomenon = false
   view.ypc = false
   view.hud = config.settings.default_hud
@@ -280,16 +281,20 @@ function view:is_velocity()
   return self.velocity
 end
 
-function view:toggle_macros()
-  self.macros = not self.macros
+function view:toggle_m1()
+  self.m1 = not self.m1
 end
 
-function view:set_macros(bool)
-  self.macros = bool
+function view:toggle_m2()
+  self.m2 = not self.m2
 end
 
-function view:is_macros()
-  return self.macros
+function view:is_m1()
+  return self.m1
+end
+
+function view:is_m2()
+  return self.m2
 end
 
 function view:toggle_ypc()
