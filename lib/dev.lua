@@ -11,7 +11,7 @@ function dev:scene(i)
     tracker:load_track(1, "love-lead.txt")
     tracker:load_track(2, "love-saw.txt")
     fn.dismiss_messages()
-    terminal:get_field():load_string("abc def ghi")
+    editor:activate(1, 1)
     page:select(1)
   elseif i == 2 then
     for i = 1, 5 do

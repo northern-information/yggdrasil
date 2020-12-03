@@ -10,10 +10,7 @@ function keyboard.event(type, code, val)
   if keys:is_alt(code) then keys:handle_alt(val) end
   if not fn.break_splash() then fn.dismiss_messages() end
   if val == 0 then return end -- ignore other keyups
-  if config.settings.dev_mode then
-    print(code)
-    print("")
-  end
+  if config.settings.dev_mode then print(code) print("") end
 
 
 
@@ -38,9 +35,7 @@ function keyboard.event(type, code, val)
         editor:close()
       end
     end
-  end
-
-  if keys:is_return(code) and not terminal:is_empty() then
+  elseif keys:is_return(code) and not terminal:is_empty() then
     terminal:execute()
     terminal:set_focus(true)
   end
@@ -55,9 +50,19 @@ function keyboard.event(type, code, val)
         if tracker:has_message() then tracker:clear_message()
     elseif tracker:is_info()     then tracker:set_info(false)
     elseif editor:is_open()      then editor:clear() editor:close()
-    else tracker:deselect()
+    else   tracker:deselect()
     end
   end
+
+
+
+  -- eternal tab & caps
+
+
+
+  if keys:is_tab(code) then page:cycle() end
+
+  if keys:is_caps(code) then keys:toggle_y_mode() end
 
 
 
@@ -103,6 +108,12 @@ function keyboard.event(type, code, val)
       editor:backspace()
 
     end
+
+
+
+  -- not editor
+
+
 
   else
 
@@ -183,12 +194,6 @@ function keyboard.event(type, code, val)
         end
       end
     end
-
-
-    if keys:is_tab(code) then page:cycle() end
-
-    if keys:is_caps(code) then keys:toggle_y_mode() end
-
   end
 
   if keys ~= nil then
