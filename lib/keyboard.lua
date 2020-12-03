@@ -11,6 +11,7 @@ function keyboard.event(type, code, val)
   if not fn.break_splash() then fn.dismiss_messages() end
   if val == 0 then return end -- ignore other keyups
   if config.settings.dev_mode then print(code) print("") end
+  if keys:is_caps(code) then keys:toggle_y_mode() end
 
 
 
@@ -28,11 +29,13 @@ function keyboard.event(type, code, val)
       elseif not editor:is_open() then
         editor:activate(view:get_x(), view:get_y())
         editor:select_field(1)
-      elseif editor:is_open() and editor:is_unsaved_changes() and editor:is_valid() then
+      elseif editor:is_open() and editor:is_unsaved_changes() and editor:is_valid() and not editor:is_enter_action() then
         editor:commit()
-      elseif editor:is_open() and editor:is_valid() then
+      elseif editor:is_open() and editor:is_valid() and not editor:is_enter_action() then
         editor:clear()
         editor:close()
+      elseif editor:is_open() and editor:is_enter_action() then
+        editor:run_enter_action()
       end
     end
   elseif keys:is_return(code) and not terminal:is_empty() then
@@ -53,16 +56,6 @@ function keyboard.event(type, code, val)
     else   tracker:deselect()
     end
   end
-
-
-
-  -- eternal tab & caps
-
-
-
-  if keys:is_tab(code) then page:cycle() end
-
-  if keys:is_caps(code) then keys:toggle_y_mode() end
 
 
 
@@ -194,6 +187,9 @@ function keyboard.event(type, code, val)
         end
       end
     end
+
+    if keys:is_tab(code) then page:cycle() end
+
   end
 
   if keys ~= nil then

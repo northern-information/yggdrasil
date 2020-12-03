@@ -7,6 +7,19 @@ function editor.init()
   editor.fields = {}
   editor.field_index = {}
   editor.tab_index = 0
+  editor.enter_action = false
+end
+
+function editor:check_enter_action()
+  editor.enter_action = false
+  local field = self:get_field_by_index(self:get_tab_index())
+  if field ~= nil and field.action ~= nil then
+    editor.enter_action = true
+  end
+end
+
+function editor:run_enter_action()
+  self:get_field_by_index(self:get_tab_index()).action_method()
 end
 
 function editor:activate(x, y)
@@ -179,6 +192,7 @@ end
 
 function editor:set_tab_index(i)
   self.tab_index = i
+  self:check_enter_action()
 end
 
 function editor:get_tab_index()
@@ -207,6 +221,10 @@ end
 
 function editor:get_fields()
   return self.fields
+end
+
+function editor:is_enter_action()
+  return self.enter_action
 end
 
 return editor

@@ -11,6 +11,7 @@ function dev:scene(i)
     tracker:load_track(1, "love-lead.txt")
     tracker:load_track(2, "love-saw.txt")
     fn.dismiss_messages()
+    tracker:select_slot(1, 1)
     editor:activate(1, 1)
     page:select(1)
   elseif i == 2 then

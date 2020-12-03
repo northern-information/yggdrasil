@@ -111,17 +111,18 @@ function graphics:draw_editor()
   -- validator
   self:draw_validator_cube(editor:is_valid(), editor:is_unsaved_changes())
   -- commit indicator
-  if editor:is_valid() and editor:is_unsaved_changes() then
+  if editor:is_valid() and editor:is_unsaved_changes() and not editor:is_enter_action() then
     self:draw_commit_indicator()
   end
   -- data entry
   for i = 1, #editor:get_field_index() do
-    local field = editor:get_field_by_index(i)
+    local fi = fn.over_cycle(editor:get_tab_index() + i - 1, 1, #editor:get_field_index())
+    local field = editor:get_field_by_index(fi)
     if field.display ~= nil then 
       local y = 20 + (10 * i)
       local y2 = 20 + (10 * i) - 7
       -- highlight
-      if field.input_field.focus then
+      if i == 1 then
         self:rect(left_edge + 22, y2, 44, 9, 1)
         self:rect(125, y2, 3, 9, 15)
       end
@@ -134,8 +135,11 @@ function graphics:draw_editor()
       -- label text
       self:text_right(left_edge + 20, y, field.display, 15)
       -- value text
-      self:draw_field(left_edge + 24, y, field.input_field)
-      i = i + 1
+      if field.action == "sample" then
+        self:text(left_edge + 24, y, "SELECT...", 15)
+      else
+        self:draw_field(left_edge + 24, y, field.input_field)
+      end
     end
   end
 end

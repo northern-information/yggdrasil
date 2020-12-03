@@ -116,6 +116,16 @@ function fn.cycle(value, min, max)
   end
 end
 
+function fn.over_cycle(value, min, max)
+  if value > max then
+    return fn.over_cycle(value - max, min, max)
+  elseif value < min then
+    return fn.over_cycle(max - value, min, max)
+  else
+    return value
+  end
+end
+
 function fn.is_int(test)
   if test == nil then return false end
   if not tonumber(test) then return false end
