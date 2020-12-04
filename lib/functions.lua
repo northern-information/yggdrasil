@@ -83,12 +83,31 @@ function fn.new()
   for x = 1, tracker:get_cols() do tracker:append_track_after(x - 1) end
 end
 
+function fn.run_routine(filename)
+  local r = filesystem:get_routines_path() .. filename
+  if filesystem:file_or_directory_exists(r) then
+    local lines = filesystem:file_read(r)
+    for k, line in pairs(lines) do
+      fn.cmd(line)
+    end
+  end
+end
+
 function fn.cmd(s)
   local t = fn.string_split(s, "")
   for k, v in pairs(t) do
     terminal:add(v)
   end
   terminal:execute()
+end
+
+function fn.toggle_enc_override()
+  synth:toggle_encoder_override()
+  if synth:is_encoder_override() then
+    synth:scroll_m1(0) -- trigger the message box open
+  else
+    tracker:clear_message()
+  end
 end
 
 

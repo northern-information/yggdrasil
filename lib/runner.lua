@@ -10,13 +10,7 @@ function runner:start()
 end
 
 function runner:startup_routine()
-  local startup = filesystem:get_routines_path() .. self.startup_routine_file
-  if filesystem:file_or_directory_exists(startup) then
-    local lines = filesystem:file_read(startup)
-    for k, line in pairs(lines) do
-      fn.cmd(line)
-    end
-  end
+  fn.run_routine(self:get_startup_routine_file())
 end
 
 function runner:run(input)
@@ -43,6 +37,10 @@ end
 
 function runner:get_current_run_file()
   return filesystem:get_runs_path() .. self.current_run .. ".txt"
+end
+
+function runner:get_startup_routine_file()
+  return runner.startup_routine_file
 end
 
 return runner
