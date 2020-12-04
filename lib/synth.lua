@@ -27,13 +27,13 @@ function synth:panic()
   engine.panic()
 end
 
-function synth:get_c_shift_message()
+function synth:get_manual_override_message()
   return "MANUAL OVERRIDE [" .. self:get_m1_override() .. "] [" .. self:get_m2_override() .. "]"
 end
 
 function synth:scroll_m1(d)
   self:set_m1_override(self:get_m1_override() + d)
-  tracker:set_message(self:get_c_shift_message())
+  tracker:set_message(self:get_manual_override_message())
 end
 
 function synth:set_m1_override(i)
@@ -46,7 +46,7 @@ end
 
 function synth:scroll_m2(d)
   self:set_m2_override(self:get_m2_override() + d)
-  tracker:set_message(self:get_c_shift_message())
+  tracker:set_message(self:get_manual_override_message())
 end
 
 function synth:set_m2_override(i)

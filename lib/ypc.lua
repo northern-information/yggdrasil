@@ -121,6 +121,10 @@ function ypc:load_bank(s)
   end
 end
 
+function ypc:get_samples()
+  return filesystem:scandir(filesystem:get_sample_path() .. self:get_bank())
+end
+
 function ypc:get_bank()
   return self.bank
 end

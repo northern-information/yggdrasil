@@ -98,7 +98,7 @@ function Slot:get_editor_fields()
       display = "YPC",
       tab_index = 6,
       action = "sample",
-      action_method = function() print("pop") end,
+      action_method = function() print("pop") tabutil.print(ypc:get_samples()) end,
       value_getter = function() return self:get_sample_name() end,
       value_setter = function(x) self:set_sample_name(x) end,
       value_clear = function() self:set_sample_name("") end,
