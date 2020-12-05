@@ -28,6 +28,7 @@ function init()
   editor.init()
   tracker.init()
   clipboard.init()
+  selector.init()
   tracker:refresh()
   runner:start()
   y.screen_dirty = true

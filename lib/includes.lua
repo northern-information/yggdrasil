@@ -46,3 +46,4 @@ music       = include("lib/music")        -- essentially musicutil abstractions
 synth       = include("lib/synth")        -- supercollider
 graphics    = include("lib/graphics")     -- everything you see on the screen
 clipboard   = include("lib/clipboard")    -- cut, copy, paste
+selector    = include("lib/selector")     -- select items in a list

@@ -68,7 +68,10 @@ function graphics:render_page(page)
       if view:is_hud() then
         self:draw_hud_foreground()
       end
-      if editor:is_open() then
+      if selector:is_open() then
+        self:draw_selector()
+        self:draw_commit_processing()
+      elseif editor:is_open() then
         self:draw_editor()
         self:draw_commit_processing()
       else
@@ -91,6 +94,50 @@ end
 
 
 
+
+-- selector
+
+-- this is presently built to only support YPC stuff
+-- i didn't abstract it up because i couldn't think of
+-- another apparent usecase
+function graphics:draw_selector()
+  local x = 1
+  local w = 128
+  -- background
+  self:rect(x - 1, 0, w + 1, 64, 0)
+  -- title
+  self:rect(x - 1, 0, w + 1, 8, 15)
+  if screen.text_extents(editor:get_title()) < 41 then
+    self:draw_mixer_glyph(106, 0, editor:get_track():get_clade(), true)
+  end
+  self:text(x, 6, editor:get_title(), 0)
+  -- validator (remember, the rest of the editor must be valid)
+  self:draw_validator_cube(1, 10, editor:is_valid(), editor:is_unsaved_changes())
+  -- loaded
+  self:text(16, 18, selector:get_selected_item(), 1)
+  -- commit indicator  
+  if selector:is_unsaved_changes() and editor:is_valid() then
+    self:draw_commit_indicator()
+  end
+  for i = 1, #selector:get_items() do
+    -- this "-2" business below is to push the selected field down one
+    local ii = fn.over_cycle(selector:get_tab_index() + i - 2, 1,#selector:get_items())
+    local item = selector:get_item(ii)
+    if ii ~= nil then 
+      local y = 20 + (10 * i)
+      local y2 = 20 + (10 * i) - 7
+      -- highlight
+      if i == 2 then
+        self:rect(x, y2, 128, 9, 1)
+        self:rect(125, y2, 3, 9, 15)
+      end
+      -- value text
+      self:text(x + 1, y, item, 15)
+    end
+  end
+end
+
+
 -- editor
 
 
@@ -109,20 +156,21 @@ function graphics:draw_editor()
   end
   self:text(left_edge, 6, editor:get_title(), 0)
   -- validator
-  self:draw_validator_cube(editor:is_valid(), editor:is_unsaved_changes())
+  self:draw_validator_cube(74, 10, editor:is_valid(), editor:is_unsaved_changes())
   -- commit indicator
   if editor:is_valid() and editor:is_unsaved_changes() and not editor:is_enter_action() then
     self:draw_commit_indicator()
   end
   -- data entry
   for i = 1, #editor:get_field_index() do
-    local fi = fn.over_cycle(editor:get_tab_index() + i - 1, 1, #editor:get_field_index())
+    -- this "-2" business below is to push the selected field down one
+    local fi = fn.over_cycle(editor:get_tab_index() + i - 2, 1, #editor:get_field_index())
     local field = editor:get_field_by_index(fi)
     if field.display ~= nil then 
       local y = 20 + (10 * i)
       local y2 = 20 + (10 * i) - 7
       -- highlight
-      if i == 1 then
+      if i == 2 then
         self:rect(left_edge + 22, y2, 44, 9, 1)
         self:rect(125, y2, 3, 9, 15)
       end
@@ -175,9 +223,7 @@ function graphics:draw_commit()
   self.commit_frame = self.frame + 30
 end
 
-function graphics:draw_validator_cube(valid, unsaved_changes, level)
-  local x = 74
-  local y = 10
+function graphics:draw_validator_cube(x, y, valid, unsaved_changes, level)
   local l = level ~= nil and level or 1
   if valid then
     -- horizontals

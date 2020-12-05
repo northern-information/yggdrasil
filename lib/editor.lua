@@ -19,7 +19,7 @@ function editor:check_enter_action()
 end
 
 function editor:run_enter_action()
-  self:get_field_by_index(self:get_tab_index()).action_method()
+  self:get_field_by_index(self:get_tab_index()).action_method(self:get_slot())
 end
 
 function editor:activate(x, y)
@@ -47,10 +47,6 @@ end
 
 function editor:cycle_fields(i)
   self:select_field(fn.cycle(self:get_tab_index() + i, 1, #self:get_field_index()))
-end
-
-function editor:increment_fields(i)
-  self:select_field(util.clamp(self:get_tab_index() + i, 1, #self:get_field_index()))
 end
 
 function editor:add_field(field)
@@ -113,9 +109,15 @@ function editor:commit()
     end
   end
   local cache = self:get_slot()
+  local cache_index = self:get_tab_index()
   self:clear()
   tracker:refresh()
   self:activate(cache:get_x(), cache:get_y())
+  self:select_field(cache_index)
+  if self:is_enter_action() and selector:is_open() then
+    selector:close()
+    self:run_enter_action()
+  end
 end
 
 

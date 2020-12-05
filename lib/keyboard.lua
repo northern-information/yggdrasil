@@ -29,6 +29,8 @@ function keyboard.event(type, code, val)
       elseif not editor:is_open() then
         editor:activate(view:get_x(), view:get_y())
         editor:select_field(1)
+      elseif selector:is_open() and editor:is_unsaved_changes() and editor:is_valid() and selector:is_unsaved_changes() then
+        editor:commit()
       elseif editor:is_open() and editor:is_unsaved_changes() and editor:is_valid() and not editor:is_enter_action() then
         editor:commit()
       elseif editor:is_open() and editor:is_valid() and not editor:is_enter_action() then
@@ -52,6 +54,7 @@ function keyboard.event(type, code, val)
   if keys:is_esc(code) then
         if tracker:has_message() then tracker:clear_message()
     elseif tracker:is_info()     then tracker:set_info(false)
+    elseif selector:is_open()    then selector:close()
     elseif editor:is_open()      then editor:clear() editor:close()
     else   tracker:deselect()
     end
@@ -65,42 +68,51 @@ function keyboard.event(type, code, val)
 
   if editor:is_open() then
 
-    if keys:is_arrow(code) and keys:is_mod() then
-      local pan = keys:is_shifted() and 10 or 1
-          if keys:equals(code, "RIGHT") then view:pan_x(1 * pan)
-      elseif keys:equals(code, "LEFT")  then view:pan_x(-1 * pan)
-      elseif keys:equals(code, "UP")    then view:pan_y(-1 * pan)
-      elseif keys:equals(code, "DOWN")  then view:pan_y(1 * pan)
+    if selector:is_open() then
+          if keys:equals(code, "UP") then selector:move(-1)
+      elseif keys:equals(code, "DOWN")  then selector:move(1)
+      elseif keys:is_tab(code) then selector:move(keys:is_shifted() and -1 or 1)
       end
-      tracker:select_slot(view:get_x(), view:get_y())
-      editor:clear()
-      editor:activate(view:get_x(), view:get_y())
+    else
 
-    elseif keys:is_arrow(code) then
-          if keys:equals(code, "RIGHT") then editor:get_focused_field().input_field:move_cursor_index(1)
-      elseif keys:equals(code, "LEFT")  then editor:get_focused_field().input_field:move_cursor_index(-1)
-      elseif keys:equals(code, "UP")    then editor:increment_fields(-1)
-      elseif keys:equals(code, "DOWN")  then editor:increment_fields(1)
+      if keys:is_arrow(code) and keys:is_mod() then
+        local pan = keys:is_shifted() and 10 or 1
+            if keys:equals(code, "RIGHT") then view:pan_x(1 * pan)
+        elseif keys:equals(code, "LEFT")  then view:pan_x(-1 * pan)
+        elseif keys:equals(code, "UP")    then view:pan_y(-1 * pan)
+        elseif keys:equals(code, "DOWN")  then view:pan_y(1 * pan)
+        end
+        tracker:select_slot(view:get_x(), view:get_y())
+        editor:clear()
+        editor:activate(view:get_x(), view:get_y())
+
+      elseif keys:is_arrow(code) then
+            if keys:equals(code, "RIGHT") then editor:get_focused_field().input_field:move_cursor_index(1)
+        elseif keys:equals(code, "LEFT")  then editor:get_focused_field().input_field:move_cursor_index(-1)
+        elseif keys:equals(code, "UP")    then editor:cycle_fields(-1)
+        elseif keys:equals(code, "DOWN")  then editor:cycle_fields(1)
+        end
+      
+      elseif keys:is_tab(code) then
+        if keys:is_shifted() then
+          editor:cycle_fields(-1)
+        else
+          editor:cycle_fields(1)
+        end
+
+      elseif keys:is_letter_code(code) or keys:is_number_code(code) or keys:is_symbol(code) and not keys:is_mod() then
+        if keys:is_shifted() and (keys:is_number_code(code) or keys:is_symbol(code)) then
+          editor:add(keys:get_shifted_keycode(code))
+        else
+          editor:add(keys:get_keycode_value(code))
+        end
+
+      elseif keys:is_backspace_or_delete(code) then
+        editor:backspace()
+
       end
-    
-    elseif keys:is_tab(code) then
-      if keys:is_shifted() then
-        editor:cycle_fields(-1)
-      else
-        editor:cycle_fields(1)
-      end
 
-    elseif keys:is_letter_code(code) or keys:is_number_code(code) or keys:is_symbol(code) and not keys:is_mod() then
-      if keys:is_shifted() and (keys:is_number_code(code) or keys:is_symbol(code)) then
-        editor:add(keys:get_shifted_keycode(code))
-      else
-        editor:add(keys:get_keycode_value(code))
-      end
-
-    elseif keys:is_backspace_or_delete(code) then
-      editor:backspace()
-
-    end
+    end -- selector:is_open()
 
 
 

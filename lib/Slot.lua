@@ -67,9 +67,29 @@ function Slot:get_editor_fields()
       validator = function(x) return (fn.is_int(tonumber(x))) and (music:is_valid_midi(tonumber(x))) end,
     },
     {
+      field_id = "ypc",
+      display = "YPC",
+      tab_index = 3,
+      action = "sample",
+      action_method = function(s) selector:activate(ypc:get_samples(), s:get_sample_name() .. ".wav") end,
+      value_getter = function() return self:get_sample_name() end,
+      value_setter = function(x) self:set_sample_name(x) end,
+      value_clear = function() self:set_sample_name("") end,
+      validator = function(x) return true end,
+    },
+    {
+      field_id = "phenomenon",
+      display = "PHEN",
+      tab_index = 4,
+      value_getter = function() return "todo" end,
+      value_setter = function(x) end,
+      value_clear = function() end,
+      validator = function(x) return true end,
+    },
+    {
       field_id = "velocity",
       display = "VEL",
-      tab_index = 3,
+      tab_index = 5,
       value_getter = function() return self:get_velocity() end,
       value_setter = function(x) self:set_velocity(tonumber(x)) end,
       value_clear = function() self:set_velocity(0) end,
@@ -78,7 +98,7 @@ function Slot:get_editor_fields()
     {
       field_id = "m1",
       display = "M1",
-      tab_index = 4,
+      tab_index = 6,
       value_getter = function() return self:get_m1() end,
       value_setter = function(x) self:set_m1(tonumber(x)) end,
       value_clear = function() self:set_m1(50) end,
@@ -87,22 +107,11 @@ function Slot:get_editor_fields()
     {
       field_id = "m2",
       display = "M2",
-      tab_index = 5,
+      tab_index = 7,
       value_getter = function() return self:get_m2() end,
       value_setter = function(x) self:set_m2(tonumber(x)) end,
       value_clear = function() self:set_m2(50) end,
       validator = function(x) return (fn.is_int(tonumber(x))) and (tonumber(x) >= 0) and (tonumber(x) <= 99) end,
-    },
-    {
-      field_id = "ypc",
-      display = "YPC",
-      tab_index = 6,
-      action = "sample",
-      action_method = function() print("pop") tabutil.print(ypc:get_samples()) end,
-      value_getter = function() return self:get_sample_name() end,
-      value_setter = function(x) self:set_sample_name(x) end,
-      value_clear = function() self:set_sample_name("") end,
-      validator = function(x) return ypc:is_valid_sample_name(x) end,
     }
   }
 end
