@@ -10,12 +10,12 @@ commands:register{
   end,
   payload = function(branch)
     return {
-        class = "REVERSE",
-        phenomenon = true,
-        prefix = "rev",
-        value = nil,
-        x = branch[1].leaves[1], 
-        y = branch[2].leaves[1],
+      class = "REVERSE",
+      phenomenon = true,
+      prefix = "rev",
+      value = nil,
+      x = branch[1].leaves[1], 
+      y = branch[2].leaves[1],
     }
   end,
   action = function(payload)

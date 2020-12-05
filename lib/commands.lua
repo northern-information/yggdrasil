@@ -2,6 +2,7 @@ commands = {}
 
 function commands.init()
   commands.all = {}
+  commands.phenomena = {}
   commands:register_all()
   commands.k3 = nil
 end
@@ -22,9 +23,13 @@ function commands:get_all()
   return self.all
 end
 
+function commands:get_phenomena()
+  return self.phenomena
+end
+
 
 function commands:register(t)
-  local class = self:extract_class(t)
+  local class, phenomenon = self:extract_class_and_phenomenon(t)
   --[[
   loop through all registered classes
   then all their invocations
@@ -42,6 +47,9 @@ function commands:register(t)
   end
   -- if class == "ARPEGGIO" then
     self.all[class] = t
+    if phenomenon then
+      self.phenomena[class] = t
+    end
   -- end
 end
 
@@ -53,12 +61,12 @@ check against some of the structures of the
 command composition. it is simply extracting
 the classname from the payload.
 ]]
-function commands:extract_class(t)
+function commands:extract_class_and_phenomenon(t)
   local dummy_branches = {}
   local dummy_branch = Branch:new("stub;1;2;3;4")
   for i = 1, 4 do  dummy_branches[i] = dummy_branch end
   local result = t.payload(dummy_branches)
-  return result.class
+  return result.class, (result.phenomenon ~= nil)
 end
 
 --[[
