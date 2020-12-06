@@ -25,6 +25,6 @@ commands:register{
     }
   end,
   action = function(payload)
-    self:set_k3(payload.command_string)
+    commands:set_k3(payload.command_string)
   end
 }
