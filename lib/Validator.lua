@@ -2,7 +2,7 @@ Validator = {}
 
 function Validator:new(branch, invocations)
   local v = setmetatable({}, { 
-    __index = Validator,
+    __index = Validator
   })
   v.branch = branch
   v.invocations = invocations
@@ -38,13 +38,12 @@ end
 
 -- i.e. "#2"
 function Validator:validate_prefix_invocation()
-  local result = false
   for k, v in pairs(self.invocations) do
     if string.find(self.branch.leaves[1], v) then
-      result = true
+      return true
     end
   end
-  return result
+  return false
 end
 
 -- i.e. "play"

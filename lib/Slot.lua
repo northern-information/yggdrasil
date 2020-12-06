@@ -177,8 +177,14 @@ function Slot:trigger()
       if self:get_y() ~= self.payload.value then
         track:set_position(self.payload.value)
       end
-    elseif p == "END" then  
+    elseif p == "END" then
       track:set_position(0)
+    elseif p == "LACUNA" then
+      track:disable()
+      local new_track = tracker:get_track(self.payload.value)
+      if new_track ~= nil then
+        new_track:queue_event("enable", _clock:get_the_arrow_of_time() + 1)
+      end
     elseif p == "LUCKY" then  
       local slots = track:get_not_empty_slots()
       if #slots ~= 1 then

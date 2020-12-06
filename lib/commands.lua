@@ -3,39 +3,18 @@ commands = {}
 function commands.init()
   commands.all = {}
   commands.phenomena = {}
-  commands:register_all()
   commands.k3 = nil
+  commands:register_all()
 end
 
-function commands:set_k3(s)
-  self.k3 = s
-end
-
-function commands:fire_k3()
-  if self.k3 ~= nil then
-    runner:run(self.k3)
-  else
-    tracker:set_message("Assign K3 with: k3 = ...")
-  end
-end
-
-function commands:get_all()
-  return self.all
-end
-
-function commands:get_phenomena()
-  return self.phenomena
-end
-
-
+--[[
+loop through all registered classes
+then all their invocations
+then all the incoming invocations
+and alert if there are duplicates
+]]
 function commands:register(t)
   local class, phenomenon = self:extract_class_and_phenomenon(t)
-  --[[
-  loop through all registered classes
-  then all their invocations
-  then all the incoming invocations
-  and alert if there are duplicates
-  ]]
   for k, command in pairs(self.all) do
     for kk, existing_invocation in pairs(command.invocations) do
       for kkk, new_invocation in pairs(t.invocations) do
@@ -45,7 +24,7 @@ function commands:register(t)
       end
     end
   end
-  -- if class == "ARPEGGIO" then
+  -- if class == "LACUNA" then
     self.all[class] = t
     if phenomenon then
       self.phenomena[class] = t
@@ -71,7 +50,7 @@ end
 
 --[[
 add new commands in yggdrasil/lib/commands/*
-add new commands in yggdrasil/lib/phenomenon/*
+add new phenomena in yggdrasil/lib/phenomenon/*
  - "invocations" defines the valid aliases
  - "signature" defines what string from the terminal fits with this command
  - "payload" defines how to format the string for execution
@@ -87,6 +66,26 @@ function commands:register_all()
     include(config.settings.phenomenon_path .. string.gsub(file, ".lua", ""))
   end
   fn.print_matron_message(">>> Yggdrasil Ready <<<")
-end -- register all
+end
+
+function commands:set_k3(s)
+  self.k3 = s
+end
+
+function commands:fire_k3()
+  if self.k3 ~= nil then
+    runner:run(self.k3)
+  else
+    tracker:set_message("Assign K3 with: k3 = ...")
+  end
+end
+
+function commands:get_all()
+  return self.all
+end
+
+function commands:get_phenomena()
+  return self.phenomena
+end
 
 return commands

@@ -109,15 +109,37 @@ end
 
 --- tracking
 
+function Track:queue_event(event, when)
+  self.queue[when] = event
+end
 
+function Track:get_queue()
+  return self.queue
+end
+
+function Track:pre_process()
+  for k, v in pairs(self:get_queue()) do
+    if k <= _clock:get_the_arrow_of_time() then
+      if v == "enable" then
+        self:enable()
+        self:set_playback(true)
+        self:set_position(self:is_descending() and self:get_depth() or 1)
+      end
+      self.queue[k] = nil
+    end
+  end
+end
 
 function Track:advance()
-  if self:is_descending() then
-    self:set_position(self:get_position() + 1)
-  elseif not self:is_descending() then
-    self:set_position(self:get_position() - 1)
+  self:pre_process()
+  if self:is_playback() and self:is_enabled() then
+    if self:is_descending() then
+      self:set_position(self:get_position() + 1)
+    elseif not self:is_descending() then
+      self:set_position(self:get_position() - 1)
+    end
+    self:trigger()
   end
-  self:trigger()
 end
 
 function Track:trigger()
@@ -192,11 +214,11 @@ function Track:update_every_other(payload)
 end
 
 function Track:update_slot(payload)
+  if payload.y > self:get_depth() then
+    self:fill(payload.y)
+  end
   local slot = self:get_slot(payload.y)
   if slot ~= nil then  
-    if payload.y > self:get_depth() then
-      self:fill(payload.y)
-    end
     if payload.phenomenon then
       slot:run_phenomenon(payload)
       view:set_phenomenon(true)

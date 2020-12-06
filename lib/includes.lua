@@ -8,7 +8,7 @@ engine.name = "YggdrasilSynth"
 
 -- application configuration and dev override
 config = include("lib/config")
-config_ = io.open(_path["code"] .. "yggdrasil/lib/config_.lua", "r")
+config_ = io.open(_path.code .. "yggdrasil/lib/config_.lua", "r")
 if config_ ~= nil then
   io.close(config_)
   include("yggdrasil/lib/config_")

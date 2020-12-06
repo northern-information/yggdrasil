@@ -23,6 +23,7 @@ function Branch:make_leaves(input)
   local result = {}
   local processed = string.gsub(input, ";", " ; ")
   processed = string.gsub(processed, ":", " : ")
+  processed = string.gsub(processed, "@", "@ ") -- note no leading space
   processed = string.gsub(processed, "#", "# ") -- note no leading space
   processed = string.gsub(processed, ">", "> ") -- note no leading space
   processed = string.gsub(processed, "<", "< ") -- note no leading space
