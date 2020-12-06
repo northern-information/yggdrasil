@@ -1,4 +1,4 @@
-keyboard = hid.connect()
+local keyboard = hid.connect()
 
 function keyboard.event(type, code, val)
 

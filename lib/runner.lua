@@ -1,4 +1,4 @@
-runner = {}
+local runner = {}
 
 function runner.init()
   runner.current_run = "yggdrasil-run-" .. os.date("%Y-%m-%d-%H-%M-%S")

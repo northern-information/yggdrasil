@@ -1,4 +1,4 @@
-filesystem = {}
+local filesystem = {}
 
 function filesystem.init()
   filesystem.paths = {

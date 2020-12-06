@@ -1,4 +1,4 @@
-editor = {}
+local editor = {}
 
 function editor.init()
   editor.open = false

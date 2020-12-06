@@ -1,9 +1,9 @@
-config = {}
+local config = {}
 
 config["settings"] = {
   version_major = 1,
   version_minor = 0,
-  version_patch = 14,
+  version_patch = 15,
   ppqn = 96,
   root = 0,
   scale = 41,

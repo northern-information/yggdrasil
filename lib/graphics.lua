@@ -1,4 +1,4 @@
-graphics = {}
+local graphics = {}
 
 function graphics.init()
   -- frames and animation state

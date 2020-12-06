@@ -1,4 +1,4 @@
-view = {}
+local view = {}
 
 function view.init()
   -- page

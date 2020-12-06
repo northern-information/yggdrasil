@@ -1,4 +1,4 @@
-tracker = {}
+local tracker = {}
 
 function tracker.init()
   tracker.selected = false

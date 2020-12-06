@@ -1,4 +1,4 @@
-page = {}
+local page = {}
 
 function page.init()
   page.titles = config.page_titles

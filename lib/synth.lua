@@ -1,4 +1,4 @@
-synth = {}
+local synth = {}
 
 function synth.init()
   synth.encoder_override = false

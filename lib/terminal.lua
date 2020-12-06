@@ -1,4 +1,4 @@
-terminal = {}
+local terminal = {}
 
 function terminal.init()
   terminal:set_field(Field:new(128))

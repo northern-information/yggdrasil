@@ -1,4 +1,4 @@
-music = {}
+local music = {}
 
 function music.init()
   music.root = config.settings.root

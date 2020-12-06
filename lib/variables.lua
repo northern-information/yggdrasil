@@ -1,4 +1,4 @@
-variables = {}
+local variables = {}
 
 function variables.init()
   variables.database = {}

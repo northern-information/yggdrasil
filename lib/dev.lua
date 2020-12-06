@@ -1,6 +1,6 @@
 screen.ping()
 
-dev = {}
+local dev = {}
 
 function dev:scene(i)
   local debug_interpreter_cache = config.settings.debug_interpreter

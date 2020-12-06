@@ -1,4 +1,4 @@
-_midi = {}
+local _midi = {}
 
 function _midi.init()
   _midi.devices = {}

@@ -1,4 +1,4 @@
-parameters = {}
+local parameters = {}
 
 function parameters.init()
   parameters.startup = true -- prevents writing parameters on startup

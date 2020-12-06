@@ -4,7 +4,7 @@
 -- and keeps track of which samples are loaded
 --
 
-ypc = {}
+local ypc = {}
 
 function ypc.init()
   -- keeping track of active voices

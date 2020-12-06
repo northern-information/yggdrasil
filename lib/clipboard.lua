@@ -1,4 +1,4 @@
-clipboard = {}
+local clipboard = {}
 
 function clipboard.init()
   clipboard.type = nil

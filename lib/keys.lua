@@ -1,4 +1,4 @@
-keys = {}
+local keys = {}
 
 function keys.init()
   keys.y_mode = false

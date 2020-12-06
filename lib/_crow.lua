@@ -1,4 +1,4 @@
-_crow = {}
+local _crow = {}
 
 function _crow.init()
   crow.init()

@@ -1,4 +1,4 @@
-commands = {}
+local commands = {}
 
 function commands.init()
   commands.all = {}
