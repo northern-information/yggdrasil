@@ -227,9 +227,7 @@ function tracker:load_track(track_number, filename)
 end
 
 function tracker:set_track_depth(track, depth)
-  if depth > self:get_rows() then
-    self:set_rows(depth)
-  end
+  self:set_rows(depth)
   self:get_track(track):fill(depth)
 end
 
@@ -322,6 +320,9 @@ end
 
 
 function tracker:update_slot(payload)
+  if (payload.y > self:get_rows()) then
+    self:set_rows(payload.y)
+  end
   local track = self:get_track(payload.x)
   if track ~= nil then
     track:update_slot(payload)
@@ -402,7 +403,7 @@ end
 function tracker:select_slot(x, y)
   self:deselect()
   if not self:is_in_bounds(x, y) then
-    self:set_message(x .. "/" .. y .. " is out of bounds.")
+    self:set_message(x .. " " .. y .. " is out of bounds.")
   else
     for k, slot in pairs(self:get_track(x):get_slots()) do
       if slot:get_y() == y then
