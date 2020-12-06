@@ -23,7 +23,7 @@ function _midi:register_note(note, velocity, channel, device, origin_track)
     channel = channel,
     device = device,
     origin_track = origin_track,
-    generation = tracker:get_generation()
+    birthday = _clock:get_the_arrow_of_time()
   }
   for k, registered_note in pairs(self.notes) do
     if registered_note.note == new.note

@@ -1,16 +1,5 @@
 Track = {}
 
-local function track_clock(track)
-  while true do
-    clock.sync(track:get_clock() / 1)
-    if tracker:is_playback() 
-    and track:is_playback() 
-    and track:is_enabled() then
-      track:advance()
-    end
-  end
-end
-
 function Track:new(x)
   local t = setmetatable({}, { 
     __index = Track,
@@ -25,10 +14,11 @@ function Track:new(x)
   t.descend = true
   t.view = ""
   t.slots = {}
+  t.queue = {}
   t.extents = 0
   t.selected = false
-  t.clock = 1
-  t.track_clock = clock.run(track_clock, t)
+  t.sync = 1
+  t.ppqn_table = _clock:build_ppqn_table(t.sync)
   -- mixer
   t.enabled = true
   t.muted = false
@@ -52,7 +42,7 @@ function Track:new_index(t, k, v)
     rawset(t, "save_keys", {})
   end
   local block_list = {
-    "x", "slots", "id", "track_clock"
+    "x", "slots", "id"
   }
   if not fn.table_contains(block_list, k) then
     table.insert(t.save_keys, k)
@@ -610,12 +600,17 @@ function Track:set_jf(bool)
   self.jf = bool
 end
 
-function Track:get_clock()
-  return self.clock
+function Track:get_sync()
+  return self.sync
 end
 
-function Track:set_clock(f)
-  self.clock = f
+function Track:set_sync(f)
+  self.sync = _clock:snap_to_ppqn_grains(f)
+  self.ppqn_table = _clock:build_ppqn_table(self.sync)
+end
+
+function Track:get_ppqn_table()
+  return self.ppqn_table
 end
 
 function Track:is_playback()

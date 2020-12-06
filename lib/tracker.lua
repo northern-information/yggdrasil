@@ -11,7 +11,6 @@ function tracker.init()
   tracker.track_view = "ipn"
   tracker.extents = 0
   tracker.info = false
-  tracker.generation = 0
   tracker.any_soloed = false
   tracker.clipboard_type = nil
   tracker.clipboard = {}
@@ -63,16 +62,6 @@ function tracker:paste_track(x, y, clipboard_track)
   tracker:deselect()
   tracker:select_track(x)
   tracker:refresh()
-end
-
-function tracker.tracker_clock()
-  while true do
-    clock.sync(1)
-    tracker:increment_generation()
-    if tracker:is_playback() then
-      fn.dirty_screen(true)
-    end
-  end
 end
 
 function tracker:refresh()
@@ -169,7 +158,8 @@ function tracker:update_track(payload)
       elseif payload.class == "SHIFT" then
         track:shift(payload.shift)
       elseif payload.class == "CLOCK" then
-        track:set_clock(payload.clock)
+        -- note users see "clock", but the code is "sync"
+        track:set_sync(payload.clock)
       elseif payload.class == "SYNTH" then
         if payload.voice ~= nil then
           track:set_voice(payload.voice)
@@ -689,21 +679,14 @@ end
 
 -- primitive getters, setters, & checks
 
+
+
 function tracker:set_selected_type(s)
   self.selected_type = s
 end
 
 function tracker:get_selected_type()
   return self.selected_type
-end
-
-
-function tracker:increment_generation()
-  self.generation = self.generation + 1
-end
-
-function tracker:get_generation()
-  return self.generation
 end
 
 function tracker:is_in_bounds(x, y)
