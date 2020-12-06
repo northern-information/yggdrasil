@@ -25,8 +25,6 @@ function clipboard:copy_items()
   end
 end
 
-
-
 function clipboard:paste_items()
   if not self:is_cut() and not self:is_copy() then
     tracker:set_message("Clipboard empty.")    

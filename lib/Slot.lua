@@ -34,7 +34,7 @@ function Slot:new_index(s, k, v)
     rawset(s, "save_keys", {})
   end
   local block_list = {
-    "x", "index", "id"
+    "x", "y", "index", "id", "selected", "extents"
   }
   if not fn.table_contains(block_list, k) then
     table.insert(s.save_keys, k)
@@ -278,7 +278,9 @@ end
 
 -- primitive getters, setters, & checks
 
-
+function Slot:get_payload()
+  return self.payload
+end
 
 function Slot:set_payload(payload)
   self.payload = payload
