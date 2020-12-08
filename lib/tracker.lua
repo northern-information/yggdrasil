@@ -50,6 +50,7 @@ function tracker:paste_slot(x, y, clipboard_slot, mass_update)
   target_slot:set_view(clipboard_slot:get_view())
   target_slot:set_phenomenon(clipboard_slot:is_phenomenon())
   target_slot:set_payload(clipboard_slot:get_payload())
+  target_slot:set_sample_name(clipboard_slot:get_sample_name())
   target_slot:refresh()
   if not mass_update ~= nil then
     tracker:deselect()

@@ -51,7 +51,7 @@ function ypc:play(track, sample_name, frequency, velocity)
   -- voice to 0 (not playing)
   local voice = self:acquire_voice(track)
   if voice then
-    print(sample_name, self.samples[sample_name], voice, frequency, velocity)
+    -- print(sample_name, self.samples[sample_name], voice, frequency, velocity)
     local duration = self.samples[sample_name]:play(voice, frequency, velocity)
     if duration ~= nil then 
       self.voices[voice].track = track 
