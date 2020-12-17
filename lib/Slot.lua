@@ -192,7 +192,7 @@ function Slot:trigger()
         repeat
           new_y = slots[math.random(1, #slots)]:get_y()
         until (new_y ~= self:get_y())
-        track:set_position(new_y)
+        track:set_position(new_y - 1)
       end
     elseif p == "OFF" then
       _midi:kill_notes_on_track(track:get_id())
