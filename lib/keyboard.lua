@@ -22,7 +22,7 @@ function keyboard.event(type, code, val)
   if keys:is_return(code) and terminal:is_empty() then
     if not tracker:is_selected() then
       tracker:select_slot(view:get_x(), view:get_y())
-    elseif #tracker:get_selected_slots() == 1 then
+    elseif #tracker:get_selected_slots() >= 1 then
       local slot = tracker:get_selected_slots()[1]
       if tracker:is_selected() and (view:get_x() ~= slot:get_x() or view:get_y() ~= slot:get_y()) then
         tracker:select_slot(view:get_x(), view:get_y())

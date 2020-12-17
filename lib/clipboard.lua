@@ -27,14 +27,17 @@ end
 
 function clipboard:paste_items()
   if not self:is_cut() and not self:is_copy() then
-    tracker:set_message("Clipboard empty.")    
+    tracker:set_message("Clipboard empty.")
   else
+    local result = false
     if self:is_slot() then
-      tracker:paste_slot(view:get_x(), view:get_y(), self:get_contents()[1])
+      result = tracker:paste_slot(view:get_x(), view:get_y(), self:get_contents()[1])
     elseif self:is_track() then
-      tracker:paste_track(view:get_x(), view:get_y(), self:get_contents()[1])
+      result = tracker:paste_track(view:get_x(), view:get_y(), self:get_contents()[1])
     end
-    self:send_message("Pasted")
+    if result then
+      self:send_message("Pasted")
+    end
     if self:is_cut() then
       self:get_contents()[1]:clear()
       self:set_type(nil)

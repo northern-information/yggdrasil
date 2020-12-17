@@ -47,7 +47,7 @@ function Sample:play(voice, frequency, velocity)
   local rate = self.rate_compensation * frequency / self.frequency
   local duration = (self.position[2]-self.position[1])/rate
   -- plays sample in a one-shot loop
-  print("playing "..self.name.." on voice "..voice.." at "..frequency.." with velocity "..velocity)
+  -- print("playing "..self.name.." on voice "..voice.." at "..frequency.." with velocity "..velocity)
 
   -- unsure whether clock is needed here
   -- it might be faster to help play in sync

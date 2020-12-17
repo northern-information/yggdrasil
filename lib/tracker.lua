@@ -28,16 +28,13 @@ end
 
 function tracker:paste_slot(x, y, clipboard_slot, mass_update)
   local target_track = self:get_track(x)
-  if y > self:get_rows()  then
+  if y > self:get_rows() then
     self:set_rows(y)
   end
   if y > target_track:get_depth() then
     target_track:fill(y)
   end
   local target_slot = target_track:get_slot(y)
-  target_slot:set_x(x)
-  target_slot:set_y(y)
-  target_slot:set_index(tracker:index(x, y))
   target_slot:set_empty(clipboard_slot:is_empty())
   target_slot:set_midi_note(clipboard_slot:get_midi_note())
   target_slot:set_ygg_note(clipboard_slot:get_ygg_note())
@@ -51,35 +48,36 @@ function tracker:paste_slot(x, y, clipboard_slot, mass_update)
   target_slot:set_phenomenon(clipboard_slot:is_phenomenon())
   target_slot:set_payload(clipboard_slot:get_payload())
   target_slot:set_sample_name(clipboard_slot:get_sample_name())
-  target_slot:refresh()
-  if not mass_update ~= nil then
-    tracker:deselect()
-    tracker:select_slot(x, y)
-    tracker:refresh()
-  end
+  if mass_update then return true end
+  tracker:deselect()
+  tracker:refresh()
+  tracker:select_slot(x, y)
+  return true
 end
 
 function tracker:paste_track(x, y, clipboard_track)
   local target_track = self:get_track(x)
+  local cached_depth = clipboard_track:get_depth()
   local new_depth = clipboard_track:get_depth() + y - 1
   if self:get_rows() < new_depth then
     self:set_rows(new_depth)
   end
   target_track:fill(new_depth)
-  for k, save_key in pairs(target_track:get_save_keys()) do
-    target_track[save_key] = clipboard_track[save_key]
+  if target_track:get_id() ~= clipboard_track:get_id() then
+    for k, save_key in pairs(target_track:get_save_keys()) do
+      target_track[save_key] = clipboard_track[save_key]
+    end
   end
-  local clipboard_slots = clipboard_track:get_slots()
-  local i = 0
-  for k, clipboard_slot in pairs(clipboard_slots) do
-    self:paste_slot(x, y + i, clipboard_slot, true)
-    i = i + 1
-  end
-  target_track:update_slot_x()
   target_track:update_slot_y()
+  target_track:refresh()
+  local clipboard_slots = fn.deep_copy(clipboard_track:get_slots())
+  for i = 1, cached_depth do
+    self:paste_slot(x, y + i - 1, clipboard_slots[i], true)
+  end
   tracker:deselect()
-  tracker:select_track(x)
   tracker:refresh()
+  tracker:select_track(x)
+  return true
 end
 
 function tracker:refresh()
@@ -456,6 +454,7 @@ function tracker:clear_selected_slots()
       slot:clear()
     end
   end
+  self:set_message("Cleared.")
   self:refresh()
 end
 
