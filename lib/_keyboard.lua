@@ -1,6 +1,6 @@
-local keyboard = hid.connect()
+local _keyboard = hid.connect()
 
-function keyboard.event(type, code, val)
+function _keyboard.event(type, code, val)
 
   screen.ping()
   graphics:ping_cursor_frame()
@@ -211,4 +211,4 @@ function keyboard.event(type, code, val)
 
 end
 
-return keyboard
+return _keyboard
