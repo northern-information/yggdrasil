@@ -18,9 +18,19 @@ end
 
 function _crow:play(note, pair)
   if not fn.is_int(note) then return end
-  local output_pairs = {{1,2},{3,4}}
-  crow.output[output_pairs[pair][1]].volts = (note - 60) / 12
-  crow.output[output_pairs[pair][2]]()
+  
+  if pair == 1 then
+    crow.output[1].volts = (note - 60) / 12
+    crow.output[2].action = "pulse(.025, 5)"
+    crow.output[2]()
+  end
+  
+  if pair == 2 then
+    crow.output[3].volts = (note - 60) / 12
+    crow.output[4].action = "pulse(.025, 5)"
+    crow.output[4]()
+  end
+  
 end
 
 return _crow
