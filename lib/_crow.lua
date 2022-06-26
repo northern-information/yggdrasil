@@ -1,8 +1,8 @@
 local _crow = {}
 
 function _crow.init()
-  crow.output[2].action = "pulse(.1, 5, 1)"
-  crow.output[4].action = "pulse(.1, 5, 1)"
+  crow.output[2].action = "pulse(.025, 5)"
+  crow.output[4].action = "pulse(.025, 5)"
   crow.ii.jf.mode(1)
 end
 

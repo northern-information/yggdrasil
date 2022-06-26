@@ -1,9 +1,11 @@
 local config = {}
 
 config["settings"] = {
+  dev_mode = false,
+  dev_scene = 1,
   version_major = 1,
   version_minor = 0,
-  version_patch = 17,
+  version_patch = 18,
   ppqn = 96,
   root = 0,
   scale = 41,
