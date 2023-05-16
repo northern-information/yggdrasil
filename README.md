@@ -14,5 +14,3 @@ If you are an artist, musician, or runner here to use this tool, [everything you
 Software design by Northern Information
 Applied Sciences & Phantasms Working Division
 [@argotechnica](https://twitter.com/argotechnica) | [@infinitedigits](https://github.com/schollz) | [@license](https://github.com/ryanlaws) | [@tyleretters](https://nor.the-rn.info)
-
-![Northern Information](https://northern-information.github.io/arcologies-docs/assets/images/northern-information.svg)
